@@ -55,8 +55,8 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
               <span className="text-2xl font-bold tracking-tight">
-                <span className="text-white">Babak</span>
-                <span className="text-accent">Atlas</span>
+                <span className="text-white">Atlas</span>
+                <span className="text-[#0071E3]">Adaptive</span>
               </span>
             </Link>
             <p className="text-zinc-500 text-sm mb-6 max-w-xs">
@@ -120,7 +120,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-zinc-600">
-            &copy; {new Date().getFullYear()} BabakAtlas. {t("footer.copyright")}
+            &copy; {new Date().getFullYear()} AtlasAdaptive. {t("footer.copyright")}
           </p>
 
           {/* Social icons */}
@@ -138,7 +138,7 @@ export default function Footer() {
 
           {/* Contact */}
           <a
-            href="mailto:hello@babakatlas.com"
+            href="mailto:hello@atlasadaptive.com"
             className="flex items-center gap-2 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
           >
             <Mail size={14} />

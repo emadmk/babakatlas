@@ -51,9 +51,9 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 group">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-white group-hover:text-accent transition-colors duration-300">
-              Babak
+              Atlas
             </span>
-            <span className="text-accent">Atlas</span>
+            <span className="text-[#0071E3]">Adaptive</span>
           </span>
         </Link>
 

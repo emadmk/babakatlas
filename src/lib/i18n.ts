@@ -1,4 +1,4 @@
-export const locales = ["en", "fa", "tl"] as const;
+export const locales = ["en", "tl"] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = "en";
@@ -18,13 +18,6 @@ export const localeConfigs: Record<Locale, LocaleConfig> = {
     nativeName: "English",
     flag: "🇺🇸",
     dir: "ltr",
-  },
-  fa: {
-    code: "fa",
-    name: "Farsi",
-    nativeName: "فارسی",
-    flag: "🇮🇷",
-    dir: "rtl",
   },
   tl: {
     code: "tl",

@@ -13,7 +13,7 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "BabakAtlas | Premium Window Tint Films",
+  title: "AtlasAdaptive - Premium Window Tint Films",
   description:
     "Professional-grade ceramic and carbon window tint films. UV protection, heat reduction, and style for your vehicle. Shipping to Philippines & Australia.",
   keywords: [
@@ -27,11 +27,11 @@ export const metadata: Metadata = {
     "Australia",
   ],
   openGraph: {
-    title: "BabakAtlas | Premium Window Tint Films",
+    title: "AtlasAdaptive - Premium Window Tint Films",
     description:
       "Professional-grade ceramic and carbon window tint films for ultimate UV protection, heat reduction, and style.",
     type: "website",
-    siteName: "BabakAtlas",
+    siteName: "AtlasAdaptive",
   },
 };
 

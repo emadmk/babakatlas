@@ -343,7 +343,7 @@ export default function CheckoutPage() {
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                       <select
                         value={address.country}
-                        onChange={(e) => setAddress({ ...address, country: e.target.value })}
+                        onChange={(e) => setAddress({ ...address, country: e.target.value as 'PH' | 'AU' })}
                         className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all appearance-none"
                       >
                         <option value="PH" className="bg-neutral-900">Philippines</option>

@@ -21,7 +21,7 @@ export async function GET(
 
     // Check authorization: either the order owner or allow anonymous for recently created orders
     const session = await getServerSession(authOptions);
-    if (order.userId && session?.user?.id !== order.userId) {
+    if (order.userId && (session?.user as { id?: string } | undefined)?.id !== order.userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 403 },

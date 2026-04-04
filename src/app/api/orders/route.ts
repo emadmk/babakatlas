@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // ── Get authenticated user (optional) ─────────────────────────
     const session = await getServerSession(authOptions);
-    const userId = session?.user?.id ?? null;
+    const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
 
     // ── Build order ───────────────────────────────────────────────
     const orderNumber = generateOrderNumber();
@@ -201,14 +201,15 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
+    const user = session?.user as { id?: string } | undefined;
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 },
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
     const userOrders = Array.from(orders.values())
       .filter((o) => o.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

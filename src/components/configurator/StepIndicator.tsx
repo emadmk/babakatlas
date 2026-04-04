@@ -30,7 +30,6 @@ export default function StepIndicator({ currentStep }: { currentStep: number }) 
         {STEPS.map((step, index) => {
           const isCompleted = currentStep > step.number;
           const isActive = currentStep === step.number;
-          const isUpcoming = currentStep < step.number;
 
           return (
             <div key={step.number} className="flex flex-col items-center relative">

@@ -7,10 +7,10 @@ import {
   Mail,
   MapPin,
   Send,
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
+  Globe,
+  ExternalLink,
+  MessageCircle,
+  Play,
 } from "lucide-react";
 
 export default function Footer() {
@@ -125,7 +125,7 @@ export default function Footer() {
 
           {/* Social icons */}
           <div className="flex items-center gap-4">
-            {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
+            {[Globe, ExternalLink, MessageCircle, Play].map((Icon, i) => (
               <a
                 key={i}
                 href="#"

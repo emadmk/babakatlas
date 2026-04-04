@@ -1,0 +1,149 @@
+{
+  "nav": {
+    "home": "Tahanan",
+    "products": "Mga Produkto",
+    "configurator": "Tagapag-ayos",
+    "about": "Tungkol sa Amin",
+    "contact": "Makipag-ugnayan",
+    "dashboard": "Dashboard",
+    "cart": "Kariton",
+    "login": "Mag-log In",
+    "signup": "Mag-sign Up"
+  },
+  "hero": {
+    "title": "Premium na Pelikulang Tint sa Bintana",
+    "subtitle": "Propesyonal na pelikulang pang-tint sa bintana ng sasakyan para sa mahusay na proteksyon sa UV, pagbawas ng init, at privacy. Naglilingkod sa Pilipinas at Australia.",
+    "cta": "I-configure ang Iyong Tint"
+  },
+  "benefits": {
+    "title": "Bakit Mag-tint ng Bintana?",
+    "items": {
+      "uvProtection": {
+        "title": "Proteksyon sa UV",
+        "description": "Harangin ang hanggang 99% ng mapaminsalang ultraviolet na sinag, na pinoprotektahan ang iyong balat at interior ng sasakyan mula sa pinsala ng araw."
+      },
+      "heatReduction": {
+        "title": "Pagbawas ng Init",
+        "description": "Malaki ang mababawas sa temperatura ng loob ng sasakyan sa pamamagitan ng pagtanggi sa init ng araw, na pinapanatiling malamig ang iyong kotse kahit sa tropikal na klima."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "description": "Palakasin ang iyong personal na privacy at seguridad sa pamamagitan ng paglimita sa kakayahang makita ang loob ng iyong sasakyan mula sa labas."
+      },
+      "glareReduction": {
+        "title": "Pagbawas ng Glare",
+        "description": "Bawasan ang nakakabulag na sikat ng araw at ilaw ng mga kasalubong na sasakyan para sa mas ligtas at mas komportableng pagmamaneho."
+      },
+      "interiorProtection": {
+        "title": "Proteksyon ng Interior",
+        "description": "Pigilan ang pag-crack, pagkupas, at pagbabago ng kulay ng iyong dashboard, upuan, at upholstery na dulot ng matagal na pagkakalantad sa araw."
+      },
+      "energySaving": {
+        "title": "Pagtitipid ng Enerhiya",
+        "description": "Bawasan ang paggamit ng air conditioning at makatipid ng gasolina sa pamamagitan ng natural na pagpapalamig sa iyong kotse gamit ang heat-rejecting na tint film."
+      }
+    }
+  },
+  "configurator": {
+    "title": "Tagapag-ayos ng Tint",
+    "selectCar": "Piliin ang Uri ng Iyong Sasakyan",
+    "selectWindows": "Piliin ang mga Bintana",
+    "selectTint": "Piliin ang Uri ng Tint",
+    "selectService": "Piliin ang Serbisyo",
+    "shipping": "Pagpapadala",
+    "checkout": "Checkout"
+  },
+  "carTypes": {
+    "sedan": "Sedan",
+    "suv": "SUV",
+    "van": "Van",
+    "stationWagon": "Station Wagon",
+    "hatchback": "Hatchback",
+    "coupe": "Coupe",
+    "truck": "Truck",
+    "convertible": "Convertible"
+  },
+  "tintTypes": {
+    "standard": {
+      "name": "Standard na Tinina",
+      "description": "Abot-kayang pelikulang tinina na nagbibigay ng magandang privacy at pangunahing pagtanggi sa init. Mainam para sa mga customer na may limitadong badyet."
+    },
+    "ceramic": {
+      "name": "Ceramic",
+      "description": "Advanced na nano-ceramic na teknolohiya na nag-aalok ng mahusay na pagtanggi sa init nang walang signal interference. Premium na kalinawan at pagganap."
+    },
+    "carbon": {
+      "name": "Carbon",
+      "description": "Pelikulang carbon-particle na naghahatid ng mahusay na pagtanggi sa init at makinis na matte finish. Hindi kukupas sa paglipas ng panahon."
+    },
+    "adaptive": {
+      "name": "Adaptive Photochromic",
+      "description": "Matalinong tint na awtomatikong inaayos ang kadiliman batay sa lakas ng sikat ng araw. Ang pinakamahusay sa mga smart window film."
+    },
+    "crystalline": {
+      "name": "Crystalline",
+      "description": "Halos di-nakikitang pelikula na mas maraming init ang natatanggihan kaysa sa maraming mas madidilim na pelikula. Pinakamataas na kalinawan na may pinakamataas na proteksyon."
+    },
+    "metallic": {
+      "name": "Metallic",
+      "description": "Pelikulang metal-particle na may reflective finish, mahusay na pagtanggi sa init, at dagdag na resistensya sa pagkabasag."
+    }
+  },
+  "windowPositions": {
+    "frontWindshield": "Harapan na Windshield",
+    "rearWindshield": "Likurang Windshield",
+    "frontLeft": "Harapang Kaliwa",
+    "frontRight": "Harapang Kanan",
+    "rearLeft": "Likurang Kaliwa",
+    "rearRight": "Likurang Kanan",
+    "rearQuarterLeft": "Likurang Quarter Kaliwa",
+    "rearQuarterRight": "Likurang Quarter Kanan",
+    "sunroof": "Sunroof"
+  },
+  "service": {
+    "shippingOnly": "Pagpapadala Lamang",
+    "installation": "Propesyonal na Pag-install",
+    "shippingOnlyDesc": "Ipapadala namin ang pre-cut na tint films direkta sa iyo. Perpekto kung mayroon kang sariling installer o mas gusto mong DIY.",
+    "installationDesc": "Ang aming mga sertipikadong technician ang mag-i-install ng tint films sa isang partner location na malapit sa iyo."
+  },
+  "shipping": {
+    "title": "Impormasyon sa Pagpapadala",
+    "philippines": "Pilipinas",
+    "australia": "Australia",
+    "calculateShipping": "Kalkulahin ang Pagpapadala",
+    "freeShipping": "Libreng Pagpapadala",
+    "estimatedDelivery": "Tinatayang Paghahatid"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Buod ng Order",
+    "paymentMethod": "Paraan ng Pagbabayad",
+    "placeOrder": "Mag-order",
+    "processing": "Pinoproseso ang iyong order..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "orders": "Mga Order Ko",
+    "profile": "Profile",
+    "settings": "Mga Setting",
+    "orderHistory": "Kasaysayan ng Order"
+  },
+  "common": {
+    "currency": "PHP",
+    "addToCart": "Idagdag sa Kariton",
+    "remove": "Alisin",
+    "total": "Kabuuan",
+    "subtotal": "Subtotal",
+    "tax": "Buwis",
+    "shipping": "Pagpapadala",
+    "next": "Susunod",
+    "back": "Bumalik",
+    "confirm": "Kumpirmahin"
+  },
+  "footer": {
+    "copyright": "Lahat ng karapatan ay nakalaan.",
+    "terms": "Mga Tuntunin ng Serbisyo",
+    "privacy": "Patakaran sa Privacy",
+    "contact": "Makipag-ugnayan sa Amin"
+  }
+}

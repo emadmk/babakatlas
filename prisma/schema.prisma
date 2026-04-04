@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ AUTH MODELS ============
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  address       String?
+  city          String?
+  country       String?   @default("PH")
+  postalCode    String?
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============ PRODUCT MODELS ============
+
+enum CarType {
+  SEDAN
+  SUV
+  VAN
+  STATION_WAGON
+  HATCHBACK
+  COUPE
+  TRUCK
+  CONVERTIBLE
+}
+
+enum WindowPosition {
+  FRONT_WINDSHIELD
+  REAR_WINDSHIELD
+  FRONT_LEFT
+  FRONT_RIGHT
+  REAR_LEFT
+  REAR_RIGHT
+  REAR_QUARTER_LEFT
+  REAR_QUARTER_RIGHT
+  SUNROOF
+}
+
+enum TintType {
+  STANDARD
+  CERAMIC
+  CARBON
+  ADAPTIVE
+  CRYSTALLINE
+  METALLIC
+}
+
+model TintProduct {
+  id           String   @id @default(cuid())
+  name         String
+  nameEn       String
+  nameFa       String?
+  nameTl       String?
+  description  String?  @db.Text
+  descEn       String?  @db.Text
+  descFa       String?  @db.Text
+  descTl       String?  @db.Text
+  tintType     TintType
+  vlt          Int
+  uvBlock      Int
+  heatReject   Int
+  pricePerSqFt Float
+  image        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orderItems   OrderItem[]
+}
+
+model CarModel {
+  id           String   @id @default(cuid())
+  name         String
+  brand        String?
+  carType      CarType
+  windowCount  Int      @default(6)
+  image        String?
+  sqftByWindow Json?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  orderItems   OrderItem[]
+}
+
+// ============ ORDER MODELS ============
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ShippingCountry {
+  PH
+  AU
+}
+
+enum ServiceType {
+  SHIPPING_ONLY
+  INSTALLATION
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  orderNumber      String          @unique
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  status           OrderStatus     @default(PENDING)
+  subtotal         Float
+  shippingCost     Float
+  installationCost Float           @default(0)
+  tax              Float           @default(0)
+  total            Float
+  shippingCountry  ShippingCountry
+  serviceType      ServiceType
+  shippingAddress  String?         @db.Text
+  city             String?
+  postalCode       String?
+  phone            String?
+  notes            String?         @db.Text
+  stripePaymentId  String?
+  paidAt           DateTime?
+  items            OrderItem[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model OrderItem {
+  id            String      @id @default(cuid())
+  orderId       String
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tintProductId String
+  tintProduct   TintProduct @relation(fields: [tintProductId], references: [id])
+  carModelId    String?
+  carModel      CarModel?   @relation(fields: [carModelId], references: [id])
+  windows       Json
+  quantity      Int         @default(1)
+  sqft          Float
+  unitPrice     Float
+  totalPrice    Float
+  createdAt     DateTime    @default(now())
+}
+
+model ShippingRate {
+  id        String          @id @default(cuid())
+  country   ShippingCountry
+  region    String?
+  baseRate  Float
+  perKgRate Float
+  freeAbove Float?
+  active    Boolean         @default(true)
+}
+
+model InstallationRate {
+  id        String          @id @default(cuid())
+  country   ShippingCountry
+  city      String?
+  carType   CarType
+  baseRate  Float
+  perWindow Float
+  active    Boolean         @default(true)
+}

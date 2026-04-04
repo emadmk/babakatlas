@@ -1,0 +1,149 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "configurator": "Configurator",
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "cart": "Cart",
+    "login": "Log In",
+    "signup": "Sign Up"
+  },
+  "hero": {
+    "title": "Premium Window Tint Films",
+    "subtitle": "Professional grade automotive window tinting films for superior UV protection, heat reduction, and privacy. Serving the Philippines and Australia.",
+    "cta": "Configure Your Tint"
+  },
+  "benefits": {
+    "title": "Why Window Tinting?",
+    "items": {
+      "uvProtection": {
+        "title": "UV Protection",
+        "description": "Block up to 99% of harmful ultraviolet rays, protecting your skin and your vehicle's interior from sun damage."
+      },
+      "heatReduction": {
+        "title": "Heat Reduction",
+        "description": "Significantly reduce cabin temperature by rejecting solar heat, keeping your car cool even in tropical climates."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "description": "Enhance your personal privacy and security by limiting visibility into your vehicle from the outside."
+      },
+      "glareReduction": {
+        "title": "Glare Reduction",
+        "description": "Reduce blinding glare from the sun and oncoming headlights for safer, more comfortable driving."
+      },
+      "interiorProtection": {
+        "title": "Interior Protection",
+        "description": "Prevent cracking, fading, and discoloration of your dashboard, seats, and upholstery caused by prolonged sun exposure."
+      },
+      "energySaving": {
+        "title": "Energy Saving",
+        "description": "Lower your air conditioning usage and save fuel by keeping your car naturally cooler with heat-rejecting tint films."
+      }
+    }
+  },
+  "configurator": {
+    "title": "Tint Configurator",
+    "selectCar": "Select Your Car Type",
+    "selectWindows": "Select Windows",
+    "selectTint": "Select Tint Type",
+    "selectService": "Select Service",
+    "shipping": "Shipping",
+    "checkout": "Checkout"
+  },
+  "carTypes": {
+    "sedan": "Sedan",
+    "suv": "SUV",
+    "van": "Van",
+    "stationWagon": "Station Wagon",
+    "hatchback": "Hatchback",
+    "coupe": "Coupe",
+    "truck": "Truck",
+    "convertible": "Convertible"
+  },
+  "tintTypes": {
+    "standard": {
+      "name": "Standard Dyed",
+      "description": "Affordable dyed film providing good privacy and basic heat rejection. Ideal for budget-conscious customers."
+    },
+    "ceramic": {
+      "name": "Ceramic",
+      "description": "Advanced nano-ceramic technology offering superior heat rejection without signal interference. Premium clarity and performance."
+    },
+    "carbon": {
+      "name": "Carbon",
+      "description": "Carbon-particle film delivering excellent heat rejection and a sleek matte finish. Will not fade over time."
+    },
+    "adaptive": {
+      "name": "Adaptive Photochromic",
+      "description": "Intelligent tint that automatically adjusts its darkness based on sunlight intensity. The ultimate in smart window films."
+    },
+    "crystalline": {
+      "name": "Crystalline",
+      "description": "Near-invisible film that rejects more heat than many darker films. Maximum clarity with maximum protection."
+    },
+    "metallic": {
+      "name": "Metallic",
+      "description": "Metal-particle film with a reflective finish, excellent heat rejection, and added shatter resistance."
+    }
+  },
+  "windowPositions": {
+    "frontWindshield": "Front Windshield",
+    "rearWindshield": "Rear Windshield",
+    "frontLeft": "Front Left",
+    "frontRight": "Front Right",
+    "rearLeft": "Rear Left",
+    "rearRight": "Rear Right",
+    "rearQuarterLeft": "Rear Quarter Left",
+    "rearQuarterRight": "Rear Quarter Right",
+    "sunroof": "Sunroof"
+  },
+  "service": {
+    "shippingOnly": "Shipping Only",
+    "installation": "Professional Installation",
+    "shippingOnlyDesc": "We ship the pre-cut tint films directly to you. Perfect if you have your own installer or prefer DIY.",
+    "installationDesc": "Our certified technicians will install the tint films at a partner location near you."
+  },
+  "shipping": {
+    "title": "Shipping Information",
+    "philippines": "Philippines",
+    "australia": "Australia",
+    "calculateShipping": "Calculate Shipping",
+    "freeShipping": "Free Shipping",
+    "estimatedDelivery": "Estimated Delivery"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Order Summary",
+    "paymentMethod": "Payment Method",
+    "placeOrder": "Place Order",
+    "processing": "Processing your order..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "orders": "My Orders",
+    "profile": "Profile",
+    "settings": "Settings",
+    "orderHistory": "Order History"
+  },
+  "common": {
+    "currency": "USD",
+    "addToCart": "Add to Cart",
+    "remove": "Remove",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "shipping": "Shipping",
+    "next": "Next",
+    "back": "Back",
+    "confirm": "Confirm"
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us"
+  }
+}

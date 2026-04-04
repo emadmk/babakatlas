@@ -14,7 +14,8 @@ export function getStripe(): Stripe {
       );
     }
     _stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-12-18.acacia' as Stripe.StripeConfig['apiVersion'],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      apiVersion: '2024-12-18.acacia' as any,
       typescript: true,
     });
   }

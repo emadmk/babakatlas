@@ -63,12 +63,12 @@ function HeroSection() {
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-[500px] h-[120px] border border-white/[0.04] rounded-[40%] bg-gradient-to-b from-white/[0.02] to-transparent" />
           {/* Window tint visual */}
           <div className="absolute bottom-28 left-1/2 -translate-x-[45%] w-[180px] h-[70px] bg-gradient-to-br from-accent/10 to-accent/[0.03] rounded-tl-[60%] rounded-tr-[30%] rounded-br-[10%] rounded-bl-[20%] border border-accent/10" />
-          <div className="absolute bottom-28 left-1/2 translate-x-[5%] w-[150px] h-[65px] bg-gradient-to-bl from-accent/8 to-accent/[0.02] rounded-tl-[30%] rounded-tr-[60%] rounded-br-[20%] rounded-bl-[10%] border border-accent/8" />
+          <div className="absolute bottom-28 left-1/2 translate-x-[5%] w-[150px] h-[65px] bg-gradient-to-bl from-accent/[0.08] to-accent/[0.02] rounded-tl-[30%] rounded-tr-[60%] rounded-br-[20%] rounded-bl-[10%] border border-accent/[0.08]" />
         </motion.div>
         {/* Floating orbs */}
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-accent/5 rounded-full blur-[100px] animate-float" />
         <div
-          className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-accent/3 rounded-full blur-[120px] animate-float"
+          className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-accent/[0.03] rounded-full blur-[120px] animate-float"
           style={{ animationDelay: "-3s" }}
         />
       </div>
@@ -147,12 +147,12 @@ function HeroSection() {
    BENEFITS SECTION
    ============================================================ */
 const benefits = [
-  { icon: Shield, titleKey: "benefits.uv.title", descKey: "benefits.uv.desc", color: "#0071E3" },
-  { icon: Thermometer, titleKey: "benefits.heat.title", descKey: "benefits.heat.desc", color: "#FF6B35" },
-  { icon: Eye, titleKey: "benefits.privacy.title", descKey: "benefits.privacy.desc", color: "#8B5CF6" },
-  { icon: Zap, titleKey: "benefits.glare.title", descKey: "benefits.glare.desc", color: "#F59E0B" },
-  { icon: Palette, titleKey: "benefits.interior.title", descKey: "benefits.interior.desc", color: "#30D158" },
-  { icon: Sun, titleKey: "benefits.energy.title", descKey: "benefits.energy.desc", color: "#06B6D4" },
+  { icon: Shield, titleKey: "benefits.items.uvProtection.title", descKey: "benefits.items.uvProtection.description", color: "#0071E3" },
+  { icon: Thermometer, titleKey: "benefits.items.heatReduction.title", descKey: "benefits.items.heatReduction.description", color: "#FF6B35" },
+  { icon: Eye, titleKey: "benefits.items.privacy.title", descKey: "benefits.items.privacy.description", color: "#8B5CF6" },
+  { icon: Zap, titleKey: "benefits.items.glareReduction.title", descKey: "benefits.items.glareReduction.description", color: "#F59E0B" },
+  { icon: Palette, titleKey: "benefits.items.interiorProtection.title", descKey: "benefits.items.interiorProtection.description", color: "#30D158" },
+  { icon: Sun, titleKey: "benefits.items.energySaving.title", descKey: "benefits.items.energySaving.description", color: "#06B6D4" },
 ];
 
 function BenefitsSection() {
@@ -281,9 +281,9 @@ function ProductShowcaseSection() {
         </motion.div>
       </div>
 
-      {/* Horizontal scroll */}
+      {/* Horizontal scroll on mobile, grid on desktop */}
       <div className="relative">
-        <div className="flex gap-6 overflow-x-auto px-6 pb-4 snap-x snap-mandatory scrollbar-hide md:max-w-7xl md:mx-auto md:grid md:grid-cols-3 md:overflow-visible md:px-6">
+        <div className="flex gap-6 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:max-w-7xl md:mx-auto md:grid md:grid-cols-3 md:overflow-visible md:px-6">
           {tintProducts.map((product, i) => (
             <motion.div
               key={product.name}
@@ -350,10 +350,10 @@ function ProductShowcaseSection() {
    HOW IT WORKS SECTION
    ============================================================ */
 const steps = [
-  { icon: Car, titleKey: "howItWorks.step1", descKey: "howItWorks.step1.desc" },
-  { icon: MousePointer2, titleKey: "howItWorks.step2", descKey: "howItWorks.step2.desc" },
-  { icon: Layers, titleKey: "howItWorks.step3", descKey: "howItWorks.step3.desc" },
-  { icon: Package, titleKey: "howItWorks.step4", descKey: "howItWorks.step4.desc" },
+  { icon: Car, titleKey: "howItWorks.step1", descKey: "howItWorks.step1desc" },
+  { icon: MousePointer2, titleKey: "howItWorks.step2", descKey: "howItWorks.step2desc" },
+  { icon: Layers, titleKey: "howItWorks.step3", descKey: "howItWorks.step3desc" },
+  { icon: Package, titleKey: "howItWorks.step4", descKey: "howItWorks.step4desc" },
 ];
 
 function HowItWorksSection() {
@@ -427,12 +427,10 @@ function HowItWorksSection() {
 function AnimatedCounter({
   target,
   suffix,
-  prefix,
   inView,
 }: {
   target: number;
   suffix?: string;
-  prefix?: string;
   inView: boolean;
 }) {
   const [count, setCount] = useState(0);
@@ -456,7 +454,6 @@ function AnimatedCounter({
 
   return (
     <span>
-      {prefix}
       {count.toLocaleString()}
       {suffix}
     </span>
@@ -464,10 +461,10 @@ function AnimatedCounter({
 }
 
 const stats = [
-  { value: 10000, suffix: "+", label: "stats.cars" },
-  { value: 99, suffix: "%", label: "stats.uv" },
-  { value: 50, suffix: "+", label: "stats.models" },
-  { value: 2, suffix: "", label: "stats.countries" },
+  { value: 10000, suffix: "+", labelKey: "stats.cars" },
+  { value: 99, suffix: "%", labelKey: "stats.uv" },
+  { value: 50, suffix: "+", labelKey: "stats.models" },
+  { value: 2, suffix: "", labelKey: "stats.countries" },
 ];
 
 function StatsSection() {
@@ -484,7 +481,7 @@ function StatsSection() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
             <motion.div
-              key={stat.label}
+              key={stat.labelKey}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -497,7 +494,7 @@ function StatsSection() {
                   inView={inView}
                 />
               </div>
-              <p className="text-sm text-zinc-500">{t(stat.label)}</p>
+              <p className="text-sm text-zinc-500">{t(stat.labelKey)}</p>
             </motion.div>
           ))}
         </div>
@@ -515,9 +512,9 @@ function CTASection() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   const badges = [
-    { icon: Truck, text: t("cta.badge1") },
-    { icon: Award, text: t("cta.badge2") },
-    { icon: Shield, text: t("cta.badge3") },
+    { icon: Truck, textKey: "cta.badge1" },
+    { icon: Award, textKey: "cta.badge2" },
+    { icon: Shield, textKey: "cta.badge3" },
   ];
 
   return (
@@ -545,11 +542,11 @@ function CTASection() {
         <div className="flex flex-wrap items-center justify-center gap-6 mt-12">
           {badges.map((badge) => (
             <div
-              key={badge.text}
+              key={badge.textKey}
               className="flex items-center gap-2 text-sm text-zinc-400"
             >
               <badge.icon size={16} className="text-accent" />
-              {badge.text}
+              {t(badge.textKey)}
             </div>
           ))}
         </div>

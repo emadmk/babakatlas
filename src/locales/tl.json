@@ -11,12 +11,14 @@
     "signup": "Mag-sign Up"
   },
   "hero": {
-    "title": "Premium na Pelikulang Tint sa Bintana",
-    "subtitle": "Propesyonal na pelikulang pang-tint sa bintana ng sasakyan para sa mahusay na proteksyon sa UV, pagbawas ng init, at privacy. Naglilingkod sa Pilipinas at Australia.",
-    "cta": "I-configure ang Iyong Tint"
+    "title": "Premium na Window Tint Films",
+    "subtitle": "Professional-grade na ceramic at carbon tint films para sa ultimate na UV protection, heat reduction, at istilo. Engineered para sa perpeksyon.",
+    "cta": "I-configure ang Iyong Tint",
+    "cta2": "Tuklasin ang mga Produkto"
   },
   "benefits": {
     "title": "Bakit Mag-tint ng Bintana?",
+    "subtitle": "Maranasan ang pagkakaiba ng professional na window tinting",
     "items": {
       "uvProtection": {
         "title": "Proteksyon sa UV",
@@ -140,10 +142,61 @@
     "back": "Bumalik",
     "confirm": "Kumpirmahin"
   },
+  "products": {
+    "title": "Aming Koleksyon ng Tint",
+    "subtitle": "Piliin ang perpektong tint para sa iyong pangangailangan"
+  },
+  "howItWorks": {
+    "title": "Paano Ito Gumagana",
+    "subtitle": "Apat na simpleng hakbang para sa perpektong tint",
+    "step1": "Piliin ang Iyong Kotse",
+    "step1desc": "Piliin ang make, model, at taon ng iyong kotse.",
+    "step2": "Piliin ang mga Bintana",
+    "step2desc": "Piliin kung aling mga bintana ang gusto mong i-tint.",
+    "step3": "Pumili ng Tint",
+    "step3desc": "Pumili mula sa aming range ng premium films.",
+    "step4": "Mag-order at Mag-install",
+    "step4desc": "Mag-order at makakuha ng pre-cut films o professional installation."
+  },
+  "stats": {
+    "cars": "Mga Kotse na Na-tint",
+    "uv": "UV Block",
+    "models": "Mga Modelo ng Kotse",
+    "countries": "Mga Bansa"
+  },
+  "cta": {
+    "title": "Handa ka na bang I-transform ang Iyong Sasakyan?",
+    "subtitle": "Magsimula sa aming interactive configurator.",
+    "button": "Simulan ang Pag-configure",
+    "badge1": "Libreng shipping sa $99+",
+    "badge2": "Professional grade",
+    "badge3": "May warranty"
+  },
+  "testimonials": {
+    "title": "Mga Sinasabi ng Aming Customers"
+  },
   "footer": {
     "copyright": "Lahat ng karapatan ay nakalaan.",
     "terms": "Mga Tuntunin ng Serbisyo",
     "privacy": "Patakaran sa Privacy",
-    "contact": "Makipag-ugnayan sa Amin"
+    "contact": "Kontak",
+    "company": "Kompanya",
+    "products": "Mga Produkto",
+    "support": "Suporta",
+    "about": "Tungkol Sa Amin",
+    "careers": "Mga Trabaho",
+    "press": "Press",
+    "ceramic": "Ceramic Tint",
+    "carbon": "Carbon Tint",
+    "standard": "Standard Tint",
+    "specialty": "Specialty Films",
+    "faq": "FAQ",
+    "installation": "Gabay sa Pag-install",
+    "warranty": "Warranty",
+    "returns": "Mga Returns",
+    "email": "hello@babakatlas.com",
+    "newsletter": "Mag-subscribe sa newsletter",
+    "newsletterPlaceholder": "Ilagay ang email",
+    "shipping": "Nagpapadala sa Pilipinas at Australia"
   }
 }

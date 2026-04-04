@@ -12,11 +12,13 @@
   },
   "hero": {
     "title": "Premium Window Tint Films",
-    "subtitle": "Professional grade automotive window tinting films for superior UV protection, heat reduction, and privacy. Serving the Philippines and Australia.",
-    "cta": "Configure Your Tint"
+    "subtitle": "Professional-grade ceramic and carbon tint films for ultimate UV protection, heat reduction, and style. Engineered for perfection.",
+    "cta": "Configure Your Tint",
+    "cta2": "Explore Products"
   },
   "benefits": {
     "title": "Why Window Tinting?",
+    "subtitle": "Experience the difference that professional window tinting makes",
     "items": {
       "uvProtection": {
         "title": "UV Protection",
@@ -140,10 +142,61 @@
     "back": "Back",
     "confirm": "Confirm"
   },
+  "products": {
+    "title": "Our Tint Collection",
+    "subtitle": "Choose the perfect tint for your needs"
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Four simple steps to your perfect tint",
+    "step1": "Choose Your Car",
+    "step1desc": "Select your car make, model, and year from our extensive database.",
+    "step2": "Select Windows",
+    "step2desc": "Pick exactly which windows you want tinted with our interactive configurator.",
+    "step3": "Pick Your Tint",
+    "step3desc": "Choose from our range of premium ceramic, carbon, and specialty films.",
+    "step4": "Order & Install",
+    "step4desc": "Place your order and get pre-cut films delivered or professionally installed."
+  },
+  "stats": {
+    "cars": "Cars Tinted",
+    "uv": "UV Block",
+    "models": "Car Models",
+    "countries": "Countries"
+  },
+  "cta": {
+    "title": "Ready to Transform Your Ride?",
+    "subtitle": "Get started with our interactive configurator and find the perfect tint for your vehicle.",
+    "button": "Start Configuring",
+    "badge1": "Free shipping over $99",
+    "badge2": "Professional grade",
+    "badge3": "Warranty included"
+  },
+  "testimonials": {
+    "title": "What Our Customers Say"
+  },
   "footer": {
     "copyright": "All rights reserved.",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
-    "contact": "Contact Us"
+    "contact": "Contact",
+    "company": "Company",
+    "products": "Products",
+    "support": "Support",
+    "about": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "ceramic": "Ceramic Tint",
+    "carbon": "Carbon Tint",
+    "standard": "Standard Tint",
+    "specialty": "Specialty Films",
+    "faq": "FAQ",
+    "installation": "Installation Guide",
+    "warranty": "Warranty",
+    "returns": "Returns",
+    "email": "hello@babakatlas.com",
+    "newsletter": "Subscribe to our newsletter",
+    "newsletterPlaceholder": "Enter your email",
+    "shipping": "Shipping to Philippines & Australia"
   }
 }

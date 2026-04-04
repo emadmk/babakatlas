@@ -43,6 +43,14 @@ function HeroSection() {
     >
       {/* Background layers */}
       <div className="absolute inset-0">
+        {/* Hero background image */}
+        <img
+          src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&h=1080&fit=crop"
+          alt="Car with tinted windows"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/65" />
         {/* Radial gradient */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(0,113,227,0.12),transparent)]" />
         {/* Subtle grid */}
@@ -54,17 +62,6 @@ function HeroSection() {
             backgroundSize: "60px 60px",
           }}
         />
-        {/* Car silhouette / abstract shape */}
-        <motion.div
-          style={{ y }}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px]"
-        >
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-gradient-to-t from-white/[0.02] to-transparent rounded-t-[50%] blur-sm" />
-          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-[500px] h-[120px] border border-white/[0.04] rounded-[40%] bg-gradient-to-b from-white/[0.02] to-transparent" />
-          {/* Window tint visual */}
-          <div className="absolute bottom-28 left-1/2 -translate-x-[45%] w-[180px] h-[70px] bg-gradient-to-br from-accent/10 to-accent/[0.03] rounded-tl-[60%] rounded-tr-[30%] rounded-br-[10%] rounded-bl-[20%] border border-accent/10" />
-          <div className="absolute bottom-28 left-1/2 translate-x-[5%] w-[150px] h-[65px] bg-gradient-to-bl from-accent/[0.08] to-accent/[0.02] rounded-tl-[30%] rounded-tr-[60%] rounded-br-[20%] rounded-bl-[10%] border border-accent/[0.08]" />
-        </motion.div>
         {/* Floating orbs */}
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-accent/5 rounded-full blur-[100px] animate-float" />
         <div

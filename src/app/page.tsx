@@ -215,6 +215,7 @@ const tintProducts = [
     features: ["Basic UV protection", "Affordable option", "Multiple shades"],
     priceRange: "$49 - $89",
     color: "#737373",
+    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
   },
   {
     name: "Ceramic",
@@ -223,6 +224,7 @@ const tintProducts = [
     priceRange: "$149 - $299",
     color: "#0071E3",
     popular: true,
+    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
   },
   {
     name: "Carbon",
@@ -230,6 +232,7 @@ const tintProducts = [
     features: ["Matte finish", "No fading", "Good heat rejection"],
     priceRange: "$99 - $199",
     color: "#525252",
+    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
   },
   {
     name: "Adaptive",
@@ -237,6 +240,7 @@ const tintProducts = [
     features: ["Auto-adjusting tint", "Smart technology", "Premium finish"],
     priceRange: "$299 - $499",
     color: "#8B5CF6",
+    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
   },
   {
     name: "Crystalline",
@@ -244,6 +248,7 @@ const tintProducts = [
     features: ["Near-clear look", "Max UV block", "Premium clarity"],
     priceRange: "$199 - $399",
     color: "#06B6D4",
+    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
   },
   {
     name: "Metallic",
@@ -251,6 +256,7 @@ const tintProducts = [
     features: ["Reflective finish", "High heat rejection", "Durable"],
     priceRange: "$79 - $159",
     color: "#C4A35A",
+    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
   },
 ];
 
@@ -289,12 +295,27 @@ function ProductShowcaseSection() {
               transition={{ duration: 0.6, delay: i * 0.1 }}
               className="snap-center min-w-[280px] md:min-w-0 group"
             >
-              <div className="relative glass-card p-6 h-full flex flex-col">
+              <div className="relative glass-card overflow-hidden h-full flex flex-col">
                 {product.popular && (
-                  <div className="absolute -top-3 left-6 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <div className="absolute top-3 left-6 z-10 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
                     Most Popular
                   </div>
                 )}
+                {/* Product tint image */}
+                <div className="w-full h-32 overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={`${product.name} tint sample`}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    style={{ filter: `brightness(0.7) saturate(0.8)` }}
+                  />
+                  <div
+                    className="absolute inset-0 h-32 opacity-30"
+                    style={{ background: `linear-gradient(135deg, ${product.color}40, transparent)` }}
+                  />
+                </div>
+                <div className="p-6 flex flex-col flex-1">
                 {/* Color accent bar */}
                 <div
                   className="w-full h-1 rounded-full mb-6"
@@ -333,6 +354,7 @@ function ProductShowcaseSection() {
                   >
                     Details <ChevronRight size={14} />
                   </button>
+                </div>
                 </div>
               </div>
             </motion.div>
@@ -562,6 +584,7 @@ const testimonials = [
     quote:
       "The ceramic tint completely transformed my driving experience. My cabin stays cool even in Manila traffic. Absolutely worth every peso.",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
   },
   {
     name: "Sarah Chen",
@@ -569,6 +592,7 @@ const testimonials = [
     quote:
       "Crystal clear visibility with incredible heat rejection. The installation was flawless and the pre-cut fit was perfect.",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
   },
   {
     name: "James Rivera",
@@ -576,6 +600,7 @@ const testimonials = [
     quote:
       "Best investment for my truck. The UV protection is noticeable immediately. My leather seats look brand new after 6 months.",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
   },
 ];
 
@@ -624,13 +649,13 @@ function TestimonialsSection() {
               </p>
 
               <div className="flex items-center gap-3">
-                {/* Avatar placeholder */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/30 to-accent/10 border border-accent/20 flex items-center justify-center text-accent text-sm font-bold">
-                  {item.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </div>
+                {/* Avatar */}
+                <img
+                  src={item.avatar}
+                  alt={`${item.name} avatar`}
+                  loading="lazy"
+                  className="w-10 h-10 rounded-full object-cover border border-accent/20"
+                />
                 <div>
                   <p className="text-sm font-medium text-white">{item.name}</p>
                   <p className="text-xs text-zinc-500">{item.car}</p>

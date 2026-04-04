@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { products } from "../route";
+import { products } from "@/lib/adminData";
 
 export async function GET(
   _request: NextRequest,

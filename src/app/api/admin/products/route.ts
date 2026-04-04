@@ -1,28 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TINT_TYPES } from "@/store/configuratorStore";
-
-// In-memory product store seeded from TINT_TYPES
-const products = new Map(
-  Object.entries(TINT_TYPES).map(([slug, tint]) => [
-    slug,
-    {
-      id: slug,
-      slug,
-      name: { en: tint.name, tl: tint.name },
-      description: { en: tint.description, tl: tint.description },
-      tintType: slug,
-      vlt: tint.vlt,
-      uvBlock: tint.uvBlock,
-      heatRejection: tint.heatRejection,
-      pricePerSqft: tint.pricePerSqft,
-      imageUrl: `/images/tints/${slug}.jpg`,
-      badge: tint.badge ?? null,
-      active: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ])
-);
+import { products } from "@/lib/adminData";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -71,5 +48,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid request" }, { status: 400 });
   }
 }
-
-export { products };

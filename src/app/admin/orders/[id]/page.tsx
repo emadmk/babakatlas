@@ -14,14 +14,7 @@ import {
 } from "lucide-react";
 import { useAdminStore, type AdminOrder } from "@/store/adminStore";
 
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  confirmed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  processing: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  shipped: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-  delivered: "bg-green-500/20 text-green-400 border-green-500/30",
-  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
-};
+
 
 const statusTimeline = [
   "pending",

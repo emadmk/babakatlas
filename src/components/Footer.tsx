@@ -74,7 +74,7 @@ export default function Footer() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("footer.newsletter.placeholder")}
+                  placeholder={t("footer.newsletterPlaceholder")}
                   className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
                 />
                 <button className="bg-accent hover:bg-accent-hover text-white px-4 py-2.5 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium">
@@ -120,7 +120,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-zinc-600">
-            &copy; {new Date().getFullYear()} {t("footer.copyright")}
+            &copy; {new Date().getFullYear()} BabakAtlas. {t("footer.copyright")}
           </p>
 
           {/* Social icons */}

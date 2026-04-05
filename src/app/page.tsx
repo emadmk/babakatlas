@@ -64,7 +64,7 @@ interface HomepageData {
     icon: string;
   }>;
   stats: Array<{
-    value: number;
+    value: number | string;
     label: TranslatedText;
     suffix: string;
   }>;
@@ -537,7 +537,7 @@ function StatsSection({ data, language }: { data: HomepageData["stats"]; languag
             >
               <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                 <AnimatedCounter
-                  target={stat.value}
+                  target={typeof stat.value === "string" ? parseInt(stat.value, 10) || 0 : stat.value}
                   suffix={stat.suffix}
                   inView={inView}
                 />

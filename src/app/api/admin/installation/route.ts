@@ -12,16 +12,17 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
+    const items = body.data || body;
 
-    if (Array.isArray(body)) {
-      const results = body.map((item: { id: string; [key: string]: unknown }) =>
+    if (Array.isArray(items)) {
+      const results = items.map((item: { id: string; [key: string]: unknown }) =>
         updateInstallationRate(item.id, item)
       );
       return NextResponse.json({ success: true, data: results.filter(Boolean) });
     }
 
-    if (body.id) {
-      const updated = updateInstallationRate(body.id, body);
+    if (items.id) {
+      const updated = updateInstallationRate(items.id, items);
       if (!updated) {
         return NextResponse.json({ success: false, error: "Installation rate not found" }, { status: 404 });
       }

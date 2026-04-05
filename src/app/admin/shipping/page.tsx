@@ -102,12 +102,12 @@ export default function AdminShippingPage() {
         fetch("/api/admin/shipping", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(countries),
+          body: JSON.stringify({ data: countries }),
         }),
         fetch("/api/admin/installation", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(installationRates),
+          body: JSON.stringify({ data: installationRates }),
         }),
       ]);
 

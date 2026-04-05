@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
+// Using <img> for user-uploaded images (next/image requires explicit domains)
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -144,11 +144,10 @@ export default function AdminCarsPage() {
                 {/* Image */}
                 <div className="relative w-full h-40 bg-white/[0.02] overflow-hidden">
                   {car.imageUrl ? (
-                    <Image
+                    <img
                       src={car.imageUrl}
-                      alt={car.name.en}
-                      fill
-                      className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                      alt={car.name?.en || "Car"}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">

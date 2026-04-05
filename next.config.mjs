@@ -7,6 +7,14 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
       },
     ],
+    // Allow local uploaded images
+    domains: [],
+  },
+  // Increase server response size limit for large pages
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
 };
 

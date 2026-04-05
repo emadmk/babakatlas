@@ -115,11 +115,33 @@ export default function ContactPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setSubmitting(true);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        setTimeout(() => setSubmitted(false), 5000);
+        setForm({ name: "", email: "", subject: "", message: "" });
+      } else {
+        console.error('Contact form error:', data.error);
+      }
+    } catch (err) {
+      console.error('Failed to submit contact form:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) return <LoadingSkeleton />;
@@ -248,10 +270,11 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  className="btn-glow inline-flex items-center gap-2 !text-sm !px-6 !py-3"
+                  disabled={submitting}
+                  className="btn-glow inline-flex items-center gap-2 !text-sm !px-6 !py-3 disabled:opacity-50"
                 >
                   <Send size={16} />
-                  {txt(labels?.send, language) || "Send Message"}
+                  {submitting ? "Sending..." : (txt(labels?.send, language) || "Send Message")}
                 </button>
               </form>
             </div>

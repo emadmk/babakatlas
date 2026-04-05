@@ -79,6 +79,16 @@ export interface SiteSettings {
   contactPhone: string;
   taxRates: { PH: number; AU: number };
   currencies: { PH: string; AU: string };
+  shippingMarkup: number;
+  shippingMarkupType: 'flat' | 'percentage';
+  shippoFromAddress: {
+    name: string;
+    street1: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
 }
 
 export interface FaqItem {
@@ -557,6 +567,16 @@ const seedSiteSettings: SiteSettings = {
   contactPhone: "+63 917 000 0000",
   taxRates: { PH: 0.12, AU: 0.10 },
   currencies: { PH: "PHP", AU: "AUD" },
+  shippingMarkup: 0,
+  shippingMarkupType: 'flat',
+  shippoFromAddress: {
+    name: 'AtlasAdaptive',
+    street1: '123 Main Street',
+    city: 'Manila',
+    state: 'Metro Manila',
+    zip: '1000',
+    country: 'PH',
+  },
 };
 
 const seedFaqItems: FaqItem[] = [

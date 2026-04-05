@@ -125,6 +125,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Create the order
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,13 +148,50 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Store order ID and navigate to success
-      sessionStorage.setItem('lastOrderId', data.data.id);
-      sessionStorage.setItem('lastOrderNumber', data.data.orderNumber);
-      sessionStorage.setItem('lastOrderTotal', String(data.data.pricing.total));
+      const orderId = data.data.id;
+      const orderNumber = data.data.orderNumber;
+      const totalAmount = data.data.pricing?.total ?? config.total;
+
+      // Store order info
+      sessionStorage.setItem('lastOrderId', orderId);
+      sessionStorage.setItem('lastOrderNumber', orderNumber);
+      sessionStorage.setItem('lastOrderTotal', String(totalAmount));
       sessionStorage.setItem('lastOrderCountry', address.country);
 
-      router.push('/checkout/success');
+      // Step 2: Try to create a Stripe checkout session
+      const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      if (!stripeKey) {
+        // Stripe not configured, go directly to success (for dev/testing)
+        router.push('/checkout/success');
+        return;
+      }
+
+      const checkoutRes = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            name: `${tint?.name} Tint - ${config.carType ? formatCarType(config.carType) : 'Vehicle'}`,
+            description: `${config.selectedWindows.length} windows, ${config.totalSqft} sq ft`,
+            amount: totalAmount,
+            quantity: 1,
+          }],
+          email: contact.email,
+          orderId,
+        }),
+      });
+
+      const checkoutData = await checkoutRes.json();
+
+      if (!checkoutData.success || !checkoutData.data?.url) {
+        // If Stripe session fails, fall back to success page
+        setError(checkoutData.error || 'Payment setup failed. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Step 3: Redirect to Stripe Checkout
+      window.location.href = checkoutData.data.url;
     } catch {
       setError('Network error. Please check your connection and try again.');
       setIsSubmitting(false);
@@ -364,14 +402,24 @@ export default function CheckoutPage() {
                 <h2 className="text-lg font-semibold">Payment</h2>
               </div>
 
-              {/* Stripe placeholder */}
-              <div className="rounded-xl border border-dashed border-white/20 bg-white/[0.02] p-8 text-center">
-                <CreditCard className="w-10 h-10 text-white/20 mx-auto mb-3" />
-                <p className="text-white/40 text-sm mb-1">Stripe Payment Integration</p>
-                <p className="text-white/25 text-xs">
-                  Card details will be collected securely via Stripe Elements
-                </p>
-              </div>
+              {/* Stripe checkout info */}
+              {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? (
+                <div className="rounded-xl border border-white/20 bg-white/[0.02] p-6 text-center">
+                  <CreditCard className="w-10 h-10 text-white/30 mx-auto mb-3" />
+                  <p className="text-white/60 text-sm mb-1">Secure Payment via Stripe</p>
+                  <p className="text-white/30 text-xs">
+                    You will be redirected to Stripe&apos;s secure checkout to complete payment
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-yellow-500/30 bg-yellow-500/5 p-6 text-center">
+                  <CreditCard className="w-10 h-10 text-yellow-500/30 mx-auto mb-3" />
+                  <p className="text-yellow-400/70 text-sm mb-1">Stripe Not Configured</p>
+                  <p className="text-white/25 text-xs">
+                    Payment processing is not available. Orders will be saved without payment.
+                  </p>
+                </div>
+              )}
 
               {/* Trust badges */}
               <div className="mt-5 flex items-center justify-center gap-6 text-white/30">

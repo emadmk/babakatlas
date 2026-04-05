@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { getCarTypes, getWindowConfigs } from "@/lib/adminData";
 

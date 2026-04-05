@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceConfigs, updateServiceConfig } from "@/lib/adminData";
 

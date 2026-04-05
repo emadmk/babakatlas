@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Package,
+  Car,
+  AppWindow,
+  Wrench,
+  Truck,
   DollarSign,
   ShoppingCart,
   Users,
@@ -18,7 +22,11 @@ import {
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/products", label: "Tint Products", icon: Package },
+  { href: "/admin/cars", label: "Car Types", icon: Car },
+  { href: "/admin/windows", label: "Windows", icon: AppWindow },
+  { href: "/admin/services", label: "Services", icon: Wrench },
+  { href: "/admin/shipping", label: "Shipping", icon: Truck },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/users", label: "Users", icon: Users },

@@ -30,6 +30,18 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+
+  useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -98,14 +110,69 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Login */}
-          <Link
-            href="/auth/login"
-            className="flex items-center gap-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded-full transition-all duration-200"
-          >
-            <User size={16} />
-            {t("nav.login")}
-          </Link>
+          {/* User / Login */}
+          {session?.user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-3 py-2 rounded-full transition-all duration-200"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#0071E3] flex items-center justify-center text-white text-xs font-bold">
+                  {session.user.name?.charAt(0)?.toUpperCase() || session.user.email?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+                <span className="max-w-[100px] truncate">{session.user.name || "Account"}</span>
+              </button>
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-48 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                  >
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <LayoutDashboard size={15} />
+                      Dashboard
+                    </Link>
+                    {userRole === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        <Shield size={15} />
+                        Admin Panel
+                      </Link>
+                    )}
+                    <div className="h-px bg-white/10" />
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        signOut({ callbackUrl: "/" });
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-300 hover:text-red-400 hover:bg-red-500/5 transition-colors w-full"
+                    >
+                      <LogOut size={15} />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="flex items-center gap-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded-full transition-all duration-200"
+            >
+              <User size={16} />
+              {t("nav.login")}
+            </Link>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -166,14 +233,27 @@ export default function Navbar() {
                     0
                   </span>
                 </Link>
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 text-sm bg-white/5 border border-white/10 text-white px-4 py-2 rounded-full"
-                >
-                  <User size={16} />
-                  {t("nav.login")}
-                </Link>
+                {session?.user ? (
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      signOut({ callbackUrl: "/" });
+                    }}
+                    className="flex items-center gap-2 text-sm bg-white/5 border border-white/10 text-red-400 px-4 py-2 rounded-full"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 text-sm bg-white/5 border border-white/10 text-white px-4 py-2 rounded-full"
+                  >
+                    <User size={16} />
+                    {t("nav.login")}
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

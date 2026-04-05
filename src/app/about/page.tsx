@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
@@ -12,72 +12,157 @@ import {
   Car,
   Star,
   Clock,
+  Shield,
+  Thermometer,
+  Eye,
+  Zap,
+  Palette,
+  Sun,
+  Layers,
+  Package,
+  CheckCircle,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
-const values = [
-  {
-    icon: Award,
-    title: "Quality",
-    description:
-      "We source and develop only the highest grade materials, ensuring every film meets rigorous performance standards.",
-  },
-  {
-    icon: Lightbulb,
-    title: "Innovation",
-    description:
-      "From adaptive nano-ceramic technology to our online configurator, we push boundaries in the window tinting industry.",
-  },
-  {
-    icon: Heart,
-    title: "Customer Service",
-    description:
-      "Every customer interaction matters. We provide expert guidance from selection through installation and beyond.",
-  },
-  {
-    icon: Leaf,
-    title: "Sustainability",
-    description:
-      "Our films reduce vehicle energy consumption and we are committed to eco-friendly manufacturing and packaging.",
-  },
-];
+/* ============================================================
+   ICON HELPER
+   ============================================================ */
+const iconMap: Record<string, any> = {
+  Award, Lightbulb, Heart, Leaf, Users, Car, Star, Clock,
+  Shield, Thermometer, Eye, Zap, Palette, Sun, Layers, Package, CheckCircle,
+};
+const getIcon = (name: string) => iconMap[name] || Award;
 
-const stats = [
-  { value: "8+", label: "Years in Business", icon: Clock },
-  { value: "50K+", label: "Cars Tinted", icon: Car },
-  { value: "99%", label: "Customer Satisfaction", icon: Star },
-  { value: "2", label: "Countries Served", icon: Users },
-];
+/* ============================================================
+   TYPES
+   ============================================================ */
+interface TranslatedText {
+  en: string;
+  tl: string;
+  [key: string]: string;
+}
 
-const team = [
-  {
-    name: "Marco Reyes",
-    role: "Founder & CEO",
-    bio: "Automotive enthusiast with 15 years in the tinting industry.",
-  },
-  {
-    name: "Sarah Chen",
-    role: "Head of Product",
-    bio: "Materials engineer driving our next-gen film technology.",
-  },
-  {
-    name: "James Villanueva",
-    role: "Operations Director",
-    bio: "Logistics expert ensuring fast delivery across the region.",
-  },
-  {
-    name: "Ava Thompson",
-    role: "Customer Experience",
-    bio: "Dedicated to making every customer journey exceptional.",
-  },
-];
+interface AboutData {
+  story: {
+    title: TranslatedText;
+    subtitle: TranslatedText;
+    paragraphs: TranslatedText[];
+  };
+  mission: {
+    label: TranslatedText;
+    title: TranslatedText;
+    subtitle: TranslatedText;
+  };
+  values: Array<{
+    icon: string;
+    title: TranslatedText;
+    description: TranslatedText;
+  }>;
+  stats: Array<{
+    value: string;
+    label: TranslatedText;
+    icon: string;
+  }>;
+  team: Array<{
+    name: string;
+    role: TranslatedText;
+    bio: TranslatedText;
+  }>;
+  cta: {
+    title: TranslatedText;
+    subtitle: TranslatedText;
+    button: TranslatedText;
+  };
+}
+
+function txt(field: TranslatedText | string | undefined, lang: string): string {
+  if (!field) return "";
+  if (typeof field === "string") return field;
+  return field[lang] || field.en || "";
+}
+
+/* ============================================================
+   LOADING SKELETON
+   ============================================================ */
+function LoadingSkeleton() {
+  return (
+    <main className="min-h-screen bg-black pt-32 pb-20">
+      <div className="max-w-4xl mx-auto px-6 mb-24">
+        <div className="text-center space-y-4">
+          <div className="w-48 h-8 bg-white/10 rounded-lg mx-auto animate-pulse" />
+          <div className="w-96 h-5 bg-white/5 rounded-lg mx-auto animate-pulse" />
+        </div>
+        <div className="mt-8 space-y-4">
+          <div className="w-full h-40 bg-white/5 rounded-2xl animate-pulse" />
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-6 mb-24">
+        <div className="w-48 h-8 bg-white/10 rounded-lg mx-auto animate-pulse mb-12" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="w-full h-40 bg-white/5 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
 
 export default function AboutPage() {
+  const { language } = useLanguage();
+  const [data, setData] = useState<AboutData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
   const parallaxRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: parallaxRef,
     offset: ["start end", "end start"],
   });
   const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchAbout() {
+      try {
+        const res = await fetch("/api/content/about");
+        if (!res.ok) throw new Error("Failed to fetch about data");
+        const json = await res.json();
+        if (!cancelled) {
+          setData(json);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch about data:", err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchAbout();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) return <LoadingSkeleton />;
+
+  if (error || !data) {
+    return (
+      <main className="min-h-screen bg-black pt-32 pb-20">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <p className="text-zinc-400 text-lg mb-4">Unable to load page content.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-glow inline-flex items-center gap-2 !text-sm !px-6 !py-3"
+          >
+            Try Again
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black pt-32 pb-20">
@@ -89,10 +174,11 @@ export default function AboutPage() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <h1 className="heading-section gradient-text mb-6">Our Story</h1>
+          <h1 className="heading-section gradient-text mb-6">
+            {txt(data.story?.title, language) || "Our Story"}
+          </h1>
           <p className="subheading max-w-2xl mx-auto mb-8">
-            Born from a passion for automotive excellence and a vision to make
-            premium window tinting accessible across Southeast Asia and Oceania.
+            {txt(data.story?.subtitle, language) || "Born from a passion for automotive excellence and a vision to make premium window tinting accessible across Southeast Asia and Oceania."}
           </p>
         </motion.div>
 
@@ -102,26 +188,9 @@ export default function AboutPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="glass-card !rounded-2xl p-8 md:p-10 text-zinc-400 text-sm leading-relaxed space-y-4"
         >
-          <p>
-            AtlasAdaptive was founded with a simple belief: everyone deserves
-            access to professional-grade window tinting, regardless of where they
-            are. Starting from a small workshop in Metro Manila, we spent years
-            perfecting our craft and sourcing the finest materials from around
-            the world.
-          </p>
-          <p>
-            Today, we serve thousands of customers across the Philippines and
-            Australia, offering cutting-edge ceramic, carbon, and adaptive tint
-            films through our innovative online platform. Our proprietary
-            configurator lets you visualize exactly how your vehicle will look
-            before you buy, taking the guesswork out of window tinting.
-          </p>
-          <p>
-            We are not just a tint company. We are a technology-driven brand
-            committed to transforming the way people protect and personalize
-            their vehicles. From our nano-ceramic formulations to our seamless
-            e-commerce experience, every detail is engineered for perfection.
-          </p>
+          {(data.story?.paragraphs || []).map((p, i) => (
+            <p key={i}>{txt(p, language)}</p>
+          ))}
         </motion.div>
       </section>
 
@@ -142,15 +211,13 @@ export default function AboutPage() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs uppercase tracking-widest text-[#0071E3] mb-4">
-              Our Mission
+              {txt(data.mission?.label, language) || "Our Mission"}
             </p>
             <h2 className="heading-section gradient-text-accent mb-6">
-              Making premium window tinting accessible across Southeast Asia and
-              Oceania
+              {txt(data.mission?.title, language) || "Making premium window tinting accessible across Southeast Asia and Oceania"}
             </h2>
             <p className="subheading max-w-xl mx-auto">
-              We combine world-class materials with innovative technology to
-              deliver the ultimate window tinting experience.
+              {txt(data.mission?.subtitle, language) || "We combine world-class materials with innovative technology to deliver the ultimate window tinting experience."}
             </p>
           </motion.div>
         </div>
@@ -167,45 +234,51 @@ export default function AboutPage() {
           Our Values
         </motion.h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((v, i) => (
-            <motion.div
-              key={v.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass-card !rounded-2xl p-6 text-center"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#0071E3]/10 flex items-center justify-center mx-auto mb-4">
-                <v.icon size={24} className="text-[#0071E3]" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">{v.title}</h3>
-              <p className="text-zinc-500 text-sm">{v.description}</p>
-            </motion.div>
-          ))}
+          {(data.values || []).map((v, i) => {
+            const IconComp = getIcon(v.icon);
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-card !rounded-2xl p-6 text-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#0071E3]/10 flex items-center justify-center mx-auto mb-4">
+                  <IconComp size={24} className="text-[#0071E3]" />
+                </div>
+                <h3 className="text-white font-semibold mb-2">{txt(v.title, language)}</h3>
+                <p className="text-zinc-500 text-sm">{txt(v.description, language)}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
       {/* Stats */}
       <section className="max-w-5xl mx-auto px-6 mb-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass-card !rounded-2xl p-6 text-center"
-            >
-              <s.icon
-                size={24}
-                className="text-[#0071E3] mx-auto mb-3"
-              />
-              <p className="text-3xl font-bold text-white mb-1">{s.value}</p>
-              <p className="text-xs text-zinc-500">{s.label}</p>
-            </motion.div>
-          ))}
+          {(data.stats || []).map((s, i) => {
+            const IconComp = getIcon(s.icon);
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-card !rounded-2xl p-6 text-center"
+              >
+                <IconComp
+                  size={24}
+                  className="text-[#0071E3] mx-auto mb-3"
+                />
+                <p className="text-3xl font-bold text-white mb-1">{s.value}</p>
+                <p className="text-xs text-zinc-500">{txt(s.label, language)}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -220,7 +293,7 @@ export default function AboutPage() {
           Our Team
         </motion.h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {team.map((member, i) => (
+          {(data.team || []).map((member, i) => (
             <motion.div
               key={member.name}
               initial={{ opacity: 0, y: 30 }}
@@ -235,8 +308,8 @@ export default function AboutPage() {
               <h3 className="text-white font-semibold text-sm mb-1">
                 {member.name}
               </h3>
-              <p className="text-[#0071E3] text-xs mb-2">{member.role}</p>
-              <p className="text-zinc-500 text-xs">{member.bio}</p>
+              <p className="text-[#0071E3] text-xs mb-2">{txt(member.role, language)}</p>
+              <p className="text-zinc-500 text-xs">{txt(member.bio, language)}</p>
             </motion.div>
           ))}
         </div>
@@ -251,17 +324,16 @@ export default function AboutPage() {
           className="glass-card !rounded-2xl p-10"
         >
           <h2 className="text-xl font-semibold text-white mb-3">
-            Ready to transform your ride?
+            {txt(data.cta?.title, language) || "Ready to transform your ride?"}
           </h2>
           <p className="text-zinc-400 text-sm mb-6">
-            Explore our range of premium window tint films and find the perfect
-            match for your vehicle.
+            {txt(data.cta?.subtitle, language) || "Explore our range of premium window tint films and find the perfect match for your vehicle."}
           </p>
           <Link
             href="/configurator"
             className="btn-glow inline-flex items-center gap-2 !text-sm !px-6 !py-3"
           >
-            Try the Configurator
+            {txt(data.cta?.button, language) || "Try the Configurator"}
           </Link>
         </motion.div>
       </section>

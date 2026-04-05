@@ -20,13 +20,109 @@ import {
   Award,
   BadgeCheck,
   ArrowRight,
+  CheckCircle,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 /* ============================================================
+   ICON HELPER
+   ============================================================ */
+const iconMap: Record<string, any> = {
+  Shield, Thermometer, Eye, Zap, Palette, Sun, Car, Layers, CheckCircle, Package,
+  MousePointer2, Truck, Award, BadgeCheck, ArrowRight, Star,
+};
+const getIcon = (name: string) => iconMap[name] || Shield;
+
+/* ============================================================
+   TYPES
+   ============================================================ */
+interface TranslatedText {
+  en: string;
+  tl: string;
+  [key: string]: string;
+}
+
+interface HomepageData {
+  hero: {
+    title: TranslatedText;
+    subtitle: TranslatedText;
+    cta: TranslatedText;
+    backgroundImage: string;
+  };
+  benefits: Array<{
+    icon: string;
+    title: TranslatedText;
+    description: TranslatedText;
+    stat?: string;
+    color?: string;
+  }>;
+  howItWorks: Array<{
+    step: number;
+    title: TranslatedText;
+    description: TranslatedText;
+    icon: string;
+  }>;
+  stats: Array<{
+    value: number;
+    label: TranslatedText;
+    suffix: string;
+  }>;
+  testimonials: Array<{
+    name: string;
+    car: string;
+    quote: TranslatedText;
+    rating: number;
+    avatar: string;
+  }>;
+  cta: {
+    title: TranslatedText;
+    subtitle: TranslatedText;
+    button: TranslatedText;
+    badges: TranslatedText[];
+  };
+}
+
+interface TintProduct {
+  name: string;
+  vlt: string;
+  features: string[];
+  priceRange: string;
+  color: string;
+  popular?: boolean;
+  image: string;
+}
+
+/* ============================================================
+   LOADING SKELETON
+   ============================================================ */
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-6 max-w-xl mx-auto px-6">
+        <div className="w-48 h-4 bg-white/10 rounded-full mx-auto animate-pulse" />
+        <div className="w-96 h-10 bg-white/10 rounded-lg mx-auto animate-pulse" />
+        <div className="w-72 h-5 bg-white/5 rounded-lg mx-auto animate-pulse" />
+        <div className="flex gap-4 justify-center mt-8">
+          <div className="w-40 h-12 bg-white/10 rounded-full animate-pulse" />
+          <div className="w-40 h-12 bg-white/5 rounded-full animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   TEXT HELPER
+   ============================================================ */
+function txt(field: TranslatedText | undefined, lang: string): string {
+  if (!field) return "";
+  return field[lang] || field.en || "";
+}
+
+/* ============================================================
    HERO SECTION
    ============================================================ */
-function HeroSection() {
+function HeroSection({ data, language }: { data: HomepageData["hero"]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -44,7 +140,7 @@ function HeroSection() {
       <div className="absolute inset-0">
         {/* Hero background image */}
         <img
-          src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&h=1080&fit=crop"
+          src={data.backgroundImage || "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&h=1080&fit=crop"}
           alt="Car with tinted windows"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -89,7 +185,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="heading-hero gradient-text mb-6"
         >
-          {t("hero.title")}
+          {txt(data.title, language) || t("hero.title")}
         </motion.h1>
 
         <motion.p
@@ -98,7 +194,7 @@ function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="subheading max-w-2xl mx-auto mb-10"
         >
-          {t("hero.subtitle")}
+          {txt(data.subtitle, language) || t("hero.subtitle")}
         </motion.p>
 
         <motion.div
@@ -108,7 +204,7 @@ function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link href="/configurator" className="btn-glow flex items-center gap-2">
-            {t("hero.cta")}
+            {txt(data.cta, language) || t("hero.cta")}
             <ArrowRight size={18} />
           </Link>
           <Link
@@ -142,16 +238,9 @@ function HeroSection() {
 /* ============================================================
    BENEFITS SECTION
    ============================================================ */
-const benefits = [
-  { icon: Shield, titleKey: "benefits.items.uvProtection.title", descKey: "benefits.items.uvProtection.description", color: "#0071E3" },
-  { icon: Thermometer, titleKey: "benefits.items.heatReduction.title", descKey: "benefits.items.heatReduction.description", color: "#FF6B35" },
-  { icon: Eye, titleKey: "benefits.items.privacy.title", descKey: "benefits.items.privacy.description", color: "#8B5CF6" },
-  { icon: Zap, titleKey: "benefits.items.glareReduction.title", descKey: "benefits.items.glareReduction.description", color: "#F59E0B" },
-  { icon: Palette, titleKey: "benefits.items.interiorProtection.title", descKey: "benefits.items.interiorProtection.description", color: "#30D158" },
-  { icon: Sun, titleKey: "benefits.items.energySaving.title", descKey: "benefits.items.energySaving.description", color: "#06B6D4" },
-];
+const defaultBenefitColors = ["#0071E3", "#FF6B35", "#8B5CF6", "#F59E0B", "#30D158", "#06B6D4"];
 
-function BenefitsSection() {
+function BenefitsSection({ data, language }: { data: HomepageData["benefits"]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -175,29 +264,33 @@ function BenefitsSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {benefits.map((b, i) => (
-            <motion.div
-              key={b.titleKey}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="glass-card p-8 group"
-            >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
-                style={{
-                  background: `${b.color}15`,
-                  border: `1px solid ${b.color}30`,
-                }}
+          {data.map((b, i) => {
+            const IconComp = getIcon(b.icon);
+            const color = b.color || defaultBenefitColors[i % defaultBenefitColors.length];
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="glass-card p-8 group"
               >
-                <b.icon size={24} style={{ color: b.color }} />
-              </div>
-              <h3 className="heading-card text-white mb-3">{t(b.titleKey)}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                {t(b.descKey)}
-              </p>
-            </motion.div>
-          ))}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
+                  style={{
+                    background: `${color}15`,
+                    border: `1px solid ${color}30`,
+                  }}
+                >
+                  <IconComp size={24} style={{ color }} />
+                </div>
+                <h3 className="heading-card text-white mb-3">{txt(b.title, language)}</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  {txt(b.description, language)}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -207,59 +300,7 @@ function BenefitsSection() {
 /* ============================================================
    PRODUCT SHOWCASE SECTION
    ============================================================ */
-const tintProducts = [
-  {
-    name: "Standard",
-    vlt: "20-70%",
-    features: ["Basic UV protection", "Affordable option", "Multiple shades"],
-    priceRange: "$49 - $89",
-    color: "#737373",
-    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
-  },
-  {
-    name: "Ceramic",
-    vlt: "15-70%",
-    features: ["99% UV block", "Superior heat rejection", "No signal interference"],
-    priceRange: "$149 - $299",
-    color: "#0071E3",
-    popular: true,
-    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
-  },
-  {
-    name: "Carbon",
-    vlt: "5-50%",
-    features: ["Matte finish", "No fading", "Good heat rejection"],
-    priceRange: "$99 - $199",
-    color: "#525252",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
-  },
-  {
-    name: "Adaptive",
-    vlt: "Variable",
-    features: ["Auto-adjusting tint", "Smart technology", "Premium finish"],
-    priceRange: "$299 - $499",
-    color: "#8B5CF6",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
-  },
-  {
-    name: "Crystalline",
-    vlt: "40-90%",
-    features: ["Near-clear look", "Max UV block", "Premium clarity"],
-    priceRange: "$199 - $399",
-    color: "#06B6D4",
-    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=400&h=200&fit=crop",
-  },
-  {
-    name: "Metallic",
-    vlt: "15-50%",
-    features: ["Reflective finish", "High heat rejection", "Durable"],
-    priceRange: "$79 - $159",
-    color: "#C4A35A",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=200&fit=crop",
-  },
-];
-
-function ProductShowcaseSection() {
+function ProductShowcaseSection({ products, language }: { products: TintProduct[]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -286,7 +327,7 @@ function ProductShowcaseSection() {
       {/* Horizontal scroll on mobile, grid on desktop */}
       <div className="relative">
         <div className="flex gap-6 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:max-w-7xl md:mx-auto md:grid md:grid-cols-3 md:overflow-visible md:px-6">
-          {tintProducts.map((product, i) => (
+          {products.map((product, i) => (
             <motion.div
               key={product.name}
               initial={{ opacity: 0, y: 40 }}
@@ -367,14 +408,7 @@ function ProductShowcaseSection() {
 /* ============================================================
    HOW IT WORKS SECTION
    ============================================================ */
-const steps = [
-  { icon: Car, titleKey: "howItWorks.step1", descKey: "howItWorks.step1desc" },
-  { icon: MousePointer2, titleKey: "howItWorks.step2", descKey: "howItWorks.step2desc" },
-  { icon: Layers, titleKey: "howItWorks.step3", descKey: "howItWorks.step3desc" },
-  { icon: Package, titleKey: "howItWorks.step4", descKey: "howItWorks.step4desc" },
-];
-
-function HowItWorksSection() {
+function HowItWorksSection({ data, language }: { data: HomepageData["howItWorks"]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -401,38 +435,41 @@ function HowItWorksSection() {
           {/* Connecting line (desktop) */}
           <div className="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-accent/50 via-accent/20 to-accent/50" />
 
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.titleKey}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="relative text-center"
-            >
-              {/* Step number with glow */}
-              <div className="relative mx-auto w-16 h-16 mb-6">
-                <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl" />
-                <div className="relative w-16 h-16 bg-black border-2 border-accent/50 rounded-full flex items-center justify-center">
-                  <span className="text-accent font-bold text-lg">
-                    {i + 1}
-                  </span>
+          {data.map((step, i) => {
+            const IconComp = getIcon(step.icon);
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="relative text-center"
+              >
+                {/* Step number with glow */}
+                <div className="relative mx-auto w-16 h-16 mb-6">
+                  <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl" />
+                  <div className="relative w-16 h-16 bg-black border-2 border-accent/50 rounded-full flex items-center justify-center">
+                    <span className="text-accent font-bold text-lg">
+                      {step.step ?? i + 1}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="glass-card p-6">
-                <step.icon
-                  size={28}
-                  className="text-accent mx-auto mb-4"
-                />
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  {t(step.titleKey)}
-                </h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  {t(step.descKey)}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                <div className="glass-card p-6">
+                  <IconComp
+                    size={28}
+                    className="text-accent mx-auto mb-4"
+                  />
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {txt(step.title, language)}
+                  </h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed">
+                    {txt(step.description, language)}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -478,15 +515,7 @@ function AnimatedCounter({
   );
 }
 
-const stats = [
-  { value: 10000, suffix: "+", labelKey: "stats.cars" },
-  { value: 99, suffix: "%", labelKey: "stats.uv" },
-  { value: 50, suffix: "+", labelKey: "stats.models" },
-  { value: 2, suffix: "", labelKey: "stats.countries" },
-];
-
-function StatsSection() {
-  const { t } = useLanguage();
+function StatsSection({ data, language }: { data: HomepageData["stats"]; language: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -497,9 +526,9 @@ function StatsSection() {
 
       <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, i) => (
+          {data.map((stat, i) => (
             <motion.div
-              key={stat.labelKey}
+              key={i}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -512,7 +541,7 @@ function StatsSection() {
                   inView={inView}
                 />
               </div>
-              <p className="text-sm text-zinc-500">{t(stat.labelKey)}</p>
+              <p className="text-sm text-zinc-500">{txt(stat.label, language)}</p>
             </motion.div>
           ))}
         </div>
@@ -524,16 +553,12 @@ function StatsSection() {
 /* ============================================================
    CTA SECTION
    ============================================================ */
-function CTASection() {
+function CTASection({ data, language }: { data: HomepageData["cta"]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
-  const badges = [
-    { icon: Truck, textKey: "cta.badge1" },
-    { icon: Award, textKey: "cta.badge2" },
-    { icon: Shield, textKey: "cta.badge3" },
-  ];
+  const badgeIcons = [Truck, Award, Shield];
 
   return (
     <section id="cta" className="section-padding relative overflow-hidden">
@@ -549,24 +574,27 @@ function CTASection() {
         transition={{ duration: 0.7 }}
         className="max-w-3xl mx-auto px-6 text-center relative z-10"
       >
-        <h2 className="heading-section text-white mb-6">{t("cta.title")}</h2>
-        <p className="subheading max-w-xl mx-auto mb-10">{t("cta.subtitle")}</p>
+        <h2 className="heading-section text-white mb-6">{txt(data.title, language) || t("cta.title")}</h2>
+        <p className="subheading max-w-xl mx-auto mb-10">{txt(data.subtitle, language) || t("cta.subtitle")}</p>
 
         <Link href="/configurator" className="btn-glow inline-flex items-center gap-2 text-lg">
-          {t("cta.button")}
+          {txt(data.button, language) || t("cta.button")}
           <ArrowRight size={20} />
         </Link>
 
         <div className="flex flex-wrap items-center justify-center gap-6 mt-12">
-          {badges.map((badge) => (
-            <div
-              key={badge.textKey}
-              className="flex items-center gap-2 text-sm text-zinc-400"
-            >
-              <badge.icon size={16} className="text-accent" />
-              {t(badge.textKey)}
-            </div>
-          ))}
+          {(data.badges || []).map((badge, i) => {
+            const BadgeIcon = badgeIcons[i % badgeIcons.length];
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-2 text-sm text-zinc-400"
+              >
+                <BadgeIcon size={16} className="text-accent" />
+                {txt(badge, language)}
+              </div>
+            );
+          })}
         </div>
       </motion.div>
     </section>
@@ -576,34 +604,7 @@ function CTASection() {
 /* ============================================================
    TESTIMONIALS SECTION
    ============================================================ */
-const testimonials = [
-  {
-    name: "Miguel Santos",
-    car: "Toyota Fortuner 2024",
-    quote:
-      "The ceramic tint completely transformed my driving experience. My cabin stays cool even in Manila traffic. Absolutely worth every peso.",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-  },
-  {
-    name: "Sarah Chen",
-    car: "Tesla Model 3 2023",
-    quote:
-      "Crystal clear visibility with incredible heat rejection. The installation was flawless and the pre-cut fit was perfect.",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
-  },
-  {
-    name: "James Rivera",
-    car: "Ford Ranger 2024",
-    quote:
-      "Best investment for my truck. The UV protection is noticeable immediately. My leather seats look brand new after 6 months.",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-  },
-];
-
-function TestimonialsSection() {
+function TestimonialsSection({ data, language }: { data: HomepageData["testimonials"]; language: string }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -624,7 +625,7 @@ function TestimonialsSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((item, i) => (
+          {data.map((item, i) => (
             <motion.div
               key={item.name}
               initial={{ opacity: 0, y: 40 }}
@@ -644,7 +645,7 @@ function TestimonialsSection() {
               </div>
 
               <p className="text-zinc-300 text-sm leading-relaxed mb-6 italic">
-                &ldquo;{item.quote}&rdquo;
+                &ldquo;{txt(item.quote, language)}&rdquo;
               </p>
 
               <div className="flex items-center gap-3">
@@ -672,15 +673,76 @@ function TestimonialsSection() {
    PAGE COMPOSITION
    ============================================================ */
 export default function Home() {
+  const { language } = useLanguage();
+  const [homepageData, setHomepageData] = useState<HomepageData | null>(null);
+  const [tintProducts, setTintProducts] = useState<TintProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        const [homepageRes, productsRes] = await Promise.all([
+          fetch("/api/content/homepage"),
+          fetch("/api/products/tints"),
+        ]);
+
+        if (!homepageRes.ok || !productsRes.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const homepage = await homepageRes.json();
+        const products = await productsRes.json();
+
+        if (!cancelled) {
+          setHomepageData(homepage);
+          setTintProducts(Array.isArray(products) ? products : products.products || []);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch homepage data:", err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (error || !homepageData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-zinc-400 text-lg">Unable to load page content.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-glow inline-flex items-center gap-2 !text-sm !px-6 !py-3"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <HeroSection />
-      <BenefitsSection />
-      <ProductShowcaseSection />
-      <HowItWorksSection />
-      <StatsSection />
-      <TestimonialsSection />
-      <CTASection />
+      <HeroSection data={homepageData.hero} language={language} />
+      <BenefitsSection data={homepageData.benefits} language={language} />
+      <ProductShowcaseSection products={tintProducts} language={language} />
+      <HowItWorksSection data={homepageData.howItWorks} language={language} />
+      <StatsSection data={homepageData.stats} language={language} />
+      <TestimonialsSection data={homepageData.testimonials} language={language} />
+      <CTASection data={homepageData.cta} language={language} />
     </>
   );
 }

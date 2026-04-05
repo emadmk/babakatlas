@@ -209,9 +209,12 @@ export default function LoginPage() {
                   Remember me
                 </span>
               </label>
-              <span className="text-sm text-primary-500 cursor-default">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-primary-500 hover:text-primary-300 transition-colors"
+              >
                 Forgot password?
-              </span>
+              </Link>
             </div>
 
             {/* Submit */}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -28,6 +29,7 @@ import {
   HelpCircle,
   Info,
   Phone,
+  LogOut,
 } from "lucide-react";
 
 type NavItem = {
@@ -240,8 +242,8 @@ export default function AdminLayout({
           })}
         </nav>
 
-        {/* Back to site */}
-        <div className="px-3 py-4 border-t border-white/10">
+        {/* Back to site & Sign Out */}
+        <div className="px-3 py-4 border-t border-white/10 space-y-1">
           <Link
             href="/"
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white hover:bg-white/5 transition-all"
@@ -249,6 +251,13 @@ export default function AdminLayout({
             <ChevronLeft size={16} />
             Back to Site
           </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all w-full"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
         </div>
       </aside>
 

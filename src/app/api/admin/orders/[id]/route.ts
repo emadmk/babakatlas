@@ -1,37 +1,32 @@
-import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 
-// Simplified mock - in production this would query the database
+import { NextRequest, NextResponse } from "next/server";
+import { getAdminOrder, updateAdminOrder } from "@/lib/adminData";
+
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // Return a mock order detail
-  return NextResponse.json({
-    success: true,
-    data: {
-      id: params.id,
-      message: "Order detail endpoint - connect to database for real data",
-    },
-  });
+  const { id } = await params;
+  const order = getAdminOrder(id);
+  if (!order) {
+    return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+  }
+  return NextResponse.json({ success: true, data: order });
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const { status, note } = body;
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: params.id,
-        status: status || "pending",
-        note: note || null,
-        updatedAt: new Date().toISOString(),
-      },
-    });
+    const updated = updateAdminOrder(id, body);
+    if (!updated) {
+      return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, data: updated });
   } catch {
     return NextResponse.json({ success: false, error: "Invalid request" }, { status: 400 });
   }

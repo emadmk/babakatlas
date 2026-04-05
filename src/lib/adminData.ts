@@ -99,6 +99,45 @@ export interface SiteSettings {
   };
 }
 
+export interface AdminOrder {
+  id: string;
+  orderNumber: string;
+  userId: string | null;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  contact: { name: string; email: string; phone: string };
+  shippingAddress: { address: string; city: string; postalCode: string; country: string };
+  items: {
+    carType: string;
+    carModel: string;
+    tintType: string;
+    tintName: string;
+    selectedWindows: string[];
+    totalSqft: number;
+    unitPrice: number;
+    subtotal: number;
+  };
+  serviceType: 'shipping' | 'installation';
+  pricing: { subtotal: number; shipping: number; installation: number; taxLabel: string; tax: number; total: number };
+  paymentStatus: 'unpaid' | 'paid' | 'refunded';
+  notes: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  country: string;
+  city: string;
+  ordersCount: number;
+  totalSpent: number;
+  status: 'active' | 'banned';
+  joinedAt: string;
+  lastActive: string;
+}
+
 export interface FaqItem {
   id: string;
   question: { en: string; tl: string };
@@ -1022,6 +1061,110 @@ const seedHomepageContent: HomepageContent = {
   },
 };
 
+const seedAdminOrders: AdminOrder[] = [
+  {
+    id: "ord-001",
+    orderNumber: "TG-20260401-A1B2",
+    userId: "usr-001",
+    status: "pending",
+    contact: { name: "Juan Dela Cruz", email: "juan@example.com", phone: "+63 917 123 4567" },
+    shippingAddress: { address: "123 Rizal Ave", city: "Manila", postalCode: "1000", country: "PH" },
+    items: { carType: "sedan", carModel: "Toyota Corolla", tintType: "ceramic", tintName: "Ceramic", selectedWindows: ["front_left", "front_right", "rear_left", "rear_right"], totalSqft: 16, unitPrice: 8, subtotal: 128 },
+    serviceType: "shipping",
+    pricing: { subtotal: 128, shipping: 0, installation: 0, taxLabel: "VAT 12%", tax: 15.36, total: 143.36 },
+    paymentStatus: "paid",
+    notes: [],
+    createdAt: "2026-04-01T10:30:00Z",
+    updatedAt: "2026-04-01T10:30:00Z",
+  },
+  {
+    id: "ord-002",
+    orderNumber: "TG-20260402-C3D4",
+    userId: "usr-002",
+    status: "processing",
+    contact: { name: "Sarah Thompson", email: "sarah@example.com", phone: "+61 412 345 678" },
+    shippingAddress: { address: "45 George St", city: "Sydney", postalCode: "2000", country: "AU" },
+    items: { carType: "suv", carModel: "Toyota RAV4", tintType: "carbon", tintName: "Carbon", selectedWindows: ["front_windshield", "rear_windshield", "front_left", "front_right", "rear_left", "rear_right"], totalSqft: 46, unitPrice: 6, subtotal: 276 },
+    serviceType: "installation",
+    pricing: { subtotal: 276, shipping: 0, installation: 184, taxLabel: "GST 10%", tax: 46, total: 506 },
+    paymentStatus: "paid",
+    notes: ["Customer requested morning installation"],
+    createdAt: "2026-04-02T14:15:00Z",
+    updatedAt: "2026-04-03T09:00:00Z",
+  },
+  {
+    id: "ord-003",
+    orderNumber: "TG-20260403-E5F6",
+    userId: "usr-003",
+    status: "shipped",
+    contact: { name: "Maria Santos", email: "maria@example.com", phone: "+63 918 987 6543" },
+    shippingAddress: { address: "789 EDSA", city: "Quezon City", postalCode: "1100", country: "PH" },
+    items: { carType: "hatchback", carModel: "Honda Jazz", tintType: "adaptive", tintName: "Adaptive", selectedWindows: ["front_left", "front_right", "rear_left", "rear_right", "rear_windshield"], totalSqft: 23, unitPrice: 12, subtotal: 276 },
+    serviceType: "shipping",
+    pricing: { subtotal: 276, shipping: 0, installation: 0, taxLabel: "VAT 12%", tax: 33.12, total: 309.12 },
+    paymentStatus: "paid",
+    notes: [],
+    createdAt: "2026-04-03T08:45:00Z",
+    updatedAt: "2026-04-03T16:00:00Z",
+  },
+  {
+    id: "ord-004",
+    orderNumber: "TG-20260403-G7H8",
+    userId: "usr-004",
+    status: "delivered",
+    contact: { name: "James Wilson", email: "james@example.com", phone: "+61 423 456 789" },
+    shippingAddress: { address: "12 Collins St", city: "Melbourne", postalCode: "3000", country: "AU" },
+    items: { carType: "sedan", carModel: "BMW 3 Series", tintType: "crystalline", tintName: "Crystalline", selectedWindows: ["front_windshield", "rear_windshield", "front_left", "front_right", "rear_left", "rear_right"], totalSqft: 38, unitPrice: 10, subtotal: 380 },
+    serviceType: "shipping",
+    pricing: { subtotal: 380, shipping: 0, installation: 0, taxLabel: "GST 10%", tax: 38, total: 418 },
+    paymentStatus: "paid",
+    notes: ["Delivered to reception"],
+    createdAt: "2026-03-28T11:20:00Z",
+    updatedAt: "2026-04-02T14:30:00Z",
+  },
+  {
+    id: "ord-005",
+    orderNumber: "TG-20260404-I9J0",
+    userId: null,
+    status: "pending",
+    contact: { name: "Ana Reyes", email: "ana@example.com", phone: "+63 919 111 2222" },
+    shippingAddress: { address: "456 Ayala Ave", city: "Makati", postalCode: "1226", country: "PH" },
+    items: { carType: "coupe", carModel: "Mazda MX-5", tintType: "metallic", tintName: "Metallic", selectedWindows: ["front_left", "front_right", "rear_left", "rear_right"], totalSqft: 14, unitPrice: 5, subtotal: 70 },
+    serviceType: "installation",
+    pricing: { subtotal: 70, shipping: 0, installation: 56, taxLabel: "VAT 12%", tax: 15.12, total: 141.12 },
+    paymentStatus: "unpaid",
+    notes: [],
+    createdAt: "2026-04-04T06:00:00Z",
+    updatedAt: "2026-04-04T06:00:00Z",
+  },
+  {
+    id: "ord-006",
+    orderNumber: "TG-20260330-K1L2",
+    userId: "usr-005",
+    status: "cancelled",
+    contact: { name: "David Chen", email: "david@example.com", phone: "+61 434 567 890" },
+    shippingAddress: { address: "88 Pitt St", city: "Sydney", postalCode: "2000", country: "AU" },
+    items: { carType: "truck", carModel: "Ford Ranger", tintType: "standard", tintName: "Standard", selectedWindows: ["front_left", "front_right", "rear_left", "rear_right"], totalSqft: 16, unitPrice: 3, subtotal: 48 },
+    serviceType: "shipping",
+    pricing: { subtotal: 48, shipping: 25, installation: 0, taxLabel: "GST 10%", tax: 4.8, total: 77.8 },
+    paymentStatus: "refunded",
+    notes: ["Customer cancelled - wrong vehicle selected"],
+    createdAt: "2026-03-30T09:10:00Z",
+    updatedAt: "2026-03-31T10:00:00Z",
+  },
+];
+
+const seedAdminUsers: AdminUser[] = [
+  { id: "usr-001", name: "Juan Dela Cruz", email: "juan@example.com", phone: "+63 917 123 4567", country: "PH", city: "Manila", ordersCount: 3, totalSpent: 456.72, status: "active", joinedAt: "2025-11-15T08:00:00Z", lastActive: "2026-04-01T10:30:00Z" },
+  { id: "usr-002", name: "Sarah Thompson", email: "sarah@example.com", phone: "+61 412 345 678", country: "AU", city: "Sydney", ordersCount: 5, totalSpent: 1240.00, status: "active", joinedAt: "2025-10-20T14:30:00Z", lastActive: "2026-04-02T14:15:00Z" },
+  { id: "usr-003", name: "Maria Santos", email: "maria@example.com", phone: "+63 918 987 6543", country: "PH", city: "Quezon City", ordersCount: 2, totalSpent: 618.24, status: "active", joinedAt: "2026-01-05T10:00:00Z", lastActive: "2026-04-03T08:45:00Z" },
+  { id: "usr-004", name: "James Wilson", email: "james@example.com", phone: "+61 423 456 789", country: "AU", city: "Melbourne", ordersCount: 7, totalSpent: 2890.50, status: "active", joinedAt: "2025-09-10T12:00:00Z", lastActive: "2026-03-28T11:20:00Z" },
+  { id: "usr-005", name: "David Chen", email: "david@example.com", phone: "+61 434 567 890", country: "AU", city: "Sydney", ordersCount: 1, totalSpent: 0, status: "active", joinedAt: "2026-03-25T16:45:00Z", lastActive: "2026-03-30T09:10:00Z" },
+  { id: "usr-006", name: "Pedro Garcia", email: "pedro@example.com", phone: "+63 920 333 4444", country: "PH", city: "Cebu", ordersCount: 0, totalSpent: 0, status: "banned", joinedAt: "2026-04-01T09:00:00Z", lastActive: "2026-04-01T09:00:00Z" },
+  { id: "usr-007", name: "Emma Brown", email: "emma@example.com", phone: "+61 445 678 901", country: "AU", city: "Brisbane", ordersCount: 4, totalSpent: 1560.00, status: "active", joinedAt: "2025-12-18T11:30:00Z", lastActive: "2026-03-20T15:00:00Z" },
+  { id: "usr-008", name: "Rico Magsaysay", email: "rico@example.com", phone: "+63 921 555 6666", country: "PH", city: "Davao", ordersCount: 6, totalSpent: 890.40, status: "active", joinedAt: "2025-08-22T07:15:00Z", lastActive: "2026-04-04T12:00:00Z" },
+];
+
 // ---------------------------------------------------------------------------
 // File-based persistence
 // ---------------------------------------------------------------------------
@@ -1044,6 +1187,8 @@ interface StoreData {
   aboutContent: AboutContent;
   contactInfo: ContactInfo;
   homepageContent: HomepageContent;
+  adminOrders: AdminOrder[];
+  adminUsers: AdminUser[];
 }
 
 function loadFromFile(): StoreData | null {
@@ -1075,6 +1220,8 @@ function saveToFile(): void {
       aboutContent,
       contactInfo,
       homepageContent,
+      adminOrders: Array.from(adminOrders.values()),
+      adminUsers: Array.from(adminUsers.values()),
     };
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
@@ -1123,6 +1270,14 @@ let aboutContent: AboutContent = saved?.aboutContent || { ...seedAboutContent };
 let contactInfo: ContactInfo = saved?.contactInfo || { ...seedContactInfo };
 
 let homepageContent: HomepageContent = saved?.homepageContent || { ...seedHomepageContent };
+
+const adminOrders = new Map<string, AdminOrder>(
+  (saved?.adminOrders || seedAdminOrders).map((o) => [o.id, o])
+);
+
+const adminUsers = new Map<string, AdminUser>(
+  (saved?.adminUsers || seedAdminUsers).map((u) => [u.id, u])
+);
 
 // ---------------------------------------------------------------------------
 // Product helpers
@@ -1373,4 +1528,54 @@ export function updateHomepageContent(data: Partial<HomepageContent>): HomepageC
   homepageContent = { ...homepageContent, ...data };
   saveToFile();
   return { ...homepageContent };
+}
+
+// ---------------------------------------------------------------------------
+// AdminOrder helpers
+// ---------------------------------------------------------------------------
+
+export function getAdminOrders(): AdminOrder[] {
+  return Array.from(adminOrders.values());
+}
+
+export function getAdminOrder(id: string): AdminOrder | undefined {
+  return adminOrders.get(id);
+}
+
+export function updateAdminOrder(id: string, data: Partial<AdminOrder>): AdminOrder | null {
+  const existing = adminOrders.get(id);
+  if (!existing) return null;
+  const updated: AdminOrder = { ...existing, ...data, id: existing.id, updatedAt: new Date().toISOString() };
+  adminOrders.set(id, updated);
+  saveToFile();
+  return updated;
+}
+
+export function createAdminOrder(data: Omit<AdminOrder, 'id'>): AdminOrder {
+  const id = `ord-${crypto.randomUUID().slice(0, 8)}`;
+  const order: AdminOrder = { ...data, id };
+  adminOrders.set(id, order);
+  saveToFile();
+  return order;
+}
+
+// ---------------------------------------------------------------------------
+// AdminUser helpers
+// ---------------------------------------------------------------------------
+
+export function getAdminUsers(): AdminUser[] {
+  return Array.from(adminUsers.values());
+}
+
+export function getAdminUser(id: string): AdminUser | undefined {
+  return adminUsers.get(id);
+}
+
+export function updateAdminUser(id: string, data: Partial<AdminUser>): AdminUser | null {
+  const existing = adminUsers.get(id);
+  if (!existing) return null;
+  const updated: AdminUser = { ...existing, ...data, id: existing.id };
+  adminUsers.set(id, updated);
+  saveToFile();
+  return updated;
 }

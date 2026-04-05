@@ -15,34 +15,52 @@ import {
   UserX,
   Save,
 } from "lucide-react";
-import { useAdminStore, type AdminUser } from "@/store/adminStore";
+
+interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  country: string;
+  city: string;
+  ordersCount: number;
+  totalSpent: number;
+  status: "active" | "banned";
+  joinedAt: string;
+  lastActive: string;
+}
 
 export default function UserDetailPage() {
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
-  const { users, toggleUserStatus } = useAdminStore();
 
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editCountry, setEditCountry] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const found = users.find((u) => u.id === userId);
-    if (found) {
-      setUser(found);
-      setEditName(found.name);
-      setEditEmail(found.email);
-      setEditCountry(found.country);
-    }
-  }, [users, userId]);
+    fetch(`/api/admin/users/${userId}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success && res.data) {
+          setUser(res.data);
+          setEditName(res.data.name);
+          setEditEmail(res.data.email);
+          setEditCountry(res.data.country);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [userId]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await fetch(`/api/admin/users/${userId}`, {
+      const res = await fetch(`/api/admin/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,10 +69,32 @@ export default function UserDetailPage() {
           country: editCountry,
         }),
       });
+      const json = await res.json();
+      if (json.success) setUser(json.data);
     } finally {
       setSaving(false);
     }
   };
+
+  const toggleUserStatus = async () => {
+    if (!user) return;
+    const newStatus = user.status === "active" ? "banned" : "active";
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    const json = await res.json();
+    if (json.success) setUser(json.data);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-white/30 text-sm">Loading user...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -79,7 +119,7 @@ export default function UserDetailPage() {
           <p className="text-white/50 text-sm mt-1">{user.email}</p>
         </div>
         <button
-          onClick={() => toggleUserStatus(user.id)}
+          onClick={() => toggleUserStatus()}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
             user.status === "active"
               ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"

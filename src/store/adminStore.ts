@@ -57,10 +57,13 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   country: string;
+  city?: string;
   ordersCount: number;
   totalSpent: number;
   joinedAt: string;
+  lastActive?: string;
   status: "active" | "banned";
 }
 

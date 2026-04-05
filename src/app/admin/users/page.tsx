@@ -7,8 +7,23 @@ import { Search, UserCheck, UserX } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
 
 export default function AdminUsersPage() {
-  const { users, setUsers, userSearch, setUserSearch, toggleUserStatus } =
+  const { users, setUsers, userSearch, setUserSearch } =
     useAdminStore();
+
+  const toggleUserStatus = async (id: string) => {
+    const user = users.find((u) => u.id === id);
+    if (!user) return;
+    const newStatus = user.status === "active" ? "banned" : "active";
+    const res = await fetch(`/api/admin/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      setUsers(users.map((u) => (u.id === id ? json.data : u)));
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();

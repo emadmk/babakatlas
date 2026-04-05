@@ -12,9 +12,38 @@ import {
   Clock,
   Send,
 } from "lucide-react";
-import { useAdminStore, type AdminOrder } from "@/store/adminStore";
 
-
+interface AdminOrder {
+  id: string;
+  orderNumber: string;
+  userId: string | null;
+  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  contact: { name: string; email: string; phone: string };
+  shippingAddress: { address: string; city: string; postalCode: string; country: string };
+  items: {
+    carType: string;
+    carModel: string | null;
+    tintType: string;
+    tintName: string;
+    selectedWindows: string[];
+    totalSqft: number;
+    unitPrice: number;
+    subtotal: number;
+  };
+  serviceType: "shipping" | "installation";
+  pricing: {
+    subtotal: number;
+    shipping: number;
+    installation: number;
+    taxLabel: string;
+    tax: number;
+    total: number;
+  };
+  paymentStatus: "unpaid" | "paid" | "refunded";
+  notes: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 const statusTimeline = [
   "pending",
@@ -30,17 +59,28 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
-  const { orders, updateOrderStatus, addOrderNote } = useAdminStore();
 
   const [order, setOrder] = useState<AdminOrder | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newNote, setNewNote] = useState("");
 
   useEffect(() => {
-    const found = orders.find((o) => o.id === orderId);
-    if (found) {
-      setOrder(found);
-    }
-  }, [orders, orderId]);
+    fetch(`/api/admin/orders/${orderId}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setOrder(res.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-white/30 text-sm">Loading order...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -52,9 +92,25 @@ export default function OrderDetailPage() {
 
   const currentStatusIdx = statusTimeline.indexOf(order.status);
 
-  const handleAddNote = () => {
+  const handleUpdateStatus = async (status: string) => {
+    const res = await fetch(`/api/admin/orders/${order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const json = await res.json();
+    if (json.success) setOrder(json.data);
+  };
+
+  const handleAddNote = async () => {
     if (!newNote.trim()) return;
-    addOrderNote(order.id, newNote.trim());
+    const res = await fetch(`/api/admin/orders/${order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: [...order.notes, newNote.trim()] }),
+    });
+    const json = await res.json();
+    if (json.success) setOrder(json.data);
     setNewNote("");
   };
 
@@ -79,8 +135,7 @@ export default function OrderDetailPage() {
         <select
           value={order.status}
           onChange={(e) => {
-            updateOrderStatus(order.id, e.target.value as typeof order.status);
-            setOrder({ ...order, status: e.target.value as typeof order.status });
+            handleUpdateStatus(e.target.value);
           }}
           className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
         >

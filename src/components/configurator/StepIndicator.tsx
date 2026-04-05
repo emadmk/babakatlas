@@ -5,11 +5,10 @@ import { Check } from 'lucide-react';
 
 const STEPS = [
   { label: 'Car Type', number: 1 },
-  { label: 'Windows', number: 2 },
-  { label: 'Tint Type', number: 3 },
-  { label: 'Service', number: 4 },
-  { label: 'Shipping', number: 5 },
-  { label: 'Summary', number: 6 },
+  { label: 'Windows & Tint', number: 2 },
+  { label: 'Service', number: 3 },
+  { label: 'Shipping', number: 4 },
+  { label: 'Summary', number: 5 },
 ];
 
 export default function StepIndicator({ currentStep }: { currentStep: number }) {

@@ -4,22 +4,10 @@ import { motion } from 'framer-motion';
 import {
   useConfiguratorStore,
   TINT_TYPES,
+  SHADE_LEVELS,
   SHIPPING_INFO,
-  WINDOW_SQFT,
 } from '@/store/configuratorStore';
 import { Edit3, Shield, Lock, CreditCard } from 'lucide-react';
-
-const WINDOW_LABELS: Record<string, string> = {
-  front_windshield: 'Front Windshield',
-  rear_windshield: 'Rear Windshield',
-  front_left: 'Front Left',
-  front_right: 'Front Right',
-  rear_left: 'Rear Left',
-  rear_right: 'Rear Right',
-  rear_quarter_left: 'Rear Quarter Left',
-  rear_quarter_right: 'Rear Quarter Right',
-  sunroof: 'Sunroof',
-};
 
 const CAR_LABELS: Record<string, string> = {
   sedan: 'Sedan',
@@ -63,12 +51,10 @@ function SummarySection({
 export default function OrderSummary() {
   const {
     carType,
-    selectedWindows,
-    tintType,
+    windows,
     serviceType,
     shippingCountry,
     totalSqft,
-    unitPrice,
     subtotal,
     shippingCost,
     installationCost,
@@ -77,9 +63,8 @@ export default function OrderSummary() {
     setStep,
   } = useConfiguratorStore();
 
-  const tint = tintType ? TINT_TYPES[tintType] : null;
+  const enabledWindows = windows.filter((w) => w.enabled);
   const shipping = shippingCountry ? SHIPPING_INFO[shippingCountry] : null;
-  const windowData = carType ? WINDOW_SQFT[carType] || {} : {};
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -93,41 +78,54 @@ export default function OrderSummary() {
         <div className="lg:col-span-3 space-y-4">
           {/* Vehicle */}
           <SummarySection title="Vehicle" editStep={1} onEdit={setStep}>
-            <p className="text-white font-medium">{carType ? CAR_LABELS[carType] : '--'}</p>
+            <p className="text-white font-medium">{carType ? CAR_LABELS[carType] || carType : '--'}</p>
           </SummarySection>
 
-          {/* Windows */}
-          <SummarySection title="Windows" editStep={2} onEdit={setStep}>
-            <div className="space-y-1.5">
-              {selectedWindows.map((w) => (
-                <div key={w} className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">{WINDOW_LABELS[w] || w}</span>
-                  <span className="text-xs text-white/40">{windowData[w]} sq.ft</span>
-                </div>
-              ))}
-              <div className="pt-2 mt-2 border-t border-white/5 flex justify-between">
-                <span className="text-sm text-white/50">Total area</span>
-                <span className="text-sm font-medium text-white">{totalSqft} sq.ft</span>
+          {/* Windows & Tint */}
+          <SummarySection title="Windows & Tint" editStep={2} onEdit={setStep}>
+            <div className="space-y-2.5">
+              {enabledWindows.map((w) => {
+                const tint = TINT_TYPES[w.tintType];
+                const shade = SHADE_LEVELS[w.shade];
+                return (
+                  <div
+                    key={w.position}
+                    className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0"
+                  >
+                    <div>
+                      <span className="text-sm text-white/80">{w.label}</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-white/40">
+                          {tint?.name || w.tintType}
+                        </span>
+                        <span className="text-[11px] text-white/30">|</span>
+                        <span className="text-[11px] text-white/40">
+                          {shade?.name || w.shade} ({shade?.vlt ?? '--'}% VLT)
+                        </span>
+                        <span className="text-[11px] text-white/30">|</span>
+                        <span className="text-[11px] text-white/40">{w.sqft} ft²</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-white/70">
+                      ${(w.sqft * w.pricePerSqft).toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
+              {enabledWindows.length === 0 && (
+                <p className="text-sm text-white/30">No windows selected</p>
+              )}
+              <div className="pt-2 mt-1 border-t border-white/5 flex justify-between">
+                <span className="text-sm text-white/50">
+                  {enabledWindows.length} windows | {totalSqft} sq.ft
+                </span>
+                <span className="text-sm font-medium text-white">${subtotal.toFixed(2)}</span>
               </div>
             </div>
           </SummarySection>
 
-          {/* Tint */}
-          <SummarySection title="Tint Film" editStep={3} onEdit={setStep}>
-            {tint && (
-              <div>
-                <p className="text-white font-medium mb-1">{tint.name}</p>
-                <div className="flex items-center gap-4 text-xs text-white/40">
-                  <span>VLT: {tint.vlt}</span>
-                  <span>UV: {tint.uvBlock}%</span>
-                  <span>Heat: {tint.heatRejection}%</span>
-                </div>
-              </div>
-            )}
-          </SummarySection>
-
           {/* Service */}
-          <SummarySection title="Service" editStep={4} onEdit={setStep}>
+          <SummarySection title="Service" editStep={3} onEdit={setStep}>
             <p className="text-white font-medium">
               {serviceType === 'installation'
                 ? 'Professional Installation + Shipping'
@@ -136,7 +134,7 @@ export default function OrderSummary() {
           </SummarySection>
 
           {/* Shipping */}
-          <SummarySection title="Shipping" editStep={5} onEdit={setStep}>
+          <SummarySection title="Shipping" editStep={4} onEdit={setStep}>
             {shipping && (
               <div>
                 <p className="text-white font-medium">
@@ -166,7 +164,7 @@ export default function OrderSummary() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">
-                    {tint?.name} Film ({totalSqft} ft&sup2; x ${unitPrice})
+                    Tint Films ({enabledWindows.length} windows, {totalSqft} ft²)
                   </span>
                   <span className="text-white/80">${subtotal.toFixed(2)}</span>
                 </div>

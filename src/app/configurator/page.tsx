@@ -4,14 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import StepIndicator from '@/components/configurator/StepIndicator';
 import CarTypeSelector from '@/components/configurator/CarTypeSelector';
-import WindowSelector from '@/components/configurator/WindowSelector';
-import TintTypeSelector from '@/components/configurator/TintTypeSelector';
+import WindowTintConfigurator from '@/components/configurator/WindowTintConfigurator';
 import ServiceSelector from '@/components/configurator/ServiceSelector';
 import ShippingSelector from '@/components/configurator/ShippingSelector';
 import OrderSummary from '@/components/configurator/OrderSummary';
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -33,14 +32,12 @@ function canProceed(state: ReturnType<typeof useConfiguratorStore.getState>): bo
     case 1:
       return !!state.carType;
     case 2:
-      return state.selectedWindows.length > 0;
+      return state.windows.some((w) => w.enabled);
     case 3:
-      return !!state.tintType;
-    case 4:
       return !!state.serviceType;
-    case 5:
+    case 4:
       return !!state.shippingCountry;
-    case 6:
+    case 5:
       return true;
     default:
       return false;
@@ -52,14 +49,12 @@ function StepContent({ step }: { step: number }) {
     case 1:
       return <CarTypeSelector />;
     case 2:
-      return <WindowSelector />;
+      return <WindowTintConfigurator />;
     case 3:
-      return <TintTypeSelector />;
-    case 4:
       return <ServiceSelector />;
-    case 5:
+    case 4:
       return <ShippingSelector />;
-    case 6:
+    case 5:
       return <OrderSummary />;
     default:
       return null;

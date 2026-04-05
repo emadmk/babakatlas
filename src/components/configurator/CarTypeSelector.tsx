@@ -91,7 +91,7 @@ export default function CarTypeSelector() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {carTypes.map((car) => {
           const isSelected = carType === car.id;
-          const carKey = (car.slug || car.id || "").toUpperCase();
+          const carKey = (car.slug || car.id || "").toLowerCase();
           const windowCount = car.windows?.length || Object.keys(WINDOW_SQFT[carKey] || {}).length;
           const imgSrc = car.imageUrl || car.image;
 

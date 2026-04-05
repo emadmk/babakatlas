@@ -1,5 +1,72 @@
 import { create } from 'zustand';
 
+export const TINT_TYPES: Record<
+  string,
+  {
+    name: string;
+    pricePerSqft: number;
+    description: string;
+    uvBlock: number;
+    heatRejection: number;
+    badge?: string;
+  }
+> = {
+  standard: {
+    name: 'Standard',
+    pricePerSqft: 3,
+    description: 'Basic dyed film',
+    uvBlock: 95,
+    heatRejection: 35,
+  },
+  metallic: {
+    name: 'Metallic',
+    pricePerSqft: 5,
+    description: 'Reflective metallic',
+    uvBlock: 97,
+    heatRejection: 45,
+  },
+  carbon: {
+    name: 'Carbon',
+    pricePerSqft: 6,
+    description: 'Carbon particle film',
+    uvBlock: 99,
+    heatRejection: 50,
+  },
+  ceramic: {
+    name: 'Ceramic',
+    pricePerSqft: 8,
+    description: 'Premium nano-ceramic',
+    uvBlock: 99,
+    heatRejection: 60,
+    badge: 'Most Popular',
+  },
+  crystalline: {
+    name: 'Crystalline',
+    pricePerSqft: 10,
+    description: 'Near-invisible heat block',
+    uvBlock: 99,
+    heatRejection: 60,
+  },
+  adaptive: {
+    name: 'Adaptive',
+    pricePerSqft: 12,
+    description: 'Smart auto-adjusting',
+    uvBlock: 99,
+    heatRejection: 65,
+    badge: 'Premium',
+  },
+};
+
+export const SHADE_LEVELS: Record<
+  string,
+  { name: string; vlt: number; description: string }
+> = {
+  light: { name: 'Light', vlt: 70, description: 'Subtle tint, maximum visibility' },
+  medium: { name: 'Medium', vlt: 35, description: 'Balanced privacy and visibility' },
+  dark: { name: 'Dark', vlt: 15, description: 'Maximum privacy' },
+  limo: { name: 'Limo', vlt: 5, description: 'Darkest available' },
+};
+
 export const WINDOW_SQFT: Record<string, Record<string, number>> = {
   sedan: {
     front_windshield: 12,
@@ -73,68 +140,26 @@ export const WINDOW_SQFT: Record<string, Record<string, number>> = {
   },
 };
 
-export const TINT_TYPES: Record<
-  string,
-  {
-    name: string;
-    description: string;
-    pricePerSqft: number;
-    vlt: string;
-    uvBlock: number;
-    heatRejection: number;
-    badge?: string;
-  }
-> = {
-  standard: {
-    name: 'Standard',
-    description: 'Reliable dyed film with solid UV protection and classic appearance.',
-    pricePerSqft: 3,
-    vlt: '35%',
-    uvBlock: 95,
-    heatRejection: 35,
-  },
-  metallic: {
-    name: 'Metallic',
-    description: 'Reflective metallic particles for enhanced heat rejection and privacy.',
-    pricePerSqft: 5,
-    vlt: '15-35%',
-    uvBlock: 97,
-    heatRejection: 45,
-  },
-  carbon: {
-    name: 'Carbon',
-    description: 'Carbon-infused film with no signal interference and matte finish.',
-    pricePerSqft: 6,
-    vlt: '25-50%',
-    uvBlock: 99,
-    heatRejection: 50,
-  },
-  ceramic: {
-    name: 'Ceramic',
-    description: 'Nano-ceramic technology for maximum clarity and superior heat rejection.',
-    pricePerSqft: 8,
-    vlt: '20-70%',
-    uvBlock: 99,
-    heatRejection: 60,
-    badge: 'Most Popular',
-  },
-  crystalline: {
-    name: 'Crystalline',
-    description: 'Multi-layer optical film that keeps your windows virtually clear.',
-    pricePerSqft: 10,
-    vlt: '40-90%',
-    uvBlock: 99,
-    heatRejection: 60,
-  },
-  adaptive: {
-    name: 'Adaptive',
-    description: 'Smart film that automatically adjusts tint based on light conditions.',
-    pricePerSqft: 12,
-    vlt: 'Auto-adjusting',
-    uvBlock: 99,
-    heatRejection: 65,
-    badge: 'Premium',
-  },
+export const WINDOW_LABELS: Record<string, string> = {
+  front_windshield: 'Front Windshield',
+  rear_windshield: 'Rear Windshield',
+  front_left: 'Front Left',
+  front_right: 'Front Right',
+  rear_left: 'Rear Left',
+  rear_right: 'Rear Right',
+  rear_quarter_left: 'Rear Quarter Left',
+  rear_quarter_right: 'Rear Quarter Right',
+  sunroof: 'Sunroof',
+};
+
+const FRONT_WINDOWS = ['front_windshield', 'front_left', 'front_right'];
+const REAR_WINDOWS = ['rear_windshield', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'];
+const SIDE_WINDOWS = ['front_left', 'front_right', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'];
+
+export const WINDOW_GROUPS = {
+  front: { label: 'Front Windows', positions: FRONT_WINDOWS },
+  rear: { label: 'Rear Windows', positions: REAR_WINDOWS },
+  sides: { label: 'Side Windows', positions: SIDE_WINDOWS },
 };
 
 export const SHIPPING_INFO: Record<
@@ -147,48 +172,70 @@ export const SHIPPING_INFO: Record<
 
 const INSTALLATION_RATE = 4; // per sqft
 const FREE_SHIPPING_THRESHOLD = 200;
-const TAX_RATE = 0.08;
+const TAX_RATES: Record<string, number> = { PH: 0.12, AU: 0.10 };
+
+export interface WindowConfig {
+  position: string;
+  label: string;
+  enabled: boolean;
+  tintType: string;
+  shade: string;
+  sqft: number;
+  pricePerSqft: number;
+  price: number;
+}
 
 export interface ConfiguratorState {
   step: number;
   carType: string | null;
-  carModel: string | null;
-  selectedWindows: string[];
-  tintType: string | null;
+  windows: WindowConfig[];
   serviceType: 'shipping' | 'installation' | null;
   shippingCountry: 'PH' | 'AU' | null;
-  // Computed
+
+  // Computed pricing
   totalSqft: number;
-  unitPrice: number;
   subtotal: number;
   shippingCost: number;
   installationCost: number;
   tax: number;
   total: number;
+
   // Actions
   setStep: (step: number) => void;
   setCarType: (carType: string) => void;
-  setCarModel: (carModel: string) => void;
-  toggleWindow: (window: string) => void;
-  selectAllWindows: () => void;
-  clearWindows: () => void;
-  setTintType: (tintType: string) => void;
+  toggleWindow: (position: string) => void;
+  setWindowTint: (position: string, tintType: string) => void;
+  setWindowShade: (position: string, shade: string) => void;
+  applyToAll: (tintType: string, shade: string) => void;
+  applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => void;
   setServiceType: (serviceType: 'shipping' | 'installation') => void;
   setShippingCountry: (country: 'PH' | 'AU') => void;
   calculatePricing: () => void;
   reset: () => void;
 }
 
+function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium'): WindowConfig[] {
+  const windowData = WINDOW_SQFT[carType] || {};
+  const tint = TINT_TYPES[defaultTint];
+  return Object.entries(windowData).map(([position, sqft]) => ({
+    position,
+    label: WINDOW_LABELS[position] || position,
+    enabled: true,
+    tintType: defaultTint,
+    shade: defaultShade,
+    sqft,
+    pricePerSqft: tint ? tint.pricePerSqft : 0,
+    price: sqft * (tint ? tint.pricePerSqft : 0),
+  }));
+}
+
 const initialState = {
   step: 1,
-  carType: null,
-  carModel: null,
-  selectedWindows: [] as string[],
-  tintType: null,
+  carType: null as string | null,
+  windows: [] as WindowConfig[],
   serviceType: null as 'shipping' | 'installation' | null,
   shippingCountry: null as 'PH' | 'AU' | null,
   totalSqft: 0,
-  unitPrice: 0,
   subtotal: 0,
   shippingCost: 0,
   installationCost: 0,
@@ -202,36 +249,74 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   setStep: (step: number) => set({ step }),
 
   setCarType: (carType: string) => {
-    set({ carType, carModel: null, selectedWindows: [] });
+    const windows = buildWindows(carType);
+    set({ carType, windows });
     get().calculatePricing();
   },
 
-  setCarModel: (carModel: string) => set({ carModel }),
-
-  toggleWindow: (window: string) => {
-    const { selectedWindows } = get();
-    const updated = selectedWindows.includes(window)
-      ? selectedWindows.filter((w) => w !== window)
-      : [...selectedWindows, window];
-    set({ selectedWindows: updated });
+  toggleWindow: (position: string) => {
+    const { windows } = get();
+    set({
+      windows: windows.map((w) =>
+        w.position === position ? { ...w, enabled: !w.enabled } : w
+      ),
+    });
     get().calculatePricing();
   },
 
-  selectAllWindows: () => {
-    const { carType } = get();
-    if (!carType) return;
-    const windows = Object.keys(WINDOW_SQFT[carType] || {});
-    set({ selectedWindows: windows });
+  setWindowTint: (position: string, tintType: string) => {
+    const { windows } = get();
+    const tint = TINT_TYPES[tintType];
+    if (!tint) return;
+    set({
+      windows: windows.map((w) =>
+        w.position === position
+          ? { ...w, tintType, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft }
+          : w
+      ),
+    });
     get().calculatePricing();
   },
 
-  clearWindows: () => {
-    set({ selectedWindows: [] });
+  setWindowShade: (position: string, shade: string) => {
+    const { windows } = get();
+    set({
+      windows: windows.map((w) =>
+        w.position === position ? { ...w, shade } : w
+      ),
+    });
+    // Shade doesn't affect price, but recalc for consistency
     get().calculatePricing();
   },
 
-  setTintType: (tintType: string) => {
-    set({ tintType });
+  applyToAll: (tintType: string, shade: string) => {
+    const { windows } = get();
+    const tint = TINT_TYPES[tintType];
+    if (!tint) return;
+    set({
+      windows: windows.map((w) => ({
+        ...w,
+        tintType,
+        shade,
+        pricePerSqft: tint.pricePerSqft,
+        price: w.sqft * tint.pricePerSqft,
+      })),
+    });
+    get().calculatePricing();
+  },
+
+  applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => {
+    const { windows } = get();
+    const tint = TINT_TYPES[tintType];
+    if (!tint) return;
+    const positions = WINDOW_GROUPS[group].positions;
+    set({
+      windows: windows.map((w) =>
+        positions.includes(w.position)
+          ? { ...w, tintType, shade, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft }
+          : w
+      ),
+    });
     get().calculatePricing();
   },
 
@@ -246,29 +331,27 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   },
 
   calculatePricing: () => {
-    const { carType, selectedWindows, tintType, serviceType, shippingCountry } = get();
+    const { windows, serviceType, shippingCountry } = get();
 
-    if (!carType) return;
-
-    const windowData = WINDOW_SQFT[carType] || {};
-    const totalSqft = selectedWindows.reduce((sum, w) => sum + (windowData[w] || 0), 0);
-
-    const tint = tintType ? TINT_TYPES[tintType] : null;
-    const unitPrice = tint ? tint.pricePerSqft : 0;
-    const subtotal = totalSqft * unitPrice;
+    const enabledWindows = windows.filter((w) => w.enabled);
+    const totalSqft = enabledWindows.reduce((sum, w) => sum + w.sqft, 0);
+    const subtotal = enabledWindows.reduce((sum, w) => sum + w.sqft * w.pricePerSqft, 0);
 
     const shipping = shippingCountry ? SHIPPING_INFO[shippingCountry] : null;
-    const shippingCost =
-      shipping ? (subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : shipping.baseCost) : 0;
+    const shippingCost = shipping
+      ? subtotal >= FREE_SHIPPING_THRESHOLD
+        ? 0
+        : shipping.baseCost
+      : 0;
 
     const installationCost =
       serviceType === 'installation' ? totalSqft * INSTALLATION_RATE : 0;
 
-    const tax = Math.round((subtotal + installationCost) * TAX_RATE * 100) / 100;
-    const total =
-      Math.round((subtotal + shippingCost + installationCost + tax) * 100) / 100;
+    const taxRate = shippingCountry ? (TAX_RATES[shippingCountry] || 0.08) : 0.08;
+    const tax = Math.round((subtotal + installationCost) * taxRate * 100) / 100;
+    const total = Math.round((subtotal + shippingCost + installationCost + tax) * 100) / 100;
 
-    set({ totalSqft, unitPrice, subtotal, shippingCost, installationCost, tax, total });
+    set({ totalSqft, subtotal, shippingCost, installationCost, tax, total });
   },
 
   reset: () => set({ ...initialState }),

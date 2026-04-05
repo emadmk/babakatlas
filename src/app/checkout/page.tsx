@@ -25,19 +25,11 @@ import {
 import {
   useConfiguratorStore,
   TINT_TYPES,
-  WINDOW_SQFT,
   SHIPPING_INFO,
 } from '@/store/configuratorStore';
 import { formatCurrency, getTaxInfo } from '@/lib/pricing';
 
 // ── Helpers ───────────────────────────────────────────────────────────
-function formatWindowLabel(id: string): string {
-  return id
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 function formatCarType(slug: string): string {
   return slug
     .split('_')
@@ -96,21 +88,25 @@ export default function CheckoutPage() {
   });
 
   // Derived data
-  const tint = config.tintType ? TINT_TYPES[config.tintType] : null;
-  const windowData = config.carType ? WINDOW_SQFT[config.carType] : {};
+  const enabledWindows = config.windows.filter((w) => w.enabled);
   const taxInfo = getTaxInfo(address.country);
   const shippingInfo = SHIPPING_INFO[address.country];
 
-  const isEmpty = !config.carType || !config.tintType || config.selectedWindows.length === 0;
+  const isEmpty = !config.carType || enabledWindows.length === 0;
 
   // Window details for the order summary
   const windowItems = useMemo(() => {
-    return config.selectedWindows.map((w) => ({
-      id: w,
-      label: formatWindowLabel(w),
-      sqft: windowData[w] ?? 0,
+    return enabledWindows.map((w) => ({
+      id: w.position,
+      label: w.label,
+      sqft: w.sqft,
+      tintType: w.tintType,
+      tintName: TINT_TYPES[w.tintType]?.name ?? w.tintType,
+      shade: w.shade,
+      pricePerSqft: w.pricePerSqft,
+      price: w.sqft * w.pricePerSqft,
     }));
-  }, [config.selectedWindows, windowData]);
+  }, [enabledWindows]);
 
   // ── Submit order ──────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
@@ -133,10 +129,17 @@ export default function CheckoutPage() {
           contact,
           shippingAddress: address,
           carType: config.carType,
-          carModel: config.carModel,
-          tintType: config.tintType,
-          selectedWindows: config.selectedWindows,
+          carModel: null,
+          tintType: enabledWindows[0]?.tintType ?? 'ceramic',
+          selectedWindows: enabledWindows.map((w) => w.position),
           serviceType: config.serviceType ?? 'shipping',
+          windowConfigs: enabledWindows.map((w) => ({
+            position: w.position,
+            tintType: w.tintType,
+            shade: w.shade,
+            sqft: w.sqft,
+            pricePerSqft: w.pricePerSqft,
+          })),
         }),
       });
 
@@ -171,8 +174,8 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [{
-            name: `${tint?.name} Tint - ${config.carType ? formatCarType(config.carType) : 'Vehicle'}`,
-            description: `${config.selectedWindows.length} windows, ${config.totalSqft} sq ft`,
+            name: `Tint Package - ${config.carType ? formatCarType(config.carType) : 'Vehicle'}`,
+            description: `${enabledWindows.length} windows, ${config.totalSqft} sq ft`,
             amount: totalAmount,
             quantity: 1,
           }],
@@ -472,25 +475,20 @@ export default function CheckoutPage() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6">
                 <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-                {/* Car & tint info */}
+                {/* Car info */}
                 <div className="flex items-start gap-4 pb-4 border-b border-white/10">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center flex-shrink-0">
                     <Package className="w-6 h-6 text-white/50" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-white">
-                      {tint?.name} Tint
-                      {tint?.badge && (
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
-                          {tint.badge}
-                        </span>
-                      )}
+                      Tint Package
                     </p>
                     <p className="text-sm text-white/50">
-                      {formatCarType(config.carType!)} {config.carModel ? `- ${config.carModel}` : ''}
+                      {formatCarType(config.carType!)}
                     </p>
                     <p className="text-xs text-white/30 mt-0.5">
-                      {config.totalSqft} sq ft @ ${config.unitPrice}/sq ft
+                      {enabledWindows.length} windows, {config.totalSqft} sq ft
                     </p>
                   </div>
                 </div>
@@ -506,8 +504,11 @@ export default function CheckoutPage() {
                         key={w.id}
                         className="flex items-center justify-between text-sm"
                       >
-                        <span className="text-white/60">{w.label}</span>
-                        <span className="text-white/40">{w.sqft} sq ft</span>
+                        <div>
+                          <span className="text-white/60">{w.label}</span>
+                          <span className="text-white/30 text-xs ml-2">{w.tintName} | {w.sqft} ft²</span>
+                        </div>
+                        <span className="text-white/50">${w.price.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>

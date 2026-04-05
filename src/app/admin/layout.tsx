@@ -72,7 +72,7 @@ export default function AdminLayout({
   }
 
   // Authenticated but not admin
-  if ((session.user as any).role !== "admin") {
+  if ((session.user as { role?: string }).role !== "admin") {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center space-y-4">

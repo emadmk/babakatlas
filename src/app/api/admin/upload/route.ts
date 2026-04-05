@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const url = `/uploads/${category}/${filename}`;
 
     return NextResponse.json({ success: true, url, filename });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Upload failed" }, { status: 500 });
   }
 }

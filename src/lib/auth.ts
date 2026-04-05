@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { getAdminUserByEmail } from "@/lib/adminData";
 
 // Only add Google provider if credentials are configured
 const providers: NextAuthOptions["providers"] = [];
@@ -22,10 +23,12 @@ providers.push(
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Admin user
+        if (!credentials?.email || !credentials?.password) return null;
+
+        // Admin user (hardcoded for security)
         if (
-          credentials?.email === "admin@atlasadaptive.com" &&
-          credentials?.password === "Atlas2026!"
+          credentials.email === "admin@atlasadaptive.com" &&
+          credentials.password === "Atlas2026!"
         ) {
           return {
             id: "admin-1",
@@ -34,18 +37,21 @@ providers.push(
             role: "admin",
           };
         }
-        // Demo user
-        if (
-          credentials?.email === "demo@atlasadaptive.com" &&
-          credentials?.password === "demo1234"
-        ) {
-          return {
-            id: "user-1",
-            name: "Demo User",
-            email: "demo@atlasadaptive.com",
-            role: "user",
-          };
+
+        // Check registered users from data store
+        const user = getAdminUserByEmail(credentials.email);
+        if (user && user.status === "active") {
+          // Check password (plain comparison for now - use bcrypt in production)
+          if (user.password === credentials.password) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: "user",
+            };
+          }
         }
+
         return null;
       },
     })

@@ -136,6 +136,7 @@ export interface AdminUser {
   status: 'active' | 'banned';
   joinedAt: string;
   lastActive: string;
+  password?: string; // hashed in production, plain for demo
 }
 
 export interface FaqItem {
@@ -1155,14 +1156,14 @@ const seedAdminOrders: AdminOrder[] = [
 ];
 
 const seedAdminUsers: AdminUser[] = [
-  { id: "usr-001", name: "Juan Dela Cruz", email: "juan@example.com", phone: "+63 917 123 4567", country: "PH", city: "Manila", ordersCount: 3, totalSpent: 456.72, status: "active", joinedAt: "2025-11-15T08:00:00Z", lastActive: "2026-04-01T10:30:00Z" },
-  { id: "usr-002", name: "Sarah Thompson", email: "sarah@example.com", phone: "+61 412 345 678", country: "AU", city: "Sydney", ordersCount: 5, totalSpent: 1240.00, status: "active", joinedAt: "2025-10-20T14:30:00Z", lastActive: "2026-04-02T14:15:00Z" },
-  { id: "usr-003", name: "Maria Santos", email: "maria@example.com", phone: "+63 918 987 6543", country: "PH", city: "Quezon City", ordersCount: 2, totalSpent: 618.24, status: "active", joinedAt: "2026-01-05T10:00:00Z", lastActive: "2026-04-03T08:45:00Z" },
-  { id: "usr-004", name: "James Wilson", email: "james@example.com", phone: "+61 423 456 789", country: "AU", city: "Melbourne", ordersCount: 7, totalSpent: 2890.50, status: "active", joinedAt: "2025-09-10T12:00:00Z", lastActive: "2026-03-28T11:20:00Z" },
-  { id: "usr-005", name: "David Chen", email: "david@example.com", phone: "+61 434 567 890", country: "AU", city: "Sydney", ordersCount: 1, totalSpent: 0, status: "active", joinedAt: "2026-03-25T16:45:00Z", lastActive: "2026-03-30T09:10:00Z" },
-  { id: "usr-006", name: "Pedro Garcia", email: "pedro@example.com", phone: "+63 920 333 4444", country: "PH", city: "Cebu", ordersCount: 0, totalSpent: 0, status: "banned", joinedAt: "2026-04-01T09:00:00Z", lastActive: "2026-04-01T09:00:00Z" },
-  { id: "usr-007", name: "Emma Brown", email: "emma@example.com", phone: "+61 445 678 901", country: "AU", city: "Brisbane", ordersCount: 4, totalSpent: 1560.00, status: "active", joinedAt: "2025-12-18T11:30:00Z", lastActive: "2026-03-20T15:00:00Z" },
-  { id: "usr-008", name: "Rico Magsaysay", email: "rico@example.com", phone: "+63 921 555 6666", country: "PH", city: "Davao", ordersCount: 6, totalSpent: 890.40, status: "active", joinedAt: "2025-08-22T07:15:00Z", lastActive: "2026-04-04T12:00:00Z" },
+  { id: "usr-001", name: "Juan Dela Cruz", email: "juan@example.com", phone: "+63 917 123 4567", country: "PH", city: "Manila", ordersCount: 3, totalSpent: 456.72, status: "active", joinedAt: "2025-11-15T08:00:00Z", lastActive: "2026-04-01T10:30:00Z", password: "demo1234" },
+  { id: "usr-002", name: "Sarah Thompson", email: "sarah@example.com", phone: "+61 412 345 678", country: "AU", city: "Sydney", ordersCount: 5, totalSpent: 1240.00, status: "active", joinedAt: "2025-10-20T14:30:00Z", lastActive: "2026-04-02T14:15:00Z", password: "demo1234" },
+  { id: "usr-003", name: "Maria Santos", email: "maria@example.com", phone: "+63 918 987 6543", country: "PH", city: "Quezon City", ordersCount: 2, totalSpent: 618.24, status: "active", joinedAt: "2026-01-05T10:00:00Z", lastActive: "2026-04-03T08:45:00Z", password: "demo1234" },
+  { id: "usr-004", name: "James Wilson", email: "james@example.com", phone: "+61 423 456 789", country: "AU", city: "Melbourne", ordersCount: 7, totalSpent: 2890.50, status: "active", joinedAt: "2025-09-10T12:00:00Z", lastActive: "2026-03-28T11:20:00Z", password: "demo1234" },
+  { id: "usr-005", name: "David Chen", email: "david@example.com", phone: "+61 434 567 890", country: "AU", city: "Sydney", ordersCount: 1, totalSpent: 0, status: "active", joinedAt: "2026-03-25T16:45:00Z", lastActive: "2026-03-30T09:10:00Z", password: "demo1234" },
+  { id: "usr-006", name: "Pedro Garcia", email: "pedro@example.com", phone: "+63 920 333 4444", country: "PH", city: "Cebu", ordersCount: 0, totalSpent: 0, status: "banned", joinedAt: "2026-04-01T09:00:00Z", lastActive: "2026-04-01T09:00:00Z", password: "demo1234" },
+  { id: "usr-007", name: "Emma Brown", email: "emma@example.com", phone: "+61 445 678 901", country: "AU", city: "Brisbane", ordersCount: 4, totalSpent: 1560.00, status: "active", joinedAt: "2025-12-18T11:30:00Z", lastActive: "2026-03-20T15:00:00Z", password: "demo1234" },
+  { id: "usr-008", name: "Rico Magsaysay", email: "rico@example.com", phone: "+63 921 555 6666", country: "PH", city: "Davao", ordersCount: 6, totalSpent: 890.40, status: "active", joinedAt: "2025-08-22T07:15:00Z", lastActive: "2026-04-04T12:00:00Z", password: "demo1234" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1569,6 +1570,20 @@ export function getAdminUsers(): AdminUser[] {
 
 export function getAdminUser(id: string): AdminUser | undefined {
   return adminUsers.get(id);
+}
+
+export function createAdminUser(data: Omit<AdminUser, 'id'>): AdminUser {
+  const id = `usr-${crypto.randomUUID().slice(0, 8)}`;
+  const user: AdminUser = { ...data, id };
+  adminUsers.set(id, user);
+  saveToFile();
+  return user;
+}
+
+export function getAdminUserByEmail(email: string): AdminUser | undefined {
+  return Array.from(adminUsers.values()).find(
+    (u) => u.email.toLowerCase() === email.toLowerCase()
+  );
 }
 
 export function updateAdminUser(id: string, data: Partial<AdminUser>): AdminUser | null {

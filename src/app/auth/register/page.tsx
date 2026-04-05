@@ -68,12 +68,16 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      // TODO: Call registration API
-      // await fetch("/api/auth/register", {
-      //   method: "POST",
-      //   body: JSON.stringify(formData),
-      // });
-      await new Promise((r) => setTimeout(r, 1500)); // Simulated delay
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || "Registration failed. Please try again.");
+        return;
+      }
       router.push("/auth/login?registered=true");
     } catch {
       setError("Registration failed. Please try again.");

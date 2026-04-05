@@ -21,10 +21,10 @@ export default function Footer() {
     {
       title: t("footer.company"),
       links: [
-        { label: t("footer.about"), href: "/#about" },
+        { label: t("footer.about"), href: "/about" },
         { label: "Our Technology", href: "/#benefits" },
-        { label: t("footer.careers"), href: "#" },
-        { label: "Contact", href: "#contact" },
+        { label: t("footer.careers"), href: "/about" },
+        { label: "Contact", href: "/contact" },
       ],
     },
     {
@@ -39,9 +39,9 @@ export default function Footer() {
     {
       title: t("footer.support"),
       links: [
-        { label: t("footer.faq"), href: "#" },
-        { label: "Shipping Info", href: "/#shipping" },
-        { label: t("footer.installation"), href: "#" },
+        { label: t("footer.faq"), href: "/faq" },
+        { label: "Shipping Info", href: "/shipping" },
+        { label: t("footer.installation"), href: "/faq" },
         { label: "Track Order", href: "/dashboard/orders" },
       ],
     },
@@ -120,9 +120,17 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-zinc-600">
-            &copy; {new Date().getFullYear()} AtlasAdaptive. {t("footer.copyright")}
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-zinc-600">
+              &copy; {new Date().getFullYear()} AtlasAdaptive. {t("footer.copyright")}
+            </p>
+            <Link href="/terms" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
 
           {/* Social icons */}
           <div className="flex items-center gap-4">

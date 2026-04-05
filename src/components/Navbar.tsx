@@ -8,9 +8,10 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const navLinks = [
   { href: "/", labelKey: "nav.home" },
-  { href: "/#benefits", labelKey: "nav.benefits" },
   { href: "/configurator", labelKey: "nav.configurator" },
-  { href: "/#how-it-works", labelKey: "nav.about" },
+  { href: "/about", labelKey: "nav.about" },
+  { href: "/faq", labelKey: "nav.faq" },
+  { href: "/contact", labelKey: "nav.contact" },
 ];
 
 export default function Navbar() {

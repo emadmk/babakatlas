@@ -6,10 +6,8 @@ import { motion } from "framer-motion";
 import {
   Truck,
   Package,
-  Clock,
   Shield,
   MapPin,
-  CheckCircle,
 } from "lucide-react";
 
 const regions = [

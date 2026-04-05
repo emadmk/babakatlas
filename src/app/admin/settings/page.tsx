@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Save,
   Globe,
@@ -9,6 +9,9 @@ import {
   Truck,
   CreditCard,
   Check,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 
 interface SiteSettings {
@@ -34,9 +37,20 @@ interface PaymentSettings {
   stripeMode: "test" | "live";
 }
 
+interface AllSettings {
+  site: SiteSettings;
+  business: BusinessSettings;
+  shipping: ShippingSettings;
+  payment: PaymentSettings;
+}
+
 export default function AdminSettingsPage() {
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const [site, setSite] = useState<SiteSettings>({
     siteName: "AtlasAdaptive",
@@ -57,22 +71,112 @@ export default function AdminSettingsPage() {
     enableAU: true,
   });
 
-  const [payment] = useState<PaymentSettings>({
+  const [payment, setPayment] = useState<PaymentSettings>({
     stripeConfigured: true,
     stripeMode: "test",
   });
 
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/settings");
+      const data = await res.json();
+      if (data.success) {
+        const s = data.data as AllSettings;
+        if (s.site) setSite(s.site);
+        if (s.business) setBusiness(s.business);
+        if (s.shipping) setShipping(s.shipping);
+        if (s.payment) setPayment(s.payment);
+      }
+    } catch {
+      // Use defaults if fetch fails
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
   const handleSave = async () => {
     setSaving(true);
-    // Simulate save
-    await new Promise((r) => setTimeout(r, 800));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ site, business, shipping, payment }),
+      });
+      if (res.ok) {
+        showToast("success", "Settings saved successfully");
+      } else {
+        showToast("error", "Failed to save settings");
+      }
+    } catch {
+      showToast("error", "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Settings</h1>
+            <p className="text-white/50 text-sm mt-1">
+              Configure your store settings
+            </p>
+          </div>
+        </div>
+        <div className="space-y-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white/5 border border-white/10 rounded-xl p-6 animate-pulse"
+            >
+              <div className="h-6 bg-white/10 rounded w-1/4 mb-4" />
+              <div className="space-y-3">
+                <div className="h-10 bg-white/10 rounded" />
+                <div className="h-10 bg-white/10 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border backdrop-blur-xl ${
+              toast.type === "success"
+                ? "bg-green-500/10 border-green-500/20 text-green-400"
+                : "bg-red-500/10 border-red-500/20 text-red-400"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle2 size={16} />
+            ) : (
+              <AlertCircle size={16} />
+            )}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Settings</h1>
@@ -85,8 +189,12 @@ export default function AdminSettingsPage() {
           disabled={saving}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#0071E3] hover:bg-[#0077ed] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/20"
         >
-          {saved ? <Check size={16} /> : <Save size={16} />}
-          {saving ? "Saving..." : saved ? "Saved!" : "Save Settings"}
+          {saving ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Save size={16} />
+          )}
+          {saving ? "Saving..." : "Save Settings"}
         </button>
       </div>
 
@@ -208,7 +316,10 @@ export default function AdminSettingsPage() {
               <select
                 value={business.defaultCurrency}
                 onChange={(e) =>
-                  setBusiness({ ...business, defaultCurrency: e.target.value })
+                  setBusiness({
+                    ...business,
+                    defaultCurrency: e.target.value,
+                  })
                 }
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
               >

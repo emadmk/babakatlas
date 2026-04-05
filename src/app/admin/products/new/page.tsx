@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Save, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Save,
+  ArrowLeft,
+  Package,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 interface ProductForm {
   nameEn: string;
@@ -33,6 +40,10 @@ const tintOptions = [
 export default function NewProductPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [form, setForm] = useState<ProductForm>({
     nameEn: "",
     nameTl: "",
@@ -47,6 +58,11 @@ export default function NewProductPage() {
     badge: "",
     active: true,
   });
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -69,8 +85,13 @@ export default function NewProductPage() {
         }),
       });
       if (res.ok) {
-        router.push("/admin/products");
+        showToast("success", "Product created");
+        setTimeout(() => router.push("/admin/products"), 500);
+      } else {
+        showToast("error", "Failed to create product");
       }
+    } catch {
+      showToast("error", "Failed to create product");
     } finally {
       setSaving(false);
     }
@@ -78,6 +99,29 @@ export default function NewProductPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border backdrop-blur-xl ${
+              toast.type === "success"
+                ? "bg-green-500/10 border-green-500/20 text-green-400"
+                : "bg-red-500/10 border-red-500/20 text-red-400"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle2 size={16} />
+            ) : (
+              <AlertCircle size={16} />
+            )}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin/products")}
@@ -249,6 +293,26 @@ export default function NewProductPage() {
             />
           </div>
         </div>
+
+        {/* Image Preview */}
+        {form.imageUrl && (
+          <div className="relative w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg overflow-hidden">
+            <Image
+              src={form.imageUrl}
+              alt="Preview"
+              fill
+              className="object-contain p-4"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          </div>
+        )}
+        {!form.imageUrl && (
+          <div className="w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg flex items-center justify-center">
+            <Package size={48} className="text-white/10" />
+          </div>
+        )}
 
         {/* Badge & Active */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -2,8 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { motion } from "framer-motion";
-import { Save, ArrowLeft, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Save,
+  ArrowLeft,
+  Trash2,
+  Loader2,
+  Package,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 interface ProductForm {
   nameEn: string;
@@ -49,9 +58,19 @@ export default function EditProductPage() {
     badge: "",
     active: true,
   });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     fetch(`/api/admin/products/${productId}`)
@@ -75,13 +94,14 @@ export default function EditProductPage() {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => showToast("error", "Failed to load product"))
+      .finally(() => setLoading(false));
   }, [productId]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await fetch(`/api/admin/products/${productId}`, {
+      const res = await fetch(`/api/admin/products/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,7 +117,14 @@ export default function EditProductPage() {
           active: form.active,
         }),
       });
-      router.push("/admin/products");
+      if (res.ok) {
+        showToast("success", "Product saved");
+        setTimeout(() => router.push("/admin/products"), 500);
+      } else {
+        showToast("error", "Failed to save product");
+      }
+    } catch {
+      showToast("error", "Failed to save product");
     } finally {
       setSaving(false);
     }
@@ -106,15 +133,54 @@ export default function EditProductPage() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await fetch(`/api/admin/products/${productId}`, { method: "DELETE" });
-      router.push("/admin/products");
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/admin/products");
+      } else {
+        showToast("error", "Failed to delete product");
+      }
+    } catch {
+      showToast("error", "Failed to delete product");
     } finally {
       setDeleting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={24} className="animate-spin text-white/30" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border backdrop-blur-xl ${
+              toast.type === "success"
+                ? "bg-green-500/10 border-green-500/20 text-green-400"
+                : "bg-red-500/10 border-red-500/20 text-red-400"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle2 size={16} />
+            ) : (
+              <AlertCircle size={16} />
+            )}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin/products")}
@@ -187,7 +253,7 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Tint Type Dropdown */}
+        {/* Tint Type */}
         <div>
           <label className="block text-sm text-white/60 mb-1.5">
             Tint Type
@@ -282,6 +348,26 @@ export default function EditProductPage() {
             />
           </div>
         </div>
+
+        {/* Image Preview */}
+        {form.imageUrl && (
+          <div className="relative w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg overflow-hidden">
+            <Image
+              src={form.imageUrl}
+              alt="Product preview"
+              fill
+              className="object-contain p-4"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          </div>
+        )}
+        {!form.imageUrl && (
+          <div className="w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg flex items-center justify-center">
+            <Package size={48} className="text-white/10" />
+          </div>
+        )}
 
         {/* Badge & Active */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -10,7 +10,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Car,
-  Loader2,
+
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";

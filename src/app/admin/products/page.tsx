@@ -9,7 +9,7 @@ import {
   Trash2,
   ToggleLeft,
   ToggleRight,
-  Loader2,
+
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";

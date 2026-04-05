@@ -8,7 +8,7 @@ import {
   Building2,
   Truck,
   CreditCard,
-  Check,
+
   Loader2,
   CheckCircle2,
   AlertCircle,

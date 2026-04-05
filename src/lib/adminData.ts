@@ -108,7 +108,7 @@ export interface AdminOrder {
   shippingAddress: { address: string; city: string; postalCode: string; country: string };
   items: {
     carType: string;
-    carModel: string;
+    carModel: string | null;
     tintType: string;
     tintName: string;
     selectedWindows: string[];
@@ -1552,8 +1552,8 @@ export function updateAdminOrder(id: string, data: Partial<AdminOrder>): AdminOr
   return updated;
 }
 
-export function createAdminOrder(data: Omit<AdminOrder, 'id'>): AdminOrder {
-  const id = `ord-${crypto.randomUUID().slice(0, 8)}`;
+export function createAdminOrder(data: Omit<AdminOrder, 'id'> & { id?: string }): AdminOrder {
+  const id = data.id || `ord-${crypto.randomUUID().slice(0, 8)}`;
   const order: AdminOrder = { ...data, id };
   adminOrders.set(id, order);
   saveToFile();

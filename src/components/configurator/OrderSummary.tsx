@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
   useConfiguratorStore,
   TINT_TYPES,
@@ -48,6 +49,7 @@ function SummarySection({
 }
 
 export default function OrderSummary() {
+  const router = useRouter();
   const {
     carType,
     windows,
@@ -236,6 +238,7 @@ export default function OrderSummary() {
 
               {/* Checkout button */}
               <motion.button
+                onClick={() => router.push('/checkout')}
                 className="w-full mt-6 py-4 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-semibold text-sm transition-colors relative overflow-hidden group"
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}

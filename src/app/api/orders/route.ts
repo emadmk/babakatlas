@@ -1,9 +1,12 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { buildPricingQuote } from '@/lib/pricingServer';
 import { formatCurrency } from '@/lib/pricing';
 import { TINT_TYPES, WINDOW_SQFT } from '@/store/configuratorStore';
+import { createAdminOrder } from '@/lib/adminData';
 
 import { orders, type Order } from '@/lib/ordersStore';
 
@@ -57,12 +60,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!tintType || !TINT_TYPES[tintType]) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid tint type' },
-        { status: 400 },
-      );
-    }
+    // tintType can be the primary tint or first window's tint
+    // Individual window tints are in windowConfigs if provided
 
     if (!Array.isArray(selectedWindows) || selectedWindows.length === 0) {
       return NextResponse.json(
@@ -97,7 +96,7 @@ export async function POST(request: NextRequest) {
     const orderId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    const tint = TINT_TYPES[tintType];
+    const tint = TINT_TYPES[tintType] || { name: tintType || 'Custom' };
 
     const order: Order = {
       id: orderId,
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
       items: {
         carType,
         carModel: carModel ?? null,
-        tintType,
+        tintType: tintType || 'mixed',
         tintName: tint.name,
         selectedWindows,
         totalSqft: quote.totalSqft,
@@ -132,6 +131,23 @@ export async function POST(request: NextRequest) {
     };
 
     orders.set(orderId, order);
+
+    // Also save to persistent admin data store
+    createAdminOrder({
+      id: orderId,
+      orderNumber,
+      userId,
+      status: 'pending',
+      contact,
+      shippingAddress,
+      items: order.items,
+      serviceType,
+      pricing: order.pricing,
+      paymentStatus: 'unpaid',
+      notes: [],
+      createdAt: now,
+      updatedAt: now,
+    });
 
     return NextResponse.json(
       {

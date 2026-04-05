@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 
+// =============================================================================
+// Default data (used as fallback before API loads)
+// =============================================================================
+
 export const TINT_TYPES: Record<
   string,
   {
@@ -162,6 +166,7 @@ export const WINDOW_GROUPS = {
   sides: { label: 'Side Windows', positions: SIDE_WINDOWS },
 };
 
+// Default SHIPPING_INFO kept for backward compatibility (components that import it)
 export const SHIPPING_INFO: Record<
   string,
   { name: string; baseCost: number; deliveryTime: string; flag: string }
@@ -170,9 +175,41 @@ export const SHIPPING_INFO: Record<
   AU: { name: 'Australia', baseCost: 25, deliveryTime: '5-10 business days', flag: '\u{1F1E6}\u{1F1FA}' },
 };
 
-const INSTALLATION_RATE = 4; // per sqft
-const FREE_SHIPPING_THRESHOLD = 200;
-const TAX_RATES: Record<string, number> = { PH: 0.12, AU: 0.10 };
+// =============================================================================
+// Types for API-loaded config
+// =============================================================================
+
+export interface ShippingRateData {
+  country: string;
+  countryName: { en: string; tl: string };
+  flag: string;
+  baseRate: number;
+  perSqftRate: number;
+  freeAbove: number;
+  deliveryDays: { min: number; max: number };
+  active: boolean;
+}
+
+export interface InstallationRateData {
+  country: string;
+  carType: string;
+  baseRate: number;
+  perWindowRate: number;
+  active: boolean;
+}
+
+export interface ShippingAddress {
+  name: string;
+  street1: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+// =============================================================================
+// Store types
+// =============================================================================
 
 export interface WindowConfig {
   position: string;
@@ -201,7 +238,22 @@ export interface ConfiguratorState {
   tax: number;
   total: number;
 
+  // Config loaded from API
+  configLoaded: boolean;
+  configLoading: boolean;
+  shippingRates: ShippingRateData[];
+  installationRates: InstallationRateData[];
+  taxRates: Record<string, number>;
+  freeShippingThresholds: Record<string, number>;
+  shippingMarkup: number;
+  shippingMarkupType: 'flat' | 'percentage';
+
+  // Shipping address
+  shippingAddress: ShippingAddress;
+
   // Actions
+  loadConfig: () => Promise<void>;
+  setShippingAddress: (address: Partial<ShippingAddress>) => void;
   setStep: (step: number) => void;
   setCarType: (carType: string) => void;
   toggleWindow: (position: string) => void;
@@ -217,6 +269,10 @@ export interface ConfiguratorState {
   calculatePricing: () => void;
   reset: () => void;
 }
+
+// =============================================================================
+// Helpers
+// =============================================================================
 
 function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium'): WindowConfig[] {
   const windowData = WINDOW_SQFT[carType] || {};
@@ -235,6 +291,15 @@ function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultS
   }));
 }
 
+const emptyShippingAddress: ShippingAddress = {
+  name: '',
+  street1: '',
+  city: '',
+  state: '',
+  zip: '',
+  country: '',
+};
+
 const initialState = {
   step: 1,
   carType: null as string | null,
@@ -247,10 +312,101 @@ const initialState = {
   installationCost: 0,
   tax: 0,
   total: 0,
+
+  // Config state
+  configLoaded: false,
+  configLoading: false,
+  shippingRates: [] as ShippingRateData[],
+  installationRates: [] as InstallationRateData[],
+  taxRates: { PH: 0.12, AU: 0.10 } as Record<string, number>,
+  freeShippingThresholds: { PH: 200, AU: 300 } as Record<string, number>,
+  shippingMarkup: 0,
+  shippingMarkupType: 'flat' as 'flat' | 'percentage',
+
+  // Shipping address
+  shippingAddress: { ...emptyShippingAddress },
 };
+
+// =============================================================================
+// Store
+// =============================================================================
 
 export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   ...initialState,
+
+  // ── Load config from API ──────────────────────────────────────────
+  loadConfig: async () => {
+    const { configLoaded, configLoading } = get();
+    if (configLoaded || configLoading) return;
+
+    set({ configLoading: true });
+
+    try {
+      const res = await fetch('/api/config/pricing');
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        const { shipping, installation, tax, shippingMarkup, shippingMarkupType } = json.data;
+
+        // Build lookup maps from API data
+        const freeShippingThresholds: Record<string, number> = {};
+        const taxRates: Record<string, number> = {};
+
+        if (shipping && Array.isArray(shipping)) {
+          for (const rate of shipping) {
+            freeShippingThresholds[rate.country] = rate.freeAbove;
+          }
+
+          // Also update the exported SHIPPING_INFO for backward compat
+          for (const rate of shipping) {
+            const deliveryTime = rate.deliveryDays
+              ? `${rate.deliveryDays.min}-${rate.deliveryDays.max} business days`
+              : SHIPPING_INFO[rate.country]?.deliveryTime ?? '';
+            SHIPPING_INFO[rate.country] = {
+              name: rate.countryName?.en ?? rate.country,
+              baseCost: rate.baseRate,
+              deliveryTime,
+              flag: rate.flag,
+            };
+          }
+        }
+
+        if (tax) {
+          for (const [country, rate] of Object.entries(tax)) {
+            taxRates[country] = rate as number;
+          }
+        }
+
+        set({
+          configLoaded: true,
+          configLoading: false,
+          shippingRates: shipping ?? [],
+          installationRates: installation ?? [],
+          taxRates: Object.keys(taxRates).length > 0 ? taxRates : get().taxRates,
+          freeShippingThresholds:
+            Object.keys(freeShippingThresholds).length > 0
+              ? freeShippingThresholds
+              : get().freeShippingThresholds,
+          shippingMarkup: shippingMarkup ?? 0,
+          shippingMarkupType: shippingMarkupType ?? 'flat',
+        });
+
+        // Recalculate pricing with new config values
+        get().calculatePricing();
+      } else {
+        set({ configLoading: false });
+      }
+    } catch (err) {
+      console.error('Failed to load configurator config:', err);
+      set({ configLoading: false });
+    }
+  },
+
+  // ── Shipping address ──────────────────────────────────────────────
+  setShippingAddress: (address: Partial<ShippingAddress>) => {
+    const current = get().shippingAddress;
+    set({ shippingAddress: { ...current, ...address } });
+  },
 
   setStep: (step: number) => set({ step }),
 
@@ -375,33 +531,95 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   },
 
   setShippingCountry: (country: 'PH' | 'AU') => {
-    set({ shippingCountry: country });
+    const { shippingAddress } = get();
+    set({
+      shippingCountry: country,
+      shippingAddress: { ...shippingAddress, country },
+    });
     get().calculatePricing();
   },
 
   calculatePricing: () => {
-    const { windows, serviceType, shippingCountry } = get();
+    const {
+      windows,
+      serviceType,
+      shippingCountry,
+      shippingRates,
+      installationRates,
+      taxRates,
+      freeShippingThresholds,
+      shippingMarkup,
+      shippingMarkupType,
+      carType,
+    } = get();
 
     const enabledWindows = windows.filter((w) => w.enabled);
     const totalSqft = enabledWindows.reduce((sum, w) => sum + w.sqft, 0);
     const subtotal = enabledWindows.reduce((sum, w) => sum + w.sqft * w.pricePerSqft * (w.shadeMultiplier || 1), 0);
 
-    const shipping = shippingCountry ? SHIPPING_INFO[shippingCountry] : null;
-    const shippingCost = shipping
-      ? subtotal >= FREE_SHIPPING_THRESHOLD
-        ? 0
-        : shipping.baseCost
-      : 0;
+    // ── Shipping cost (from API config) ───────────────────────────
+    let shippingCost = 0;
+    if (shippingCountry) {
+      const freeThreshold = freeShippingThresholds[shippingCountry] ?? 200;
+      if (subtotal >= freeThreshold) {
+        shippingCost = 0;
+      } else {
+        // Look up from API-loaded rates first
+        const rateData = shippingRates.find((r) => r.country === shippingCountry && r.active);
+        if (rateData) {
+          shippingCost = rateData.baseRate + totalSqft * rateData.perSqftRate;
+        } else {
+          // Fallback to SHIPPING_INFO
+          const fallback = SHIPPING_INFO[shippingCountry];
+          shippingCost = fallback ? fallback.baseCost : 0;
+        }
 
-    const installationCost =
-      serviceType === 'installation' ? totalSqft * INSTALLATION_RATE : 0;
+        // Apply markup
+        if (shippingMarkup > 0) {
+          if (shippingMarkupType === 'percentage') {
+            shippingCost = shippingCost * (1 + shippingMarkup / 100);
+          } else {
+            shippingCost = shippingCost + shippingMarkup;
+          }
+        }
+      }
+    }
 
-    const taxRate = shippingCountry ? (TAX_RATES[shippingCountry] || 0.08) : 0.08;
+    // ── Installation cost (from API config) ───────────────────────
+    let installationCost = 0;
+    if (serviceType === 'installation' && shippingCountry && carType) {
+      const carTypeUpper = carType.toUpperCase();
+      const rateData = installationRates.find(
+        (r) => r.country === shippingCountry && r.carType === carTypeUpper && r.active
+      );
+      if (rateData) {
+        installationCost = rateData.baseRate + enabledWindows.length * rateData.perWindowRate;
+      } else {
+        // Fallback: simple per-sqft rate
+        installationCost = totalSqft * 4;
+      }
+    }
+
+    // ── Tax (from API config) ─────────────────────────────────────
+    const taxRate = shippingCountry ? (taxRates[shippingCountry] ?? 0.08) : 0.08;
     const tax = Math.round((subtotal + installationCost) * taxRate * 100) / 100;
     const total = Math.round((subtotal + shippingCost + installationCost + tax) * 100) / 100;
 
     set({ totalSqft, subtotal, shippingCost, installationCost, tax, total });
   },
 
-  reset: () => set({ ...initialState }),
+  reset: () => {
+    // Preserve loaded config across resets
+    const { configLoaded, shippingRates, installationRates, taxRates, freeShippingThresholds, shippingMarkup, shippingMarkupType } = get();
+    set({
+      ...initialState,
+      configLoaded,
+      shippingRates,
+      installationRates,
+      taxRates,
+      freeShippingThresholds,
+      shippingMarkup,
+      shippingMarkupType,
+    });
+  },
 }));

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   calculateShipping,
   calculateInstallation,
-  formatCurrency,
-} from '@/lib/pricing';
-import { SHIPPING_INFO } from '@/store/configuratorStore';
+} from '@/lib/pricingServer';
+import { formatCurrency } from '@/lib/pricing';
+import { getShippingRates } from '@/lib/adminData';
 
 interface ShippingRequest {
   country: string;
@@ -42,8 +42,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Get shipping info from admin config ─────────────────────────
+    const shippingRates = getShippingRates();
+    const rateData = shippingRates.find((r) => r.country === country && r.active);
+
+    const countryName = rateData?.countryName?.en ?? country;
+    const deliveryTime = rateData
+      ? `${rateData.deliveryDays.min}-${rateData.deliveryDays.max} business days`
+      : '';
+    const freeShippingThreshold = rateData?.freeAbove ?? 200;
+
     // ── Calculate ───────────────────────────────────────────────────
-    const shippingInfo = SHIPPING_INFO[country];
     const shippingCost = calculateShipping(country, sqft, subtotal);
 
     let installationCost = 0;
@@ -58,14 +67,13 @@ export async function POST(request: NextRequest) {
     }
 
     const freeShipping = shippingCost === 0 && serviceType === 'shipping';
-    const freeShippingThreshold = country === 'PH' ? 200 : 300;
 
     return NextResponse.json({
       success: true,
       data: {
         country,
-        countryName: shippingInfo.name,
-        deliveryTime: shippingInfo.deliveryTime,
+        countryName,
+        deliveryTime,
         shippingCost,
         shippingFormatted: formatCurrency(shippingCost, country),
         installationCost,

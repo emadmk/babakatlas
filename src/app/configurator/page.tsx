@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import StepIndicator from '@/components/configurator/StepIndicator';
@@ -63,8 +64,12 @@ function StepContent({ step }: { step: number }) {
 
 export default function ConfiguratorPage() {
   const store = useConfiguratorStore();
-  const { step, setStep, reset } = store;
+  const { step, setStep, reset, loadConfig } = store;
   const isValid = canProceed(store);
+
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
   const goNext = () => {
     if (isValid && step < TOTAL_STEPS) {

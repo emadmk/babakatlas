@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { orders } from '../route';
+import { orders } from '@/lib/ordersStore';
 
 // ── GET: Get order details ────────────────────────────────────────────
 export async function GET(

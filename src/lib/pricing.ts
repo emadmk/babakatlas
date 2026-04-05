@@ -1,5 +1,13 @@
 import { TINT_TYPES, WINDOW_SQFT, SHIPPING_INFO } from '@/store/configuratorStore';
 
+// =============================================================================
+// Server-side pricing helper
+// =============================================================================
+// For server-side API routes that need admin config values, import directly
+// from @/lib/adminData. This file provides a client-safe pricing module
+// that uses sensible defaults. The configurator store fetches actual admin
+// values via /api/config/pricing and overrides these client-side defaults.
+
 // ── Subtotal ──────────────────────────────────────────────────────────
 export function calculateSubtotal(sqft: number, pricePerSqft: number): number {
   return Math.round(sqft * pricePerSqft * 100) / 100;
@@ -11,7 +19,7 @@ const SHIPPING_RATE_PER_SQFT: Record<string, number> = {
   AU: 3,
 };
 
-const FREE_SHIPPING_THRESHOLD: Record<string, number> = {
+const FREE_SHIPPING_THRESHOLD_DEFAULTS: Record<string, number> = {
   PH: 200,
   AU: 300,
 };
@@ -24,7 +32,7 @@ export function calculateShipping(
   const info = SHIPPING_INFO[country];
   if (!info) return 0;
 
-  const threshold = FREE_SHIPPING_THRESHOLD[country] ?? 200;
+  const threshold = FREE_SHIPPING_THRESHOLD_DEFAULTS[country] ?? 200;
   if (subtotal >= threshold) return 0;
 
   const rateSqft = SHIPPING_RATE_PER_SQFT[country] ?? 2;
@@ -83,7 +91,7 @@ export function calculateTotal(
 
 // ── Currency formatting ───────────────────────────────────────────────
 const CURRENCY_MAP: Record<string, { code: string; symbol: string; locale: string }> = {
-  PH: { code: 'PHP', symbol: '₱', locale: 'en-PH' },
+  PH: { code: 'PHP', symbol: '\u20B1', locale: 'en-PH' },
   AU: { code: 'AUD', symbol: 'A$', locale: 'en-AU' },
 };
 

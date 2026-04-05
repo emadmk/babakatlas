@@ -25,7 +25,6 @@ import {
 import {
   useConfiguratorStore,
   TINT_TYPES,
-  SHIPPING_INFO,
 } from '@/store/configuratorStore';
 import { formatCurrency, getTaxInfo } from '@/lib/pricing';
 
@@ -74,23 +73,39 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pre-fill from configurator store shipping address
+  const storeAddress = config.shippingAddress;
+
   // Form state
   const [contact, setContact] = useState({
-    name: '',
+    name: storeAddress.name || '',
     email: '',
     phone: '',
   });
   const [address, setAddress] = useState({
-    address: '',
-    city: '',
-    postalCode: '',
+    address: storeAddress.street1 || '',
+    city: storeAddress.city || '',
+    state: storeAddress.state || '',
+    postalCode: storeAddress.zip || '',
     country: config.shippingCountry ?? 'PH',
   });
 
   // Derived data
   const enabledWindows = config.windows.filter((w) => w.enabled);
   const taxInfo = getTaxInfo(address.country);
-  const shippingInfo = SHIPPING_INFO[address.country];
+
+  // Get shipping info from API-loaded rates or fallback
+  const shippingRateData = config.shippingRates.find(
+    (r) => r.country === address.country && r.active
+  );
+  const shippingInfo = shippingRateData
+    ? {
+        name: shippingRateData.countryName?.en ?? address.country,
+        baseCost: shippingRateData.baseRate,
+        deliveryTime: `${shippingRateData.deliveryDays.min}-${shippingRateData.deliveryDays.max} business days`,
+        flag: shippingRateData.flag,
+      }
+    : { name: address.country === 'PH' ? 'Philippines' : 'Australia', baseCost: 0, deliveryTime: '', flag: '' };
 
   const isEmpty = !config.carType || enabledWindows.length === 0;
 

@@ -5,7 +5,6 @@ import {
   useConfiguratorStore,
   TINT_TYPES,
   SHADE_LEVELS,
-  SHIPPING_INFO,
 } from '@/store/configuratorStore';
 import { Edit3, Shield, Lock, CreditCard } from 'lucide-react';
 
@@ -61,10 +60,25 @@ export default function OrderSummary() {
     tax,
     total,
     setStep,
+    shippingAddress,
+    shippingRates,
   } = useConfiguratorStore();
 
   const enabledWindows = windows.filter((w) => w.enabled);
-  const shipping = shippingCountry ? SHIPPING_INFO[shippingCountry] : null;
+
+  // Get shipping display info from API-loaded data
+  const shippingRateData = shippingCountry
+    ? shippingRates.find((r) => r.country === shippingCountry && r.active)
+    : null;
+  const shipping = shippingCountry
+    ? shippingRateData
+      ? {
+          name: shippingRateData.countryName?.en ?? shippingCountry,
+          flag: shippingRateData.flag,
+          deliveryTime: `${shippingRateData.deliveryDays.min}-${shippingRateData.deliveryDays.max} business days`,
+        }
+      : { name: shippingCountry === 'PH' ? 'Philippines' : 'Australia', flag: shippingCountry === 'PH' ? '\u{1F1F5}\u{1F1ED}' : '\u{1F1E6}\u{1F1FA}', deliveryTime: '' }
+    : null;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -140,8 +154,25 @@ export default function OrderSummary() {
                 <p className="text-white font-medium">
                   {shipping.flag} {shipping.name}
                 </p>
-                <p className="text-xs text-white/40 mt-1">
-                  Estimated delivery: {shipping.deliveryTime}
+                {shipping.deliveryTime && (
+                  <p className="text-xs text-white/40 mt-1">
+                    Estimated delivery: {shipping.deliveryTime}
+                  </p>
+                )}
+              </div>
+            )}
+            {/* Shipping Address */}
+            {shippingAddress.name && (
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <p className="text-xs text-white/40 uppercase tracking-wider mb-1.5">Ship To</p>
+                <p className="text-sm text-white/80">{shippingAddress.name}</p>
+                {shippingAddress.street1 && (
+                  <p className="text-sm text-white/60">{shippingAddress.street1}</p>
+                )}
+                <p className="text-sm text-white/60">
+                  {[shippingAddress.city, shippingAddress.state, shippingAddress.zip]
+                    .filter(Boolean)
+                    .join(', ')}
                 </p>
               </div>
             )}

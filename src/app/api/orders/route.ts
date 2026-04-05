@@ -1,53 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { buildPricingQuote, formatCurrency } from '@/lib/pricing';
+import { buildPricingQuote } from '@/lib/pricingServer';
+import { formatCurrency } from '@/lib/pricing';
 import { TINT_TYPES, WINDOW_SQFT } from '@/store/configuratorStore';
 
-// ── In-memory store (replace with DB later) ───────────────────────────
-export interface Order {
-  id: string;
-  orderNumber: string;
-  userId: string | null;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  contact: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  shippingAddress: {
-    address: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  items: {
-    carType: string;
-    carModel: string | null;
-    tintType: string;
-    tintName: string;
-    selectedWindows: string[];
-    totalSqft: number;
-    unitPrice: number;
-    subtotal: number;
-  };
-  serviceType: 'shipping' | 'installation';
-  pricing: {
-    subtotal: number;
-    shipping: number;
-    installation: number;
-    taxLabel: string;
-    tax: number;
-    total: number;
-  };
-  paymentStatus: 'unpaid' | 'paid' | 'refunded';
-  stripeSessionId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// In-memory orders (will be replaced with DB)
-const orders: Map<string, Order> = new Map();
+import { orders, type Order } from '@/lib/ordersStore';
 
 // ── Generate order number ─────────────────────────────────────────────
 function generateOrderNumber(): string {
@@ -227,5 +185,5 @@ export async function GET() {
   }
 }
 
-// Export orders map for the [id] route
-export { orders };
+// Re-export for backward compat
+export type { Order };

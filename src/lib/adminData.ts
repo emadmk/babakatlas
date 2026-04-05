@@ -81,6 +81,71 @@ export interface SiteSettings {
   currencies: { PH: string; AU: string };
 }
 
+export interface FaqItem {
+  id: string;
+  question: { en: string; tl: string };
+  answer: { en: string; tl: string };
+  order: number;
+  active: boolean;
+}
+
+export interface AboutContent {
+  story: { en: string; tl: string };
+  mission: { en: string; tl: string };
+  values: Array<{ icon: string; title: { en: string; tl: string }; description: { en: string; tl: string } }>;
+  stats: Array<{ value: string; label: { en: string; tl: string }; icon: string }>;
+  team: Array<{ name: string; role: { en: string; tl: string }; bio: { en: string; tl: string }; imageUrl: string }>;
+}
+
+export interface ContactInfo {
+  email: string;
+  phone: string;
+  businessHours: Array<{ day: { en: string; tl: string }; hours: string }>;
+  regions: Array<{ country: string; flag: string; name: { en: string; tl: string }; detail: { en: string; tl: string } }>;
+  subjects: Array<{ en: string; tl: string }>;
+}
+
+export interface HomepageContent {
+  hero: {
+    title: { en: string; tl: string };
+    subtitle: { en: string; tl: string };
+    cta: { en: string; tl: string };
+    backgroundImage: string;
+  };
+  benefits: Array<{
+    id: string;
+    icon: string;
+    title: { en: string; tl: string };
+    description: { en: string; tl: string };
+    stat: string;
+  }>;
+  howItWorks: Array<{
+    step: number;
+    title: { en: string; tl: string };
+    description: { en: string; tl: string };
+    icon: string;
+  }>;
+  stats: Array<{
+    value: string;
+    label: { en: string; tl: string };
+    suffix: string;
+  }>;
+  testimonials: Array<{
+    id: string;
+    name: string;
+    car: string;
+    quote: { en: string; tl: string };
+    rating: number;
+    avatar: string;
+  }>;
+  cta: {
+    title: { en: string; tl: string };
+    subtitle: { en: string; tl: string };
+    button: { en: string; tl: string };
+    badges: Array<{ en: string; tl: string }>;
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Seed Data
 // ---------------------------------------------------------------------------

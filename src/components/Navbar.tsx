@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, Globe, User } from "lucide-react";
+import { ShoppingCart, Menu, X, Globe, User, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSession, signOut } from "next-auth/react";
 
 const navLinks = [
   { href: "/", labelKey: "nav.home" },
@@ -17,7 +18,10 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, t } = useLanguage();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);

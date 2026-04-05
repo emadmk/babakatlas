@@ -20,11 +20,24 @@ import {
   Menu,
   X,
   ChevronLeft,
+  ChevronDown,
   Loader2,
   ShieldAlert,
+  FileText,
+  Home,
+  HelpCircle,
+  Info,
+  Phone,
 } from "lucide-react";
 
-const navItems = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+  children?: NavItem[];
+};
+
+const navItems: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Tint Products", icon: Package },
   { href: "/admin/cars", label: "Car Types", icon: Car },
@@ -33,6 +46,17 @@ const navItems = [
   { href: "/admin/shipping", label: "Shipping", icon: Truck },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  {
+    href: "/admin/content",
+    label: "Content",
+    icon: FileText,
+    children: [
+      { href: "/admin/content/homepage", label: "Homepage", icon: Home },
+      { href: "/admin/content/faq", label: "FAQ", icon: HelpCircle },
+      { href: "/admin/content/about", label: "About", icon: Info },
+      { href: "/admin/content/contact", label: "Contact", icon: Phone },
+    ],
+  },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
@@ -45,6 +69,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(false);
   const { data: session, status } = useSession();
 
   const isActive = (href: string) => {
@@ -135,8 +160,68 @@ export default function AdminLayout({
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const active = isActive(item.href);
             const Icon = item.icon;
+
+            if (item.children) {
+              const childActive = item.children.some((c) => isActive(c.href));
+              const isOpen = contentOpen || childActive;
+              return (
+                <div key={item.href}>
+                  <button
+                    onClick={() => setContentOpen(!isOpen)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      childActive
+                        ? "text-[#0071E3]"
+                        : "text-white/60 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <Icon size={18} />
+                    {item.label}
+                    <ChevronDown
+                      size={14}
+                      className={`ml-auto transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="ml-4 mt-1 space-y-1 border-l border-white/10 pl-3">
+                          {item.children.map((child) => {
+                            const cActive = isActive(child.href);
+                            const CIcon = child.icon;
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                onClick={() => setSidebarOpen(false)}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                  cActive
+                                    ? "bg-[#0071E3]/15 text-[#0071E3] border border-[#0071E3]/20"
+                                    : "text-white/50 hover:text-white hover:bg-white/5"
+                                }`}
+                              >
+                                <CIcon size={16} />
+                                {child.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}

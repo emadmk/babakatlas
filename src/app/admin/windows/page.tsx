@@ -72,15 +72,16 @@ export default function AdminWindowsPage() {
       const windowsData = await windowsRes.json();
 
       if (carsData.success) {
-        setCarTypes(carsData.data);
-        if (carsData.data.length > 0) {
-          setExpandedCar(carsData.data[0].id);
+        const cars = carsData.data || [];
+        setCarTypes(cars);
+        if (cars.length > 0) {
+          setExpandedCar(cars[0].id);
         }
       }
 
       if (windowsData.success) {
         const grouped: GroupedWindows = {};
-        for (const w of windowsData.data) {
+        for (const w of (windowsData.data || [])) {
           if (!grouped[w.carTypeId]) grouped[w.carTypeId] = [];
           grouped[w.carTypeId].push(w);
         }

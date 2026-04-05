@@ -31,14 +31,14 @@ export default function AdminDashboard() {
     fetch("/api/admin/stats")
       .then((r) => r.json())
       .then((res) => {
-        if (res.success) setStats(res.data);
+        if (res.success) setStats(res.data || stats);
       })
       .catch(() => {});
 
     fetch("/api/admin/orders")
       .then((r) => r.json())
       .then((res) => {
-        if (res.success) setOrders(res.data);
+        if (res.success) setOrders(res.data || []);
       })
       .catch(() => {});
   }, [setStats, setOrders]);

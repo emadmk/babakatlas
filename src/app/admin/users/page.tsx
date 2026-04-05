@@ -17,7 +17,7 @@ export default function AdminUsersPage() {
     fetch(`/api/admin/users?${params}`)
       .then((r) => r.json())
       .then((res) => {
-        if (res.success) setUsers(res.data);
+        if (res.success) setUsers(res.data || []);
       })
       .catch(() => {});
   }, [userSearch, setUsers]);

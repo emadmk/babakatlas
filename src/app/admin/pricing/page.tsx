@@ -38,7 +38,7 @@ export default function AdminPricingPage() {
         const data = await res.json();
         if (data.success) {
           setProducts(
-            data.data.map((p: TintProduct) => ({
+            (data.data || []).map((p: TintProduct) => ({
               id: p.id,
               name: p.name,
               tintType: p.tintType,

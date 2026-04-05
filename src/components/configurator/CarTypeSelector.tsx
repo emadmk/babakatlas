@@ -6,9 +6,13 @@ import { useConfiguratorStore, WINDOW_SQFT } from '@/store/configuratorStore';
 
 interface CarTypeItem {
   id: string;
-  label: string;
-  image: string;
+  name: string;
+  slug: string;
+  label?: string;
+  image?: string;
   imageUrl?: string;
+  windows?: Array<{ id: string; label: string; sqft: number }>;
+  totalSqft?: number;
 }
 
 function LoadingSkeleton() {
@@ -87,7 +91,8 @@ export default function CarTypeSelector() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {carTypes.map((car) => {
           const isSelected = carType === car.id;
-          const windowCount = Object.keys(WINDOW_SQFT[car.id] || {}).length;
+          const carKey = (car.slug || car.id || "").toUpperCase();
+          const windowCount = car.windows?.length || Object.keys(WINDOW_SQFT[carKey] || {}).length;
           const imgSrc = car.imageUrl || car.image;
 
           return (
@@ -125,7 +130,7 @@ export default function CarTypeSelector() {
                   isSelected ? 'text-white' : 'text-white/70'
                 }`}
               >
-                {car.label}
+                {car.name || car.label}
               </div>
 
               {/* Window count */}

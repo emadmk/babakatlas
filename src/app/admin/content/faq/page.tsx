@@ -49,7 +49,7 @@ export default function FAQContentPage() {
       const res = await fetch("/api/admin/content/faq");
       const data = await res.json();
       if (data.success && data.data) {
-        setItems(data.data);
+        setItems(Array.isArray(data.data) ? data.data : []);
       }
     } catch {
       // use defaults

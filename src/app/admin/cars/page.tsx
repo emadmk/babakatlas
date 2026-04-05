@@ -41,7 +41,7 @@ export default function AdminCarsPage() {
     try {
       const res = await fetch("/api/admin/cars");
       const data = await res.json();
-      if (data.success) setCars(data.data);
+      if (data.success) setCars(data.data || []);
     } catch {
       showToast("error", "Failed to load car types");
     } finally {

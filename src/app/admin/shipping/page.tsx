@@ -60,8 +60,8 @@ export default function AdminShippingPage() {
       const shippingData = await shippingRes.json();
       const installData = await installRes.json();
 
-      if (shippingData.success) setCountries(shippingData.data);
-      if (installData.success) setInstallationRates(installData.data);
+      if (shippingData.success) setCountries(shippingData.data || []);
+      if (installData.success) setInstallationRates(installData.data || []);
     } catch {
       showToast("error", "Failed to load shipping data");
     } finally {

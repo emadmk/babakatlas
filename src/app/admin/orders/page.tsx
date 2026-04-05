@@ -119,7 +119,7 @@ export default function AdminOrdersPage() {
 
       const res = await fetch(`/api/admin/orders?${params}`);
       const data = await res.json();
-      if (data.success) setOrders(data.data);
+      if (data.success) setOrders(data.data || []);
     } catch {
       showToast("error", "Failed to load orders");
     } finally {
@@ -246,24 +246,17 @@ export default function AdminOrdersPage() {
       {!loading && (
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[800px]">
               <thead>
                 <tr className="text-white/40 border-b border-white/10">
-                  <th className="text-left p-4 font-medium w-8"></th>
-                  <th className="text-left p-4 font-medium">Order #</th>
-                  <th className="text-left p-4 font-medium">Customer</th>
-                  <th className="text-left p-4 font-medium hidden md:table-cell">
-                    Date
-                  </th>
-                  <th className="text-left p-4 font-medium hidden lg:table-cell">
-                    Items
-                  </th>
-                  <th className="text-left p-4 font-medium">Total</th>
-                  <th className="text-left p-4 font-medium hidden sm:table-cell">
-                    Country
-                  </th>
-                  <th className="text-left p-4 font-medium">Status</th>
-                  <th className="text-left p-4 font-medium">Actions</th>
+                  <th className="text-left p-3 font-medium w-8"></th>
+                  <th className="text-left p-3 font-medium whitespace-nowrap">Order #</th>
+                  <th className="text-left p-3 font-medium">Customer</th>
+                  <th className="text-left p-3 font-medium">Date</th>
+                  <th className="text-left p-3 font-medium">Total</th>
+                  <th className="text-left p-3 font-medium">Country</th>
+                  <th className="text-left p-3 font-medium">Status</th>
+                  <th className="text-left p-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,37 +275,29 @@ export default function AdminOrdersPage() {
                         )
                       }
                     >
-                      <td className="p-4">
+                      <td className="p-3">
                         {expandedOrder === order.id ? (
                           <ChevronUp size={14} className="text-white/30" />
                         ) : (
                           <ChevronDown size={14} className="text-white/30" />
                         )}
                       </td>
-                      <td className="p-4 text-white/80 font-mono text-xs">
+                      <td className="p-3 text-white/80 font-mono text-xs whitespace-nowrap">
                         {order.orderNumber}
                       </td>
-                      <td className="p-4">
-                        <div>
-                          <p className="text-white/80">
-                            {order.contact.name}
-                          </p>
-                          <p className="text-white/40 text-xs">
-                            {order.contact.email}
-                          </p>
-                        </div>
+                      <td className="p-3">
+                        <p className="text-white/80 text-xs">
+                          {order.contact?.name || "N/A"}
+                        </p>
                       </td>
-                      <td className="p-4 text-white/60 hidden md:table-cell">
+                      <td className="p-3 text-white/60 text-xs">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="p-4 text-white/60 hidden lg:table-cell">
-                        {order.items.tintName} - {order.items.carType}
+                      <td className="p-3 text-white font-medium whitespace-nowrap">
+                        ${(order.pricing?.total || 0).toFixed(2)}
                       </td>
-                      <td className="p-4 text-white font-medium">
-                        ${order.pricing.total.toFixed(2)}
-                      </td>
-                      <td className="p-4 text-white/60 hidden sm:table-cell">
-                        {order.shippingAddress.country}
+                      <td className="p-3 text-white/60 text-xs">
+                        {order.shippingAddress?.country || "N/A"}
                       </td>
                       <td className="p-4">
                         <span

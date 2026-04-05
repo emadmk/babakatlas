@@ -42,7 +42,7 @@ export default function AdminServicesPage() {
     try {
       const res = await fetch("/api/admin/services");
       const data = await res.json();
-      if (data.success) setServices(data.data);
+      if (data.success) setServices(data.data || []);
     } catch {
       showToast("error", "Failed to load services");
     } finally {

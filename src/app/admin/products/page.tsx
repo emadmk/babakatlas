@@ -46,7 +46,7 @@ export default function AdminProductsPage() {
     try {
       const res = await fetch("/api/admin/products");
       const data = await res.json();
-      if (data.success) setProducts(data.data);
+      if (data.success) setProducts(data.data || []);
     } catch {
       showToast("error", "Failed to load products");
     } finally {

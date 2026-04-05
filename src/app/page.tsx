@@ -27,6 +27,7 @@ import { useLanguage } from "@/context/LanguageContext";
 /* ============================================================
    ICON HELPER
    ============================================================ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const iconMap: Record<string, any> = {
   Shield, Thermometer, Eye, Zap, Palette, Sun, Car, Layers, CheckCircle, Package,
   MousePointer2, Truck, Award, BadgeCheck, ArrowRight, Star,
@@ -300,7 +301,7 @@ function BenefitsSection({ data, language }: { data: HomepageData["benefits"]; l
 /* ============================================================
    PRODUCT SHOWCASE SECTION
    ============================================================ */
-function ProductShowcaseSection({ products, language }: { products: TintProduct[]; language: string }) {
+function ProductShowcaseSection({ products }: { products: TintProduct[] }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -738,7 +739,7 @@ export default function Home() {
     <>
       <HeroSection data={homepageData.hero} language={language} />
       <BenefitsSection data={homepageData.benefits} language={language} />
-      <ProductShowcaseSection products={tintProducts} language={language} />
+      <ProductShowcaseSection products={tintProducts} />
       <HowItWorksSection data={homepageData.howItWorks} language={language} />
       <StatsSection data={homepageData.stats} language={language} />
       <TestimonialsSection data={homepageData.testimonials} language={language} />

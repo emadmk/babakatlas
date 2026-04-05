@@ -171,7 +171,7 @@ export default function ContactPage() {
           >
             <div className="glass-card !rounded-2xl p-8">
               <h2 className="text-lg font-semibold text-white mb-6">
-                {txt(labels?.formTitle || contactData.formTitle, language) || "Send us a message"}
+                {"Send us a message"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

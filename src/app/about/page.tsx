@@ -27,6 +27,7 @@ import { useLanguage } from "@/context/LanguageContext";
 /* ============================================================
    ICON HELPER
    ============================================================ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const iconMap: Record<string, any> = {
   Award, Lightbulb, Heart, Leaf, Users, Car, Star, Clock,
   Shield, Thermometer, Eye, Zap, Palette, Sun, Layers, Package, CheckCircle,

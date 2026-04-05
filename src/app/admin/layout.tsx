@@ -35,7 +35,7 @@ import {
 type NavItem = {
   href: string;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number | string }>;
   children?: NavItem[];
 };
 

@@ -110,7 +110,7 @@ export default function RegisterPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            Babak<span className="text-gold">Atlas</span>
+            Atlas<span className="text-[#0071E3]">Adaptive</span>
           </h1>
           <p className="text-primary-400 mt-2 text-sm">
             Create your account to get started.

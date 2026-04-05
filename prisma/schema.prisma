@@ -98,7 +98,7 @@ enum TintType {
 
 model TintProduct {
   id           String   @id @default(cuid())
-  name         String
+  name         String   @unique
   nameEn       String
   nameFa       String?
   nameTl       String?
@@ -120,7 +120,7 @@ model TintProduct {
 
 model CarModel {
   id           String   @id @default(cuid())
-  name         String
+  name         String   @unique
   brand        String?
   carType      CarType
   windowCount  Int      @default(6)

@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 interface CarForm {
   nameEn: string;

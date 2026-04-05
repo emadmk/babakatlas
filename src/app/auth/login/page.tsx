@@ -50,11 +50,11 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
+      if (result?.ok) {
         router.push("/dashboard");
         router.refresh();
+      } else {
+        setError("Invalid credentials");
       }
     } catch {
       setError("Something went wrong. Please try again.");
@@ -90,7 +90,7 @@ export default function LoginPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            Babak<span className="text-gold">Atlas</span>
+            Atlas<span className="text-[#0071E3]">Adaptive</span>
           </h1>
           <p className="text-primary-400 mt-2 text-sm">
             Welcome back. Sign in to your account.

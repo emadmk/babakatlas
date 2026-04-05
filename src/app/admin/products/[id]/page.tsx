@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 interface ProductForm {
   nameEn: string;

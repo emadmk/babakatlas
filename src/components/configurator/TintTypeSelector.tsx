@@ -1,13 +1,24 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useConfiguratorStore, TINT_TYPES } from '@/store/configuratorStore';
+import { useConfiguratorStore } from '@/store/configuratorStore';
 import { Shield, Thermometer, Sun } from 'lucide-react';
 
-const tintOrder = ['standard', 'metallic', 'carbon', 'ceramic', 'crystalline', 'adaptive'];
+interface TintTypeItem {
+  id: string;
+  name: string;
+  description: string;
+  pricePerSqft: number;
+  vlt: string;
+  uvBlock: number;
+  heatRejection: number;
+  badge?: string;
+  darkness?: number;
+}
 
-// Visual darkness levels for each tint
-const DARKNESS: Record<string, number> = {
+// Visual darkness levels fallback
+const DEFAULT_DARKNESS: Record<string, number> = {
   standard: 65,
   metallic: 75,
   carbon: 60,
@@ -16,8 +27,69 @@ const DARKNESS: Record<string, number> = {
   adaptive: 50,
 };
 
+function LoadingSkeleton() {
+  return (
+    <div className="w-full max-w-5xl mx-auto">
+      <div className="text-center mb-10 space-y-2">
+        <div className="w-56 h-8 bg-white/10 rounded-lg mx-auto animate-pulse" />
+        <div className="w-72 h-4 bg-white/5 rounded-lg mx-auto animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="w-full h-64 bg-white/5 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TintTypeSelector() {
   const { tintType, setTintType, totalSqft } = useConfiguratorStore();
+  const [tintTypes, setTintTypes] = useState<TintTypeItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTintTypes() {
+      try {
+        const res = await fetch('/api/products/tints');
+        if (!res.ok) throw new Error('Failed to fetch tint types');
+        const data = await res.json();
+        if (!cancelled) {
+          const items = Array.isArray(data) ? data : data.tints || data.products || [];
+          setTintTypes(items);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tint types:', err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchTintTypes();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) return <LoadingSkeleton />;
+
+  if (error || tintTypes.length === 0) {
+    return (
+      <div className="w-full max-w-5xl mx-auto text-center">
+        <p className="text-white/50 text-sm mb-4">Unable to load tint types.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 text-sm font-medium ring-1 ring-blue-500/30 hover:bg-blue-500/20 transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto">
@@ -29,10 +101,10 @@ export default function TintTypeSelector() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tintOrder.map((id) => {
-          const tint = TINT_TYPES[id];
+        {tintTypes.map((tint) => {
+          const id = tint.id;
           const isSelected = tintType === id;
-          const darkness = DARKNESS[id] || 50;
+          const darkness = tint.darkness ?? DEFAULT_DARKNESS[id] ?? 50;
           const estimatedCost = totalSqft * tint.pricePerSqft;
 
           return (

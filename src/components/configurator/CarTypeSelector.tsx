@@ -1,53 +1,78 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useConfiguratorStore, WINDOW_SQFT } from '@/store/configuratorStore';
 
-const CAR_TYPES = [
-  {
-    id: 'sedan',
-    label: 'Sedan',
-    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'suv',
-    label: 'SUV',
-    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'van',
-    label: 'Van',
-    image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'station_wagon',
-    label: 'Station Wagon',
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'hatchback',
-    label: 'Hatchback',
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'coupe',
-    label: 'Coupe',
-    image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'truck',
-    label: 'Truck',
-    image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop',
-  },
-  {
-    id: 'convertible',
-    label: 'Convertible',
-    image: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=400&h=250&fit=crop',
-  },
-];
+interface CarTypeItem {
+  id: string;
+  label: string;
+  image: string;
+  imageUrl?: string;
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="text-center mb-10 space-y-2">
+        <div className="w-64 h-8 bg-white/10 rounded-lg mx-auto animate-pulse" />
+        <div className="w-48 h-4 bg-white/5 rounded-lg mx-auto animate-pulse" />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="w-full h-44 bg-white/5 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function CarTypeSelector() {
   const { carType, setCarType } = useConfiguratorStore();
+  const [carTypes, setCarTypes] = useState<CarTypeItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchCarTypes() {
+      try {
+        const res = await fetch('/api/products/cars');
+        if (!res.ok) throw new Error('Failed to fetch car types');
+        const data = await res.json();
+        if (!cancelled) {
+          setCarTypes(Array.isArray(data) ? data : data.cars || data.carTypes || []);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch car types:', err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchCarTypes();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) return <LoadingSkeleton />;
+
+  if (error || carTypes.length === 0) {
+    return (
+      <div className="w-full max-w-4xl mx-auto text-center">
+        <p className="text-white/50 text-sm mb-4">Unable to load car types.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 text-sm font-medium ring-1 ring-blue-500/30 hover:bg-blue-500/20 transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -59,9 +84,10 @@ export default function CarTypeSelector() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {CAR_TYPES.map((car) => {
+        {carTypes.map((car) => {
           const isSelected = carType === car.id;
           const windowCount = Object.keys(WINDOW_SQFT[car.id] || {}).length;
+          const imgSrc = car.imageUrl || car.image;
 
           return (
             <motion.button
@@ -83,7 +109,7 @@ export default function CarTypeSelector() {
               {/* Car Image */}
               <div className="w-full h-24 mb-4 overflow-hidden rounded-lg">
                 <img
-                  src={car.image}
+                  src={imgSrc}
                   alt={`${car.label} car type`}
                   loading="lazy"
                   className={`w-full h-full object-cover transition-all duration-300 ${

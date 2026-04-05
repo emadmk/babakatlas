@@ -15,21 +15,21 @@ import {
 
 interface ShippingCountry {
   id: string;
-  countryCode: string;
-  name: { en: string; tl: string };
+  country: string;
+  countryName: { en: string; tl: string };
   flag: string;
   baseRate: number;
   perSqftRate: number;
-  freeShippingThreshold: number;
-  deliveryDaysMin: number;
-  deliveryDaysMax: number;
+  freeAbove: number;
+  deliveryDays: { min: number; max: number };
   active: boolean;
 }
 
 interface InstallationRate {
   id: string;
   carType: string;
-  countryCode: string;
+  country: string;
+  countryCode?: string;
   baseRate: number;
   perWindowRate: number;
 }
@@ -95,12 +95,12 @@ export default function AdminShippingPage() {
         fetch("/api/admin/shipping", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ countries }),
+          body: JSON.stringify(countries),
         }),
         fetch("/api/admin/installation", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rates: installationRates }),
+          body: JSON.stringify(installationRates),
         }),
       ]);
 
@@ -119,9 +119,10 @@ export default function AdminShippingPage() {
   // Group installation rates by country
   const installByCountry: Record<string, InstallationRate[]> = {};
   for (const rate of installationRates) {
-    if (!installByCountry[rate.countryCode])
-      installByCountry[rate.countryCode] = [];
-    installByCountry[rate.countryCode].push(rate);
+    const key = rate.country || rate.countryCode || "";
+    if (!installByCountry[key])
+      installByCountry[key] = [];
+    installByCountry[key].push(rate);
   }
 
   if (loading) {
@@ -223,11 +224,11 @@ export default function AdminShippingPage() {
                   <span className="text-2xl">{country.flag}</span>
                   <div>
                     <h3 className="text-white font-semibold text-sm">
-                      {country.name.en}
+                      {country.countryName?.en || country.country || ""}
                     </h3>
-                    {country.name.tl && country.name.tl !== country.name.en && (
+                    {country.countryName?.tl && country.countryName.tl !== country.countryName.en && (
                       <p className="text-white/30 text-xs">
-                        {country.name.tl}
+                        {country.countryName.tl}
                       </p>
                     )}
                   </div>
@@ -260,10 +261,10 @@ export default function AdminShippingPage() {
                   </label>
                   <input
                     type="text"
-                    value={country.name.en}
+                    value={country.countryName?.en || ""}
                     onChange={(e) =>
                       updateCountry(country.id, {
-                        name: { ...country.name, en: e.target.value },
+                        countryName: { ...(country.countryName || { en: "", tl: "" }), en: e.target.value },
                       })
                     }
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
@@ -328,10 +329,10 @@ export default function AdminShippingPage() {
                   <input
                     type="number"
                     step="1"
-                    value={country.freeShippingThreshold}
+                    value={country.freeAbove}
                     onChange={(e) =>
                       updateCountry(country.id, {
-                        freeShippingThreshold:
+                        freeAbove:
                           parseFloat(e.target.value) || 0,
                       })
                     }
@@ -345,10 +346,10 @@ export default function AdminShippingPage() {
                   <input
                     type="number"
                     min={1}
-                    value={country.deliveryDaysMin}
+                    value={country.deliveryDays?.min || 1}
                     onChange={(e) =>
                       updateCountry(country.id, {
-                        deliveryDaysMin: parseInt(e.target.value) || 1,
+                        deliveryDays: { ...(country.deliveryDays || { min: 1, max: 1 }), min: parseInt(e.target.value) || 1 },
                       })
                     }
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
@@ -361,10 +362,10 @@ export default function AdminShippingPage() {
                   <input
                     type="number"
                     min={1}
-                    value={country.deliveryDaysMax}
+                    value={country.deliveryDays?.max || 1}
                     onChange={(e) =>
                       updateCountry(country.id, {
-                        deliveryDaysMax: parseInt(e.target.value) || 1,
+                        deliveryDays: { ...(country.deliveryDays || { min: 1, max: 1 }), max: parseInt(e.target.value) || 1 },
                       })
                     }
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
@@ -393,8 +394,8 @@ export default function AdminShippingPage() {
         </p>
 
         {Object.entries(installByCountry).map(([countryCode, rates]) => {
-          const country = countries.find(
-            (c) => c.countryCode === countryCode
+          const matchedCountry = countries.find(
+            (c) => c.country === countryCode
           );
           return (
             <div
@@ -402,8 +403,8 @@ export default function AdminShippingPage() {
               className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-4"
             >
               <h3 className="text-white font-medium text-sm mb-4 flex items-center gap-2">
-                {country?.flag}{" "}
-                {country?.name.en || countryCode}
+                {matchedCountry?.flag}{" "}
+                {matchedCountry?.countryName?.en || countryCode}
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

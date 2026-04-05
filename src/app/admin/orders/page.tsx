@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -260,13 +260,8 @@ export default function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order, i) => (
-                  <motion.tbody
-                    key={order.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
+                {(orders || []).map((order) => (
+                  <React.Fragment key={order.id}>
                     <tr
                       className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
                       onClick={() =>
@@ -299,7 +294,7 @@ export default function AdminOrdersPage() {
                       <td className="p-3 text-white/60 text-xs">
                         {order.shippingAddress?.country || "N/A"}
                       </td>
-                      <td className="p-4">
+                      <td className="p-3">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium border ${
                             statusColors[order.status] ||
@@ -310,7 +305,7 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td
-                        className="p-4"
+                        className="p-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <select
@@ -337,99 +332,90 @@ export default function AdminOrdersPage() {
                     </tr>
 
                     {/* Expanded details */}
-                    <AnimatePresence>
-                      {expandedOrder === order.id && (
-                        <tr>
-                          <td colSpan={9}>
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-4 py-4 bg-white/[0.02] border-b border-white/10">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                                  <div>
-                                    <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
-                                      Shipping
-                                    </h4>
-                                    <p className="text-white/70">
-                                      {order.shippingAddress.address}
-                                    </p>
-                                    <p className="text-white/70">
-                                      {order.shippingAddress.city},{" "}
-                                      {order.shippingAddress.postalCode}
-                                    </p>
-                                    <p className="text-white/70">
-                                      {order.shippingAddress.country}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
-                                      Order Details
-                                    </h4>
-                                    <p className="text-white/70">
-                                      Car: {order.items.carType}
-                                      {order.items.carModel &&
-                                        ` (${order.items.carModel})`}
-                                    </p>
-                                    <p className="text-white/70">
-                                      Tint: {order.items.tintName}
-                                    </p>
-                                    <p className="text-white/70">
-                                      Windows:{" "}
-                                      {order.items.selectedWindows.length} (
-                                      {order.items.totalSqft} sqft)
-                                    </p>
-                                    <p className="text-white/70">
-                                      Service: {order.serviceType}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
-                                      Pricing
-                                    </h4>
-                                    <p className="text-white/70">
-                                      Subtotal: $
-                                      {order.pricing.subtotal.toFixed(2)}
-                                    </p>
-                                    {order.pricing.shipping > 0 && (
-                                      <p className="text-white/70">
-                                        Shipping: $
-                                        {order.pricing.shipping.toFixed(2)}
-                                      </p>
-                                    )}
-                                    {order.pricing.installation > 0 && (
-                                      <p className="text-white/70">
-                                        Installation: $
-                                        {order.pricing.installation.toFixed(2)}
-                                      </p>
-                                    )}
-                                    <p className="text-white/70">
-                                      {order.pricing.taxLabel}: $
-                                      {order.pricing.tax.toFixed(2)}
-                                    </p>
-                                    <p className="text-white font-medium mt-1">
-                                      Total: $
-                                      {order.pricing.total.toFixed(2)}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="mt-3">
-                                  <Link
-                                    href={`/admin/orders/${order.id}`}
-                                    className="text-[#0071E3] hover:text-[#2997ff] text-xs font-medium transition-colors"
-                                  >
-                                    View Full Details
-                                  </Link>
-                                </div>
+                    {expandedOrder === order.id && (
+                      <tr>
+                        <td colSpan={8}>
+                          <div className="px-4 py-4 bg-white/[0.02] border-b border-white/10">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                              <div>
+                                <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
+                                  Shipping
+                                </h4>
+                                <p className="text-white/70">
+                                  {order.shippingAddress?.address || "N/A"}
+                                </p>
+                                <p className="text-white/70">
+                                  {order.shippingAddress?.city || ""}{" "}
+                                  {order.shippingAddress?.postalCode || ""}
+                                </p>
+                                <p className="text-white/70">
+                                  {order.shippingAddress?.country || ""}
+                                </p>
                               </div>
-                            </motion.div>
-                          </td>
-                        </tr>
-                      )}
-                    </AnimatePresence>
-                  </motion.tbody>
+                              <div>
+                                <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
+                                  Order Details
+                                </h4>
+                                <p className="text-white/70">
+                                  Car: {order.items?.carType || "N/A"}
+                                  {order.items?.carModel &&
+                                    ` (${order.items.carModel})`}
+                                </p>
+                                <p className="text-white/70">
+                                  Tint: {order.items?.tintName || "N/A"}
+                                </p>
+                                <p className="text-white/70">
+                                  Windows:{" "}
+                                  {(order.items?.selectedWindows || []).length} (
+                                  {order.items?.totalSqft || 0} sqft)
+                                </p>
+                                <p className="text-white/70">
+                                  Service: {order.serviceType || "N/A"}
+                                </p>
+                              </div>
+                              <div>
+                                <h4 className="text-white/40 mb-1 font-medium uppercase tracking-wider">
+                                  Pricing
+                                </h4>
+                                <p className="text-white/70">
+                                  Subtotal: $
+                                  {(order.pricing?.subtotal || 0).toFixed(2)}
+                                </p>
+                                {(order.pricing?.shipping || 0) > 0 && (
+                                  <p className="text-white/70">
+                                    Shipping: $
+                                    {(order.pricing?.shipping || 0).toFixed(2)}
+                                  </p>
+                                )}
+                                {(order.pricing?.installation || 0) > 0 && (
+                                  <p className="text-white/70">
+                                    Installation: $
+                                    {(order.pricing?.installation || 0).toFixed(2)}
+                                  </p>
+                                )}
+                                <p className="text-white/70">
+                                  {order.pricing?.taxLabel || "Tax"}: $
+                                  {(order.pricing?.tax || 0).toFixed(2)}
+                                </p>
+                                <p className="text-white font-medium mt-1">
+                                  Total: $
+                                  {(order.pricing?.total || 0).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="mt-3">
+                              <Link
+                                href={`/admin/orders/${order.id}`}
+                                className="text-[#0071E3] hover:text-[#2997ff] text-xs font-medium transition-colors"
+                              >
+                                View Full Details
+                              </Link>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

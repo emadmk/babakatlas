@@ -24,14 +24,15 @@ interface CarType {
 
 interface WindowConfig {
   id: string;
-  carTypeId: string;
-  position: { en: string; tl: string };
+  carType: string;
+  position: string;
+  label: { en: string; tl: string };
   defaultSqft: number;
   active: boolean;
 }
 
 interface GroupedWindows {
-  [carTypeId: string]: WindowConfig[];
+  [carType: string]: WindowConfig[];
 }
 
 const positionDescriptions: Record<string, string> = {
@@ -82,8 +83,9 @@ export default function AdminWindowsPage() {
       if (windowsData.success) {
         const grouped: GroupedWindows = {};
         for (const w of (windowsData.data || [])) {
-          if (!grouped[w.carTypeId]) grouped[w.carTypeId] = [];
-          grouped[w.carTypeId].push(w);
+          const key = w.carType || "";
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(w);
         }
         setWindows(grouped);
       }
@@ -112,16 +114,14 @@ export default function AdminWindowsPage() {
     }));
   };
 
-  const saveCarWindows = async (carTypeId: string) => {
-    setSavingCar(carTypeId);
+  const saveCarWindows = async (carType: string) => {
+    setSavingCar(carType);
     try {
+      const windowsToSave = windows[carType] || [];
       const res = await fetch(`/api/admin/windows`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          carTypeId,
-          windows: windows[carTypeId] || [],
-        }),
+        body: JSON.stringify(windowsToSave),
       });
       if (res.ok) {
         showToast("success", "Windows configuration saved");
@@ -198,7 +198,7 @@ export default function AdminWindowsPage() {
       <div className="space-y-3">
         {carTypes.map((car) => {
           const isExpanded = expandedCar === car.id;
-          const carWindows = windows[car.id] || [];
+          const carWindows = windows[car.type] || [];
 
           return (
             <motion.div
@@ -218,7 +218,7 @@ export default function AdminWindowsPage() {
                   <AppWindow size={18} className="text-[#0071E3]" />
                   <div className="text-left">
                     <h3 className="text-white font-medium text-sm">
-                      {car.name.en}
+                      {car.name?.en || car.type || ""}
                     </h3>
                     <p className="text-white/40 text-xs">
                       {car.type} - {carWindows.length} windows configured
@@ -286,10 +286,10 @@ export default function AdminWindowsPage() {
                                 className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
                               >
                                 <td className="py-3 text-white/80">
-                                  {w.position.en}
+                                  {w.label?.en || w.position || ""}
                                 </td>
                                 <td className="py-3 text-white/50 hidden md:table-cell">
-                                  {w.position.tl}
+                                  {w.label?.tl || w.position || ""}
                                 </td>
                                 <td className="py-3">
                                   <input
@@ -299,7 +299,7 @@ export default function AdminWindowsPage() {
                                     value={w.defaultSqft}
                                     onChange={(e) =>
                                       updateWindowField(
-                                        car.id,
+                                        car.type,
                                         w.id,
                                         "defaultSqft",
                                         parseFloat(e.target.value) || 0
@@ -310,7 +310,7 @@ export default function AdminWindowsPage() {
                                 </td>
                                 <td className="py-3 text-white/30 text-xs hidden lg:table-cell">
                                   {positionDescriptions[
-                                    w.position.en
+                                    (w.label?.en || w.position || "")
                                       .toLowerCase()
                                       .replace(/\s+/g, "-")
                                   ] || "Window position"}
@@ -319,7 +319,7 @@ export default function AdminWindowsPage() {
                                   <button
                                     onClick={() =>
                                       updateWindowField(
-                                        car.id,
+                                        car.type,
                                         w.id,
                                         "active",
                                         !w.active
@@ -354,8 +354,8 @@ export default function AdminWindowsPage() {
                       {/* Save Button */}
                       <div className="flex justify-end pt-2">
                         <button
-                          onClick={() => saveCarWindows(car.id)}
-                          disabled={savingCar === car.id}
+                          onClick={() => saveCarWindows(car.type)}
+                          disabled={savingCar === car.type}
                           className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ed] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-all"
                         >
                           {savingCar === car.id ? (
@@ -363,7 +363,7 @@ export default function AdminWindowsPage() {
                           ) : (
                             <Save size={14} />
                           )}
-                          {savingCar === car.id
+                          {savingCar === car.type
                             ? "Saving..."
                             : "Save Changes"}
                         </button>

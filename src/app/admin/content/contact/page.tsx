@@ -23,20 +23,18 @@ interface LocalizedText {
 }
 
 interface BusinessHour {
-  day: string;
+  day: LocalizedText | string;
   hours: string;
 }
 
 interface Region {
   country: string;
   flag: string;
-  name: string;
-  detail: string;
+  name: LocalizedText | string;
+  detail: LocalizedText | string;
 }
 
-interface ContactSubject {
-  label: LocalizedText;
-}
+type ContactSubject = LocalizedText | { label: LocalizedText };
 
 interface ContactContent {
   email: string;
@@ -44,6 +42,29 @@ interface ContactContent {
   businessHours: BusinessHour[];
   regions: Region[];
   subjects: ContactSubject[];
+}
+
+// Helper to safely get a localized string value
+function getLocalizedValue(val: LocalizedText | string | undefined, lang: "en" | "tl"): string {
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  return val[lang] || "";
+}
+
+// Helper to create a localized value update
+function setLocalizedValue(current: LocalizedText | string | undefined, lang: "en" | "tl", newVal: string): LocalizedText {
+  if (typeof current === "string" || !current) {
+    const base = { en: typeof current === "string" ? current : "", tl: typeof current === "string" ? current : "" };
+    return { ...base, [lang]: newVal };
+  }
+  return { ...current, [lang]: newVal };
+}
+
+// Helper to get subject label
+function getSubjectLabel(subject: ContactSubject): LocalizedText {
+  if ("label" in subject && subject.label) return subject.label;
+  if ("en" in subject) return subject as LocalizedText;
+  return { en: "", tl: "" };
 }
 
 const defaultContent: ContactContent = {
@@ -157,7 +178,7 @@ export default function ContactContentPage() {
   const addBusinessHour = () =>
     setContent((c) => ({
       ...c,
-      businessHours: [...c.businessHours, { day: "", hours: "" }],
+      businessHours: [...(c.businessHours || []), { day: { en: "", tl: "" }, hours: "" }],
     }));
 
   const updateBusinessHour = (idx: number, updates: Partial<BusinessHour>) =>
@@ -178,7 +199,7 @@ export default function ContactContentPage() {
   const addRegion = () =>
     setContent((c) => ({
       ...c,
-      regions: [...c.regions, { country: "", flag: "", name: "", detail: "" }],
+      regions: [...(c.regions || []), { country: "", flag: "", name: { en: "", tl: "" }, detail: { en: "", tl: "" } }],
     }));
 
   const updateRegion = (idx: number, updates: Partial<Region>) =>
@@ -199,15 +220,17 @@ export default function ContactContentPage() {
   const addSubject = () =>
     setContent((c) => ({
       ...c,
-      subjects: [...c.subjects, { label: { en: "", tl: "" } }],
+      subjects: [...(c.subjects || []), { en: "", tl: "" }],
     }));
 
-  const updateSubject = (idx: number, label: LocalizedText) =>
+  const updateSubjectField = (idx: number, lang: "en" | "tl", value: string) =>
     setContent((c) => ({
       ...c,
-      subjects: c.subjects.map((s, i) =>
-        i === idx ? { label } : s
-      ),
+      subjects: c.subjects.map((s, i) => {
+        if (i !== idx) return s;
+        const current = getSubjectLabel(s);
+        return { ...current, [lang]: value };
+      }),
     }));
 
   const removeSubject = (idx: number) =>
@@ -299,22 +322,33 @@ export default function ContactContentPage() {
         title="Business Hours"
         icon={<Clock size={20} />}
       >
-        {content.businessHours.map((bh, idx) => (
+        {(content.businessHours || []).map((bh, idx) => (
           <motion.div
             key={idx}
             layout
             className="flex items-center gap-3"
           >
-            <div className="flex-1 grid grid-cols-2 gap-3">
+            <div className="flex-1 grid grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-white/40 mb-1 block">Day</label>
+                <label className="text-xs text-white/40 mb-1 block">Day (EN)</label>
                 <input
-                  value={bh.day}
+                  value={getLocalizedValue(bh.day, "en")}
                   onChange={(e) =>
-                    updateBusinessHour(idx, { day: e.target.value })
+                    updateBusinessHour(idx, { day: setLocalizedValue(bh.day, "en", e.target.value) })
                   }
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
                   placeholder="e.g. Monday - Friday"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">Day (TL)</label>
+                <input
+                  value={getLocalizedValue(bh.day, "tl")}
+                  onChange={(e) =>
+                    updateBusinessHour(idx, { day: setLocalizedValue(bh.day, "tl", e.target.value) })
+                  }
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
+                  placeholder="e.g. Lun - Biy"
                 />
               </div>
               <div>
@@ -350,7 +384,7 @@ export default function ContactContentPage() {
 
       {/* Regions */}
       <CollapsibleSection title="Regions" icon={<Globe size={20} />}>
-        {content.regions.map((region, idx) => (
+        {(content.regions || []).map((region, idx) => (
           <motion.div
             key={idx}
             layout
@@ -398,12 +432,12 @@ export default function ContactContentPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-white/40 mb-1 block">
-                  Name
+                  Name (EN)
                 </label>
                 <input
-                  value={region.name}
+                  value={getLocalizedValue(region.name, "en")}
                   onChange={(e) =>
-                    updateRegion(idx, { name: e.target.value })
+                    updateRegion(idx, { name: setLocalizedValue(region.name, "en", e.target.value) })
                   }
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
                   placeholder="e.g. Philippines"
@@ -411,15 +445,43 @@ export default function ContactContentPage() {
               </div>
               <div>
                 <label className="text-xs text-white/40 mb-1 block">
-                  Detail
+                  Name (TL)
                 </label>
                 <input
-                  value={region.detail}
+                  value={getLocalizedValue(region.name, "tl")}
                   onChange={(e) =>
-                    updateRegion(idx, { detail: e.target.value })
+                    updateRegion(idx, { name: setLocalizedValue(region.name, "tl", e.target.value) })
+                  }
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
+                  placeholder="e.g. Pilipinas"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">
+                  Detail (EN)
+                </label>
+                <input
+                  value={getLocalizedValue(region.detail, "en")}
+                  onChange={(e) =>
+                    updateRegion(idx, { detail: setLocalizedValue(region.detail, "en", e.target.value) })
                   }
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
                   placeholder="e.g. Metro Manila & nearby"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">
+                  Detail (TL)
+                </label>
+                <input
+                  value={getLocalizedValue(region.detail, "tl")}
+                  onChange={(e) =>
+                    updateRegion(idx, { detail: setLocalizedValue(region.detail, "tl", e.target.value) })
+                  }
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
+                  placeholder="e.g. Metro Manila at malapit"
                 />
               </div>
             </div>
@@ -439,7 +501,9 @@ export default function ContactContentPage() {
         title="Contact Subjects"
         icon={<MessageSquare size={20} />}
       >
-        {content.subjects.map((subject, idx) => (
+        {(content.subjects || []).map((subject, idx) => {
+          const label = getSubjectLabel(subject);
+          return (
           <motion.div
             key={idx}
             layout
@@ -451,9 +515,9 @@ export default function ContactContentPage() {
                   English
                 </label>
                 <input
-                  value={subject.label.en}
+                  value={label.en || ""}
                   onChange={(e) =>
-                    updateSubject(idx, { ...subject.label, en: e.target.value })
+                    updateSubjectField(idx, "en", e.target.value)
                   }
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
                   placeholder="e.g. General Inquiry"
@@ -464,9 +528,9 @@ export default function ContactContentPage() {
                   Tagalog
                 </label>
                 <input
-                  value={subject.label.tl}
+                  value={label.tl || ""}
                   onChange={(e) =>
-                    updateSubject(idx, { ...subject.label, tl: e.target.value })
+                    updateSubjectField(idx, "tl", e.target.value)
                   }
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
                   placeholder="e.g. Pangkalahatang Tanong"
@@ -480,7 +544,8 @@ export default function ContactContentPage() {
               <Trash2 size={16} />
             </button>
           </motion.div>
-        ))}
+          );
+        })}
         <button
           onClick={addSubject}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 transition-colors text-sm"

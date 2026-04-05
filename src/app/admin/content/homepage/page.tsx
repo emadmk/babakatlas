@@ -427,18 +427,18 @@ export default function HomepageContentPage() {
       >
         <LocalizedInput
           label="Title"
-          value={content.hero.title}
+          value={content.hero?.title || { en: "", tl: "" }}
           onChange={(v) => updateHero({ title: v })}
         />
         <LocalizedInput
           label="Subtitle"
-          value={content.hero.subtitle}
+          value={content.hero?.subtitle || { en: "", tl: "" }}
           onChange={(v) => updateHero({ subtitle: v })}
           textarea
         />
         <LocalizedInput
           label="CTA Button Text"
-          value={content.hero.ctaText}
+          value={content.hero?.ctaText || { en: "", tl: "" }}
           onChange={(v) => updateHero({ ctaText: v })}
         />
         <div className="space-y-2">
@@ -446,14 +446,14 @@ export default function HomepageContentPage() {
             Background Image URL
           </label>
           <input
-            value={content.hero.backgroundImageUrl}
+            value={content.hero?.backgroundImageUrl || ""}
             onChange={(e) =>
               updateHero({ backgroundImageUrl: e.target.value })
             }
             className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3]/50"
             placeholder="https://..."
           />
-          {content.hero.backgroundImageUrl && (
+          {content.hero?.backgroundImageUrl && (
             <div className="mt-2 rounded-lg overflow-hidden border border-white/10 max-w-sm">
               <img
                 src={content.hero.backgroundImageUrl}
@@ -470,7 +470,7 @@ export default function HomepageContentPage() {
 
       {/* Benefits Section */}
       <CollapsibleSection title="Benefits" icon={<Star size={20} />}>
-        {content.benefits.map((benefit, idx) => (
+        {(content.benefits || []).map((benefit, idx) => (
           <motion.div
             key={idx}
             layout
@@ -539,7 +539,7 @@ export default function HomepageContentPage() {
 
       {/* How It Works Section */}
       <CollapsibleSection title="How It Works" icon={<Star size={20} />}>
-        {content.howItWorks.map((step, idx) => (
+        {(content.howItWorks || []).map((step, idx) => (
           <motion.div
             key={idx}
             layout
@@ -559,7 +559,7 @@ export default function HomepageContentPage() {
                 </button>
                 <button
                   onClick={() => moveStep(idx, 1)}
-                  disabled={idx === content.howItWorks.length - 1}
+                  disabled={idx === (content.howItWorks || []).length - 1}
                   className="p-1 text-white/30 hover:text-white disabled:opacity-20 transition-colors"
                 >
                   <ArrowDown size={14} />
@@ -609,7 +609,7 @@ export default function HomepageContentPage() {
 
       {/* Stats Section */}
       <CollapsibleSection title="Stats" icon={<Star size={20} />}>
-        {content.stats.map((stat, idx) => (
+        {(content.stats || []).map((stat, idx) => (
           <motion.div
             key={idx}
             layout
@@ -672,7 +672,7 @@ export default function HomepageContentPage() {
 
       {/* Testimonials Section */}
       <CollapsibleSection title="Testimonials" icon={<Star size={20} />}>
-        {content.testimonials.map((t, idx) => (
+        {(content.testimonials || []).map((t, idx) => (
           <motion.div
             key={idx}
             layout
@@ -786,25 +786,25 @@ export default function HomepageContentPage() {
       <CollapsibleSection title="CTA Section" icon={<Star size={20} />}>
         <LocalizedInput
           label="Title"
-          value={content.cta.title}
+          value={content.cta?.title || { en: "", tl: "" }}
           onChange={(v) => updateCta({ title: v })}
         />
         <LocalizedInput
           label="Subtitle"
-          value={content.cta.subtitle}
+          value={content.cta?.subtitle || { en: "", tl: "" }}
           onChange={(v) => updateCta({ subtitle: v })}
           textarea
         />
         <LocalizedInput
           label="Button Text"
-          value={content.cta.buttonText}
+          value={content.cta?.buttonText || { en: "", tl: "" }}
           onChange={(v) => updateCta({ buttonText: v })}
         />
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/70">
             Trust Badges
           </label>
-          {content.cta.trustBadges.map((badge, idx) => (
+          {(content.cta?.trustBadges || []).map((badge, idx) => (
             <div key={idx} className="flex items-start gap-2">
               <div className="flex-1">
                 <LocalizedInput

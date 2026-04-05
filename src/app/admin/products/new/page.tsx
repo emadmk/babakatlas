@@ -262,58 +262,36 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Price & Image */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-white/60 mb-1.5">
-              Price per sqft ($)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={form.pricePerSqft}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  pricePerSqft: parseFloat(e.target.value) || 0,
-                })
-              }
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-white/60 mb-1.5">
-              Image URL
-            </label>
-            <input
-              type="text"
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
-              placeholder="/images/tints/..."
-            />
-          </div>
+        {/* Price */}
+        <div>
+          <label className="block text-sm text-white/60 mb-1.5">
+            Price per sqft ($)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            value={form.pricePerSqft}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                pricePerSqft: parseFloat(e.target.value) || 0,
+              })
+            }
+            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
+          />
         </div>
 
-        {/* Image Preview */}
-        {form.imageUrl && (
-          <div className="relative w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg overflow-hidden">
-            <Image
-              src={form.imageUrl}
-              alt="Preview"
-              fill
-              className="object-contain p-4"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          </div>
-        )}
-        {!form.imageUrl && (
-          <div className="w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg flex items-center justify-center">
-            <Package size={48} className="text-white/10" />
-          </div>
-        )}
+        {/* Image */}
+        <div>
+          <label className="block text-sm text-white/60 mb-1.5">
+            Product Image
+          </label>
+          <ImageUploader
+            currentImage={form.imageUrl}
+            onImageChange={(url) => setForm({ ...form, imageUrl: url })}
+            category="tints"
+          />
+        </div>
 
         {/* Badge & Active */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

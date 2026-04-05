@@ -252,37 +252,17 @@ export default function EditCarTypePage() {
           </div>
         </div>
 
-        {/* Image URL & Preview */}
+        {/* Image */}
         <div>
           <label className="block text-sm text-white/60 mb-1.5">
-            Image URL
+            Car Image
           </label>
-          <input
-            type="text"
-            value={form.imageUrl}
-            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors"
-            placeholder="/images/cars/sedan.png"
+          <ImageUploader
+            currentImage={form.imageUrl}
+            onImageChange={(url) => setForm({ ...form, imageUrl: url })}
+            category="cars"
           />
         </div>
-        {form.imageUrl && (
-          <div className="relative w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg overflow-hidden">
-            <Image
-              src={form.imageUrl}
-              alt="Preview"
-              fill
-              className="object-contain p-4"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          </div>
-        )}
-        {!form.imageUrl && (
-          <div className="w-full h-48 bg-white/[0.02] border border-white/10 rounded-lg flex items-center justify-center">
-            <Car size={48} className="text-white/10" />
-          </div>
-        )}
 
         {/* Active Toggle */}
         <div>

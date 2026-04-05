@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save,
   ArrowLeft,
   Trash2,
   Loader2,
-  Package,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";

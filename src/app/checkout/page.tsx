@@ -19,8 +19,6 @@ import {
   User,
   Mail,
   Phone,
-  Home,
-  Globe,
 } from 'lucide-react';
 import {
   useConfiguratorStore,
@@ -82,13 +80,15 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
   });
-  const [address, setAddress] = useState({
+
+  // Use the configurator's shipping address directly (already collected in Step 4)
+  const address = {
     address: storeAddress.street1 || '',
     city: storeAddress.city || '',
     state: storeAddress.state || '',
     postalCode: storeAddress.zip || '',
     country: config.shippingCountry ?? 'PH',
-  });
+  };
 
   // Derived data
   const enabledWindows = config.windows.filter((w) => w.enabled);
@@ -345,69 +345,31 @@ export default function CheckoutPage() {
               </div>
             </GlassCard>
 
-            {/* ── Shipping Address ──────────────────────────────── */}
+            {/* ── Shipping Address (read-only, from configurator) ── */}
             <GlassCard>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <MapPin className="w-4 h-4 text-white/70" />
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-white/70" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Shipping Address</h2>
                 </div>
-                <h2 className="text-lg font-semibold">Shipping Address</h2>
+                <button
+                  type="button"
+                  onClick={() => router.push('/configurator?step=4')}
+                  className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  Edit
+                </button>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-white/50 mb-1.5">Street Address</label>
-                  <div className="relative">
-                    <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                    <input
-                      type="text"
-                      required
-                      value={address.address}
-                      onChange={(e) => setAddress({ ...address, address: e.target.value })}
-                      placeholder="123 Main Street"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="sm:col-span-1">
-                    <label className="block text-sm text-white/50 mb-1.5">City</label>
-                    <input
-                      type="text"
-                      required
-                      value={address.city}
-                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                      placeholder="Manila"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-white/50 mb-1.5">Postal Code</label>
-                    <input
-                      type="text"
-                      required
-                      value={address.postalCode}
-                      onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
-                      placeholder="1000"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-white/50 mb-1.5">Country</label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                      <select
-                        value={address.country}
-                        onChange={(e) => setAddress({ ...address, country: e.target.value as 'PH' | 'AU' })}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all appearance-none"
-                      >
-                        <option value="PH" className="bg-neutral-900">Philippines</option>
-                        <option value="AU" className="bg-neutral-900">Australia</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+              <div className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-1.5">
+                <p className="text-white text-sm font-medium">{storeAddress.name || 'No name provided'}</p>
+                <p className="text-white/60 text-sm">{storeAddress.street1 || 'No street address'}</p>
+                <p className="text-white/60 text-sm">
+                  {[storeAddress.city, storeAddress.state, storeAddress.zip].filter(Boolean).join(', ') || 'No city/state/zip'}
+                </p>
+                <p className="text-white/60 text-sm">{address.country === 'PH' ? 'Philippines' : address.country === 'AU' ? 'Australia' : address.country}</p>
               </div>
             </GlassCard>
 

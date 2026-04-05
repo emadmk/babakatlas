@@ -1,60 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   User,
   Mail,
   Phone,
-  MapPin,
   Building2,
   Globe,
-  Hash,
   Loader2,
   Check,
   Camera,
+  AlertCircle,
 } from "lucide-react";
 
 interface ProfileData {
   name: string;
   email: string;
   phone: string;
-  address: string;
   city: string;
   country: string;
-  postalCode: string;
 }
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<ProfileData>({
-    name: session?.user?.name || "",
-    email: session?.user?.email || "",
+    name: "",
+    email: "",
     phone: "",
-    address: "",
     city: "",
     country: "PH",
-    postalCode: "",
   });
+
+  useEffect(() => {
+    fetch("/api/user/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setForm({
+            name: data.data.name || session?.user?.name || "",
+            email: data.data.email || session?.user?.email || "",
+            phone: data.data.phone || "",
+            city: data.data.city || "",
+            country: data.data.country || "PH",
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsFetching(false));
+  }, [session]);
 
   const update = (field: keyof ProfileData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setSaved(false);
+    setError(null);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     try {
-      // TODO: Call profile update API
-      await new Promise((r) => setTimeout(r, 1200));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          city: form.city,
+          country: form.country,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        setError(data.error || "Failed to save profile.");
+      }
     } catch {
-      // handle error
+      setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -81,10 +111,19 @@ export default function ProfilePage() {
       disabled: true,
     },
     { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+63 9XX XXX XXXX" },
-    { key: "address", label: "Address", icon: MapPin, placeholder: "Street address" },
     { key: "city", label: "City", icon: Building2, placeholder: "City" },
-    { key: "postalCode", label: "Postal Code", icon: Hash, placeholder: "Postal code" },
   ];
+
+  if (isFetching) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-white mb-6">My Profile</h1>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -119,6 +158,13 @@ export default function ProfilePage() {
             <p className="text-primary-500 text-sm">{form.email}</p>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-red-300 text-sm">{error}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSave} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -559,6 +559,428 @@ const seedSiteSettings: SiteSettings = {
   currencies: { PH: "PHP", AU: "AUD" },
 };
 
+const seedFaqItems: FaqItem[] = [
+  {
+    id: "faq-1",
+    question: {
+      en: "What is window tinting?",
+      tl: "Ano ang window tinting?",
+    },
+    answer: {
+      en: "Window tinting is the process of applying a thin film to the interior or exterior of glass surfaces in vehicles or buildings. The film is made from polyester and can contain layers of metals, dyes, ceramics, or carbon to reduce the amount of visible light, UV rays, and infrared heat that passes through the glass. It enhances privacy, reduces glare, protects your interior from sun damage, and keeps your vehicle cooler.",
+      tl: "Ang window tinting ay ang proseso ng paglalagay ng manipis na pelikula sa loob o labas ng mga salaming ibabaw ng mga sasakyan o gusali. Ang pelikula ay gawa sa polyester at maaaring maglaman ng mga layer ng metal, tina, ceramic, o carbon upang mabawasan ang dami ng nakikitang liwanag, UV rays, at infrared heat na dumadaan sa salamin.",
+    },
+    order: 1,
+    active: true,
+  },
+  {
+    id: "faq-2",
+    question: {
+      en: "Is window tinting legal in the Philippines and Australia?",
+      tl: "Legal ba ang window tinting sa Pilipinas at Australia?",
+    },
+    answer: {
+      en: "Yes, window tinting is legal in both countries, but there are specific regulations. In the Philippines, the Land Transportation Office (LTO) allows tinting with a minimum of 20% VLT (Visible Light Transmission) for side and rear windows. Windshields must allow at least 70% VLT. In Australia, laws vary by state. Generally, front side windows must allow at least 35% VLT, while rear windows can be darker. Always check your local regulations before installation to ensure compliance.",
+      tl: "Oo, legal ang window tinting sa parehong bansa, ngunit may mga partikular na regulasyon. Sa Pilipinas, pinapayagan ng Land Transportation Office (LTO) ang tinting na may minimum na 20% VLT para sa mga side at rear window. Ang mga windshield ay dapat payagan ang hindi bababa sa 70% VLT. Sa Australia, iba-iba ang batas sa bawat estado.",
+    },
+    order: 2,
+    active: true,
+  },
+  {
+    id: "faq-3",
+    question: {
+      en: "How long does window tint last?",
+      tl: "Gaano katagal ang window tint?",
+    },
+    answer: {
+      en: "High-quality window tint films, like the ceramic and carbon options we offer at AtlasAdaptive, typically last 5 to 10 years with proper care. The lifespan depends on the type of film, quality of installation, and how well you maintain it. Ceramic tints tend to last the longest due to their superior material composition. To maximize longevity, avoid rolling down freshly tinted windows for at least 3 days and clean with non-ammonia-based products.",
+      tl: "Ang mataas na kalidad na window tint films, tulad ng ceramic at carbon na mga opsyon na inaalok namin sa AtlasAdaptive, karaniwang tumatagal ng 5 hanggang 10 taon na may wastong pag-aalaga. Ang buhay ng pelikula ay depende sa uri ng film, kalidad ng pag-install, at kung paano mo ito pinapanatili.",
+    },
+    order: 3,
+    active: true,
+  },
+  {
+    id: "faq-4",
+    question: {
+      en: "Can I install the tint myself?",
+      tl: "Maaari ko bang i-install ang tint sa sarili ko?",
+    },
+    answer: {
+      en: "While DIY installation is possible with our films and we provide detailed instructions, we highly recommend professional installation for the best results. Professional installers have the tools, controlled environment, and experience to ensure a bubble-free, perfectly aligned application. Improper installation can lead to bubbling, peeling, and uneven coverage. If you are in the Philippines or Australia, we can connect you with certified installation partners in your area.",
+      tl: "Bagama't posible ang DIY installation gamit ang aming mga film at nagbibigay kami ng detalyadong mga tagubilin, lubos naming inirerekomenda ang professional installation para sa pinakamahusay na resulta. Ang mga professional installer ay may mga kasangkapan, kontroladong kapaligiran, at karanasan upang matiyak ang walang bula at perpektong pagkakalagay.",
+    },
+    order: 4,
+    active: true,
+  },
+  {
+    id: "faq-5",
+    question: {
+      en: "What's the difference between ceramic and carbon tint?",
+      tl: "Ano ang pagkakaiba ng ceramic at carbon tint?",
+    },
+    answer: {
+      en: "Ceramic tint uses nano-ceramic particles that are non-conductive and non-metallic, offering superior heat rejection (up to 80%), excellent UV protection (99.9%), and no signal interference. Carbon tint uses carbon fiber particles that provide good heat rejection (up to 60%), UV protection, and a distinctive matte finish. Ceramic is the premium option with better performance, while carbon offers excellent value at a lower price point. Both are far superior to traditional dyed films.",
+      tl: "Ang ceramic tint ay gumagamit ng nano-ceramic na mga particle na hindi konduktor at hindi metaliko, na nag-aalok ng mahusay na pagtanggi sa init (hanggang 80%), mahusay na proteksyon sa UV (99.9%), at walang signal interference. Ang carbon tint ay gumagamit ng mga carbon fiber particle na nagbibigay ng magandang pagtanggi sa init (hanggang 60%), proteksyon sa UV, at natatanging matte finish.",
+    },
+    order: 5,
+    active: true,
+  },
+  {
+    id: "faq-6",
+    question: {
+      en: "How long does installation take?",
+      tl: "Gaano katagal ang pag-install?",
+    },
+    answer: {
+      en: "Professional installation typically takes 2 to 4 hours depending on the vehicle type and how many windows are being tinted. A standard sedan with all side windows and rear window takes about 2-3 hours. SUVs and larger vehicles may take 3-4 hours. Full vehicle wraps including the windshield can take up to 5 hours. We recommend scheduling an appointment and allowing enough time for the process.",
+      tl: "Ang professional installation ay karaniwang tumatagal ng 2 hanggang 4 na oras depende sa uri ng sasakyan at kung ilang bintana ang tinitint. Ang isang standard na sedan na may lahat ng side windows at rear window ay tumatagal ng mga 2-3 oras. Ang mga SUV at mas malalaking sasakyan ay maaaring tumagal ng 3-4 na oras.",
+    },
+    order: 6,
+    active: true,
+  },
+  {
+    id: "faq-7",
+    question: {
+      en: "Will window tint affect my visibility at night?",
+      tl: "Makakaapekto ba ang window tint sa aking visibility sa gabi?",
+    },
+    answer: {
+      en: "It depends on the VLT (Visible Light Transmission) percentage you choose. Higher VLT percentages like 50-70% will have minimal impact on night visibility, while darker tints (5-20%) will reduce visibility more noticeably. We recommend lighter tints for front side windows to maintain safe driving visibility at night, and you can go darker on rear windows. Our configurator tool helps you preview different VLT levels so you can make an informed choice.",
+      tl: "Depende ito sa porsyento ng VLT (Visible Light Transmission) na pipiliin mo. Ang mas mataas na porsyento ng VLT tulad ng 50-70% ay magkakaroon ng minimal na epekto sa visibility sa gabi, habang ang mas madilim na tint (5-20%) ay mas kapansin-pansing magbabawas ng visibility.",
+    },
+    order: 7,
+    active: true,
+  },
+  {
+    id: "faq-8",
+    question: {
+      en: "Do you ship internationally?",
+      tl: "Nagpapadala ba kayo sa ibang bansa?",
+    },
+    answer: {
+      en: "Currently, we ship to the Philippines and Australia. These are our primary markets, and we have optimized our logistics for fast, reliable delivery to both countries. We are working on expanding to other Southeast Asian and Oceanian markets in the near future. Sign up for our newsletter to be the first to know when we launch in new regions.",
+      tl: "Sa kasalukuyan, nagpapadala kami sa Pilipinas at Australia. Ito ang aming mga pangunahing merkado, at in-optimize namin ang aming logistics para sa mabilis at maaasahang paghahatid sa parehong bansa. Nagtatrabaho kami sa pagpapalawak sa iba pang mga merkado sa Southeast Asia at Oceania sa malapit na hinaharap.",
+    },
+    order: 8,
+    active: true,
+  },
+  {
+    id: "faq-9",
+    question: {
+      en: "What is your return policy?",
+      tl: "Ano ang inyong patakaran sa pagbabalik?",
+    },
+    answer: {
+      en: "We offer a 30-day satisfaction guarantee on all our products. If you are not completely satisfied with your purchase, you can return unused and unopened films within 30 days of delivery for a full refund. For defective products, we offer free replacements. If the film has been installed and you experience issues due to manufacturing defects, please contact our support team with photos and we will arrange a replacement.",
+      tl: "Nag-aalok kami ng 30-araw na satisfaction guarantee sa lahat ng aming mga produkto. Kung hindi ka ganap na nasiyahan sa iyong binili, maaari mong ibalik ang hindi nagamit at hindi nabuksan na mga film sa loob ng 30 araw pagkatapos ng paghahatid para sa buong refund.",
+    },
+    order: 9,
+    active: true,
+  },
+  {
+    id: "faq-10",
+    question: {
+      en: "How do I track my order?",
+      tl: "Paano ko masusubaybayan ang aking order?",
+    },
+    answer: {
+      en: "Once your order is shipped, you will receive a tracking number via email. You can also track your order directly through your AtlasAdaptive dashboard. Simply log in and navigate to the Orders section to see real-time tracking information, estimated delivery dates, and order history.",
+      tl: "Kapag naipadala na ang iyong order, makakatanggap ka ng tracking number sa pamamagitan ng email. Maaari mo ring subaybayan ang iyong order nang direkta sa iyong AtlasAdaptive dashboard. Mag-log in lang at pumunta sa Orders section upang makita ang real-time tracking information.",
+    },
+    order: 10,
+    active: true,
+  },
+];
+
+const seedAboutContent: AboutContent = {
+  story: {
+    en: "AtlasAdaptive was founded with a simple belief: everyone deserves access to professional-grade window tinting, regardless of where they are. Starting from a small workshop in Metro Manila, we spent years perfecting our craft and sourcing the finest materials from around the world.\n\nToday, we serve thousands of customers across the Philippines and Australia, offering cutting-edge ceramic, carbon, and adaptive tint films through our innovative online platform. Our proprietary configurator lets you visualize exactly how your vehicle will look before you buy, taking the guesswork out of window tinting.\n\nWe are not just a tint company. We are a technology-driven brand committed to transforming the way people protect and personalize their vehicles. From our nano-ceramic formulations to our seamless e-commerce experience, every detail is engineered for perfection.",
+    tl: "Ang AtlasAdaptive ay itinatag na may simpleng paniniwala: lahat ay nararapat na magkaroon ng access sa professional-grade na window tinting, kahit saan sila naroroon. Simula sa isang maliit na workshop sa Metro Manila, gumugol kami ng mga taon sa pagpeperpekto ng aming gawa at paghahanap ng mga pinakamagandang materyales mula sa buong mundo.\n\nSa kasalukuyan, naglilingkod kami sa libu-libong customer sa Pilipinas at Australia, na nag-aalok ng cutting-edge na ceramic, carbon, at adaptive tint films sa pamamagitan ng aming makabagong online platform.\n\nHindi lang kami isang tint company. Kami ay isang technology-driven na brand na nakatuon sa pagbabago ng paraan ng pagprotekta at pag-personalize ng mga tao sa kanilang mga sasakyan.",
+  },
+  mission: {
+    en: "Making premium window tinting accessible across Southeast Asia and Oceania",
+    tl: "Ginagawang accessible ang premium window tinting sa buong Southeast Asia at Oceania",
+  },
+  values: [
+    {
+      icon: "Award",
+      title: { en: "Quality", tl: "Kalidad" },
+      description: {
+        en: "We source and develop only the highest grade materials, ensuring every film meets rigorous performance standards.",
+        tl: "Naghahanap at nagde-develop lang kami ng pinakamataas na kalidad na materyales, tinitiyak na ang bawat film ay nakakatugon sa mahigpit na pamantayan ng pagganap.",
+      },
+    },
+    {
+      icon: "Lightbulb",
+      title: { en: "Innovation", tl: "Inobasyon" },
+      description: {
+        en: "From adaptive nano-ceramic technology to our online configurator, we push boundaries in the window tinting industry.",
+        tl: "Mula sa adaptive nano-ceramic na teknolohiya hanggang sa aming online configurator, tinutulak namin ang mga hangganan sa industriya ng window tinting.",
+      },
+    },
+    {
+      icon: "Heart",
+      title: { en: "Customer Service", tl: "Serbisyo sa Customer" },
+      description: {
+        en: "Every customer interaction matters. We provide expert guidance from selection through installation and beyond.",
+        tl: "Mahalaga ang bawat pakikipag-ugnayan sa customer. Nagbibigay kami ng ekspertong gabay mula sa pagpili hanggang sa pag-install at higit pa.",
+      },
+    },
+    {
+      icon: "Leaf",
+      title: { en: "Sustainability", tl: "Sustainability" },
+      description: {
+        en: "Our films reduce vehicle energy consumption and we are committed to eco-friendly manufacturing and packaging.",
+        tl: "Binabawasan ng aming mga film ang paggamit ng enerhiya ng sasakyan at kami ay nakatuon sa eco-friendly na pagmamanupaktura at packaging.",
+      },
+    },
+  ],
+  stats: [
+    { value: "8+", label: { en: "Years in Business", tl: "Taon sa Negosyo" }, icon: "Clock" },
+    { value: "50K+", label: { en: "Cars Tinted", tl: "Mga Kotse na Na-tint" }, icon: "Car" },
+    { value: "99%", label: { en: "Customer Satisfaction", tl: "Kasiyahan ng Customer" }, icon: "Star" },
+    { value: "2", label: { en: "Countries Served", tl: "Mga Bansang Pinaglilingkuran" }, icon: "Users" },
+  ],
+  team: [
+    {
+      name: "Marco Reyes",
+      role: { en: "Founder & CEO", tl: "Tagapagtatag at CEO" },
+      bio: {
+        en: "Automotive enthusiast with 15 years in the tinting industry.",
+        tl: "Automotive enthusiast na may 15 taon sa industriya ng tinting.",
+      },
+      imageUrl: "",
+    },
+    {
+      name: "Sarah Chen",
+      role: { en: "Head of Product", tl: "Pinuno ng Produkto" },
+      bio: {
+        en: "Materials engineer driving our next-gen film technology.",
+        tl: "Materials engineer na nagpapagalaw ng aming next-gen film technology.",
+      },
+      imageUrl: "",
+    },
+    {
+      name: "James Villanueva",
+      role: { en: "Operations Director", tl: "Direktor ng Operasyon" },
+      bio: {
+        en: "Logistics expert ensuring fast delivery across the region.",
+        tl: "Logistics expert na tinitiyak ang mabilis na paghahatid sa buong rehiyon.",
+      },
+      imageUrl: "",
+    },
+    {
+      name: "Ava Thompson",
+      role: { en: "Customer Experience", tl: "Karanasan ng Customer" },
+      bio: {
+        en: "Dedicated to making every customer journey exceptional.",
+        tl: "Nakatuon sa paggawa ng bawat customer journey na pambihira.",
+      },
+      imageUrl: "",
+    },
+  ],
+};
+
+const seedContactInfo: ContactInfo = {
+  email: "hello@atlasadaptive.com",
+  phone: "+63 2 8123 4567",
+  businessHours: [
+    { day: { en: "Mon - Fri", tl: "Lun - Biy" }, hours: "9:00 AM - 6:00 PM" },
+    { day: { en: "Saturday", tl: "Sabado" }, hours: "10:00 AM - 4:00 PM" },
+    { day: { en: "Sunday", tl: "Linggo" }, hours: "Closed" },
+  ],
+  regions: [
+    {
+      country: "PH",
+      flag: "\u{1F1F5}\u{1F1ED}",
+      name: { en: "Philippines", tl: "Pilipinas" },
+      detail: { en: "Metro Manila & nationwide", tl: "Metro Manila at buong bansa" },
+    },
+    {
+      country: "AU",
+      flag: "\u{1F1E6}\u{1F1FA}",
+      name: { en: "Australia", tl: "Australya" },
+      detail: { en: "All states & territories", tl: "Lahat ng estado at teritoryo" },
+    },
+  ],
+  subjects: [
+    { en: "General Inquiry", tl: "Pangkalahatang Pagtatanong" },
+    { en: "Product Question", tl: "Tanong sa Produkto" },
+    { en: "Order Support", tl: "Suporta sa Order" },
+    { en: "Installation Help", tl: "Tulong sa Pag-install" },
+    { en: "Shipping Question", tl: "Tanong sa Pagpapadala" },
+    { en: "Returns & Refunds", tl: "Pagbabalik at Refund" },
+    { en: "Partnership Opportunity", tl: "Oportunidad sa Partnership" },
+    { en: "Other", tl: "Iba pa" },
+  ],
+};
+
+const seedHomepageContent: HomepageContent = {
+  hero: {
+    title: { en: "Premium Window Tint Films", tl: "Premium na Window Tint Films" },
+    subtitle: {
+      en: "Professional-grade ceramic and carbon tint films for ultimate UV protection, heat reduction, and style. Engineered for perfection.",
+      tl: "Professional-grade na ceramic at carbon tint films para sa ultimate na UV protection, heat reduction, at istilo. Engineered para sa perpeksyon.",
+    },
+    cta: { en: "Configure Your Tint", tl: "I-configure ang Iyong Tint" },
+    backgroundImage: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&h=1080&fit=crop",
+  },
+  benefits: [
+    {
+      id: "benefit-uv",
+      icon: "Shield",
+      title: { en: "UV Protection", tl: "Proteksyon sa UV" },
+      description: {
+        en: "Block up to 99% of harmful ultraviolet rays, protecting your skin and your vehicle's interior from sun damage.",
+        tl: "Harangin ang hanggang 99% ng mapaminsalang ultraviolet na sinag, na pinoprotektahan ang iyong balat at interior ng sasakyan mula sa pinsala ng araw.",
+      },
+      stat: "99%",
+    },
+    {
+      id: "benefit-heat",
+      icon: "Thermometer",
+      title: { en: "Heat Reduction", tl: "Pagbawas ng Init" },
+      description: {
+        en: "Significantly reduce cabin temperature by rejecting solar heat, keeping your car cool even in tropical climates.",
+        tl: "Malaki ang mababawas sa temperatura ng loob ng sasakyan sa pamamagitan ng pagtanggi sa init ng araw, na pinapanatiling malamig ang iyong kotse kahit sa tropikal na klima.",
+      },
+      stat: "60%",
+    },
+    {
+      id: "benefit-privacy",
+      icon: "Eye",
+      title: { en: "Privacy", tl: "Privacy" },
+      description: {
+        en: "Enhance your personal privacy and security by limiting visibility into your vehicle from the outside.",
+        tl: "Palakasin ang iyong personal na privacy at seguridad sa pamamagitan ng paglimita sa kakayahang makita ang loob ng iyong sasakyan mula sa labas.",
+      },
+      stat: "",
+    },
+    {
+      id: "benefit-glare",
+      icon: "Zap",
+      title: { en: "Glare Reduction", tl: "Pagbawas ng Glare" },
+      description: {
+        en: "Reduce blinding glare from the sun and oncoming headlights for safer, more comfortable driving.",
+        tl: "Bawasan ang nakakabulag na sikat ng araw at ilaw ng mga kasalubong na sasakyan para sa mas ligtas at mas komportableng pagmamaneho.",
+      },
+      stat: "",
+    },
+    {
+      id: "benefit-interior",
+      icon: "Palette",
+      title: { en: "Interior Protection", tl: "Proteksyon ng Interior" },
+      description: {
+        en: "Prevent cracking, fading, and discoloration of your dashboard, seats, and upholstery caused by prolonged sun exposure.",
+        tl: "Pigilan ang pag-crack, pagkupas, at pagbabago ng kulay ng iyong dashboard, upuan, at upholstery na dulot ng matagal na pagkakalantad sa araw.",
+      },
+      stat: "",
+    },
+    {
+      id: "benefit-energy",
+      icon: "Sun",
+      title: { en: "Energy Saving", tl: "Pagtitipid ng Enerhiya" },
+      description: {
+        en: "Lower your air conditioning usage and save fuel by keeping your car naturally cooler with heat-rejecting tint films.",
+        tl: "Bawasan ang paggamit ng air conditioning at makatipid ng gasolina sa pamamagitan ng natural na pagpapalamig sa iyong kotse gamit ang heat-rejecting na tint film.",
+      },
+      stat: "",
+    },
+  ],
+  howItWorks: [
+    {
+      step: 1,
+      title: { en: "Choose Your Car", tl: "Piliin ang Iyong Kotse" },
+      description: {
+        en: "Select your car make, model, and year from our extensive database.",
+        tl: "Piliin ang make, model, at taon ng iyong kotse.",
+      },
+      icon: "Car",
+    },
+    {
+      step: 2,
+      title: { en: "Select Windows", tl: "Piliin ang mga Bintana" },
+      description: {
+        en: "Pick exactly which windows you want tinted with our interactive configurator.",
+        tl: "Piliin kung aling mga bintana ang gusto mong i-tint.",
+      },
+      icon: "MousePointer2",
+    },
+    {
+      step: 3,
+      title: { en: "Pick Your Tint", tl: "Pumili ng Tint" },
+      description: {
+        en: "Choose from our range of premium ceramic, carbon, and specialty films.",
+        tl: "Pumili mula sa aming range ng premium films.",
+      },
+      icon: "Layers",
+    },
+    {
+      step: 4,
+      title: { en: "Order & Install", tl: "Mag-order at Mag-install" },
+      description: {
+        en: "Place your order and get pre-cut films delivered or professionally installed.",
+        tl: "Mag-order at makakuha ng pre-cut films o professional installation.",
+      },
+      icon: "Package",
+    },
+  ],
+  stats: [
+    { value: "10000", label: { en: "Cars Tinted", tl: "Mga Kotse na Na-tint" }, suffix: "+" },
+    { value: "99", label: { en: "UV Block", tl: "UV Block" }, suffix: "%" },
+    { value: "50", label: { en: "Car Models", tl: "Mga Modelo ng Kotse" }, suffix: "+" },
+    { value: "2", label: { en: "Countries", tl: "Mga Bansa" }, suffix: "" },
+  ],
+  testimonials: [
+    {
+      id: "testimonial-1",
+      name: "Miguel Santos",
+      car: "Toyota Fortuner 2024",
+      quote: {
+        en: "The ceramic tint completely transformed my driving experience. My cabin stays cool even in Manila traffic. Absolutely worth every peso.",
+        tl: "Ang ceramic tint ay ganap na nagbago ng aking karanasan sa pagmamaneho. Ang loob ng aking sasakyan ay nananatiling malamig kahit sa trapik ng Manila. Talagang sulit ang bawat piso.",
+      },
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+    },
+    {
+      id: "testimonial-2",
+      name: "Sarah Chen",
+      car: "Tesla Model 3 2023",
+      quote: {
+        en: "Crystal clear visibility with incredible heat rejection. The installation was flawless and the pre-cut fit was perfect.",
+        tl: "Crystal clear na visibility na may kamangha-manghang pagtanggi sa init. Ang pag-install ay walang kapintasan at ang pre-cut fit ay perpekto.",
+      },
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
+    },
+    {
+      id: "testimonial-3",
+      name: "James Rivera",
+      car: "Ford Ranger 2024",
+      quote: {
+        en: "Best investment for my truck. The UV protection is noticeable immediately. My leather seats look brand new after 6 months.",
+        tl: "Pinakamahusay na investment para sa aking truck. Ang UV protection ay kapansin-pansin agad. Ang aking leather seats ay mukhang bago pa rin pagkatapos ng 6 na buwan.",
+      },
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+    },
+  ],
+  cta: {
+    title: { en: "Ready to Transform Your Ride?", tl: "Handa ka na bang I-transform ang Iyong Sasakyan?" },
+    subtitle: {
+      en: "Get started with our interactive configurator and find the perfect tint for your vehicle.",
+      tl: "Magsimula sa aming interactive configurator.",
+    },
+    button: { en: "Start Configuring", tl: "Simulan ang Pag-configure" },
+    badges: [
+      { en: "Free shipping over $99", tl: "Libreng shipping sa $99+" },
+      { en: "Professional grade", tl: "Professional grade" },
+      { en: "Warranty included", tl: "May warranty" },
+    ],
+  },
+};
+
 // ---------------------------------------------------------------------------
 // File-based persistence
 // ---------------------------------------------------------------------------
@@ -577,6 +999,10 @@ interface StoreData {
   shippingRates: ShippingRateConfig[];
   installationRates: InstallationRateConfig[];
   siteSettings: SiteSettings;
+  faqItems: FaqItem[];
+  aboutContent: AboutContent;
+  contactInfo: ContactInfo;
+  homepageContent: HomepageContent;
 }
 
 function loadFromFile(): StoreData | null {
@@ -604,6 +1030,10 @@ function saveToFile(): void {
       shippingRates: Array.from(shippingRates.values()),
       installationRates: Array.from(installationRates.values()),
       siteSettings,
+      faqItems: Array.from(faqItems.values()),
+      aboutContent,
+      contactInfo,
+      homepageContent,
     };
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
@@ -642,6 +1072,16 @@ const installationRates = new Map<string, InstallationRateConfig>(
 );
 
 let siteSettings: SiteSettings = saved?.siteSettings || { ...seedSiteSettings };
+
+const faqItems = new Map<string, FaqItem>(
+  (saved?.faqItems || seedFaqItems).map((f) => [f.id, f])
+);
+
+let aboutContent: AboutContent = saved?.aboutContent || { ...seedAboutContent };
+
+let contactInfo: ContactInfo = saved?.contactInfo || { ...seedContactInfo };
+
+let homepageContent: HomepageContent = saved?.homepageContent || { ...seedHomepageContent };
 
 // ---------------------------------------------------------------------------
 // Product helpers
@@ -815,4 +1255,81 @@ export function updateSiteSettings(data: Partial<SiteSettings>): SiteSettings {
   siteSettings = { ...siteSettings, ...data };
   saveToFile();
   return { ...siteSettings };
+}
+
+// ---------------------------------------------------------------------------
+// FaqItem helpers
+// ---------------------------------------------------------------------------
+
+export function getFaqItems(): FaqItem[] {
+  return Array.from(faqItems.values()).sort((a, b) => a.order - b.order);
+}
+
+export function getFaqItem(id: string): FaqItem | undefined {
+  return faqItems.get(id);
+}
+
+export function createFaqItem(data: Omit<FaqItem, "id">): FaqItem {
+  const id = `faq-${crypto.randomUUID()}`;
+  const item: FaqItem = { ...data, id };
+  faqItems.set(id, item);
+  saveToFile();
+  return item;
+}
+
+export function updateFaqItem(id: string, data: Partial<FaqItem>): FaqItem | null {
+  const existing = faqItems.get(id);
+  if (!existing) return null;
+  const updated: FaqItem = { ...existing, ...data, id: existing.id };
+  faqItems.set(id, updated);
+  saveToFile();
+  return updated;
+}
+
+export function deleteFaqItem(id: string): boolean {
+  const result = faqItems.delete(id);
+  if (result) saveToFile();
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// AboutContent helpers
+// ---------------------------------------------------------------------------
+
+export function getAboutContent(): AboutContent {
+  return { ...aboutContent };
+}
+
+export function updateAboutContent(data: Partial<AboutContent>): AboutContent {
+  aboutContent = { ...aboutContent, ...data };
+  saveToFile();
+  return { ...aboutContent };
+}
+
+// ---------------------------------------------------------------------------
+// ContactInfo helpers
+// ---------------------------------------------------------------------------
+
+export function getContactInfo(): ContactInfo {
+  return { ...contactInfo };
+}
+
+export function updateContactInfo(data: Partial<ContactInfo>): ContactInfo {
+  contactInfo = { ...contactInfo, ...data };
+  saveToFile();
+  return { ...contactInfo };
+}
+
+// ---------------------------------------------------------------------------
+// HomepageContent helpers
+// ---------------------------------------------------------------------------
+
+export function getHomepageContent(): HomepageContent {
+  return { ...homepageContent };
+}
+
+export function updateHomepageContent(data: Partial<HomepageContent>): HomepageContent {
+  homepageContent = { ...homepageContent, ...data };
+  saveToFile();
+  return { ...homepageContent };
 }

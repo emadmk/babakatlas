@@ -619,6 +619,11 @@ export default function WindowTintConfigurator() {
       .then((res) => {
         if (res.success && Array.isArray(res.data)) {
           setTintProducts(res.data);
+          // Sync with store so pricing stays consistent
+          const store = useConfiguratorStore.getState();
+          if (store.tintProducts.length === 0) {
+            useConfiguratorStore.setState({ tintProducts: res.data });
+          }
         }
       })
       .catch(() => {

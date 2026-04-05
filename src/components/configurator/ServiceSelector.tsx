@@ -4,38 +4,49 @@ import { motion } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import { Package, Wrench, Check } from 'lucide-react';
 
-const services = [
-  {
-    id: 'shipping' as const,
-    icon: Package,
-    title: 'Shipping Only',
-    description: "We'll ship the pre-cut tint films to your address for self-installation.",
-    features: [
-      'Pre-cut to your exact windows',
-      'Includes application toolkit',
-      'Video installation guide',
-      'Quality guarantee',
-    ],
-    note: null,
-  },
-  {
-    id: 'installation' as const,
-    icon: Wrench,
-    title: 'Installation + Shipping',
-    description: 'Professional installation at a certified center near you.',
-    features: [
-      'Certified professional installer',
-      'Bubble-free guarantee',
-      'Lifetime warranty on install',
-      'Same-day service available',
-      'Free removal of old tint',
-    ],
-    note: '+ $4/sq.ft installation fee',
-  },
-];
-
 export default function ServiceSelector() {
-  const { serviceType, setServiceType, totalSqft } = useConfiguratorStore();
+  const { serviceType, setServiceType, totalSqft, installationRates, shippingCountry, carType, windows } = useConfiguratorStore();
+
+  // Derive installation fee description from API-loaded rates
+  const carTypeUpper = (carType || 'SEDAN').toUpperCase();
+  const matchingRate = installationRates?.find(
+    (r) => r.country === (shippingCountry || 'PH') && r.carType === carTypeUpper && r.active
+  );
+  const installFeeNote = matchingRate
+    ? `+ $${matchingRate.baseRate} base + $${matchingRate.perWindowRate}/window`
+    : '+ Installation fee based on vehicle';
+
+  const enabledWindows = windows.filter((w) => w.enabled);
+
+  const services = [
+    {
+      id: 'shipping' as const,
+      icon: Package,
+      title: 'Shipping Only',
+      description: "We'll ship the pre-cut tint films to your address for self-installation.",
+      features: [
+        'Pre-cut to your exact windows',
+        'Includes application toolkit',
+        'Video installation guide',
+        'Quality guarantee',
+      ],
+      note: null as string | null,
+    },
+    {
+      id: 'installation' as const,
+      icon: Wrench,
+      title: 'Installation + Shipping',
+      description: 'Professional installation at a certified center near you.',
+      features: [
+        'Certified professional installer',
+        'Bubble-free guarantee',
+        'Lifetime warranty on install',
+        'Same-day service available',
+        'Free removal of old tint',
+      ],
+      note: installFeeNote,
+    },
+  ];
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -50,7 +61,12 @@ export default function ServiceSelector() {
         {services.map((service) => {
           const isSelected = serviceType === service.id;
           const Icon = service.icon;
-          const installCost = service.id === 'installation' ? totalSqft * 4 : 0;
+          const fallbackRate = 4; // Only used if API hasn't loaded yet
+          const installCost = service.id === 'installation'
+            ? matchingRate
+              ? matchingRate.baseRate + enabledWindows.length * (matchingRate.perWindowRate || 0)
+              : totalSqft * fallbackRate
+            : 0;
 
           return (
             <motion.button

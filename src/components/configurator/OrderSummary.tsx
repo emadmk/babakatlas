@@ -8,15 +8,15 @@ import {
 } from '@/store/configuratorStore';
 import { Edit3, Shield, Lock, CreditCard } from 'lucide-react';
 
-const CAR_LABELS: Record<string, string> = {
-  sedan: 'Sedan',
-  suv: 'SUV',
-  van: 'Van',
-  station_wagon: 'Station Wagon',
-  hatchback: 'Hatchback',
-  coupe: 'Coupe',
-  truck: 'Truck',
-  convertible: 'Convertible',
+// Format car type string dynamically instead of using hardcoded labels
+const formatCarType = (type: string) => {
+  // Handle common abbreviations
+  const upper = type.toUpperCase();
+  if (upper === 'SUV') return 'SUV';
+  return type
+    ?.split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ') || 'Unknown';
 };
 
 function SummarySection({
@@ -92,7 +92,7 @@ export default function OrderSummary() {
         <div className="lg:col-span-3 space-y-4">
           {/* Vehicle */}
           <SummarySection title="Vehicle" editStep={1} onEdit={setStep}>
-            <p className="text-white font-medium">{carType ? CAR_LABELS[carType] || carType : '--'}</p>
+            <p className="text-white font-medium">{carType ? formatCarType(carType) : '--'}</p>
           </SummarySection>
 
           {/* Windows & Tint */}

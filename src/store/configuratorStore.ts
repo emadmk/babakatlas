@@ -198,6 +198,18 @@ export interface InstallationRateData {
   active: boolean;
 }
 
+export interface TintProductData {
+  id: string;
+  name: string;
+  slug: string;
+  tintType: string;
+  description: string;
+  pricePerSqft: number;
+  specs: { vlt: string; uvBlock: string; heatRejection: string };
+  badge: string | null;
+  shades: { id: string; name: string; vlt: number; priceMultiplier: number }[];
+}
+
 export interface ShippingAddress {
   name: string;
   street1: string;
@@ -243,6 +255,7 @@ export interface ConfiguratorState {
   configLoading: boolean;
   shippingRates: ShippingRateData[];
   installationRates: InstallationRateData[];
+  tintProducts: TintProductData[];
   taxRates: Record<string, number>;
   freeShippingThresholds: Record<string, number>;
   shippingMarkup: number;
@@ -274,10 +287,13 @@ export interface ConfiguratorState {
 // Helpers
 // =============================================================================
 
-function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium'): WindowConfig[] {
+function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium', tintProducts?: TintProductData[]): WindowConfig[] {
   const windowData = WINDOW_SQFT[carType] || {};
-  const tint = TINT_TYPES[defaultTint];
-  const defaultMultiplier = SHADE_LEVELS[defaultShade] ? 1.0 : 1.0;
+  // Try API data first, fallback to hardcoded TINT_TYPES
+  const apiTint = tintProducts?.find((t) => t.slug === defaultTint || t.tintType === defaultTint);
+  const fallbackTint = TINT_TYPES[defaultTint];
+  const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+  const defaultMultiplier = 1.0;
   return Object.entries(windowData).map(([position, sqft]) => ({
     position,
     label: WINDOW_LABELS[position] || position,
@@ -286,8 +302,8 @@ function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultS
     shade: defaultShade,
     shadeMultiplier: defaultMultiplier,
     sqft,
-    pricePerSqft: tint ? tint.pricePerSqft : 0,
-    price: sqft * (tint ? tint.pricePerSqft : 0) * defaultMultiplier,
+    pricePerSqft,
+    price: sqft * pricePerSqft * defaultMultiplier,
   }));
 }
 
@@ -318,6 +334,7 @@ const initialState = {
   configLoading: false,
   shippingRates: [] as ShippingRateData[],
   installationRates: [] as InstallationRateData[],
+  tintProducts: [] as TintProductData[],
   taxRates: { PH: 0.12, AU: 0.10 } as Record<string, number>,
   freeShippingThresholds: { PH: 200, AU: 300 } as Record<string, number>,
   shippingMarkup: 0,
@@ -342,8 +359,19 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     set({ configLoading: true });
 
     try {
-      const res = await fetch('/api/config/pricing');
+      const [res, tintsRes] = await Promise.all([
+        fetch('/api/config/pricing'),
+        fetch('/api/products/tints'),
+      ]);
       const json = await res.json();
+      let tintProducts: TintProductData[] = [];
+      try {
+        const tintsJson = await tintsRes.json();
+        const tintData = tintsJson.data || tintsJson;
+        tintProducts = Array.isArray(tintData) ? tintData : [];
+      } catch {
+        // tint fetch failed, keep empty array
+      }
 
       if (json.success && json.data) {
         const { shipping, installation, tax, shippingMarkup, shippingMarkupType } = json.data;
@@ -382,6 +410,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
           configLoading: false,
           shippingRates: shipping ?? [],
           installationRates: installation ?? [],
+          tintProducts,
           taxRates: Object.keys(taxRates).length > 0 ? taxRates : get().taxRates,
           freeShippingThresholds:
             Object.keys(freeShippingThresholds).length > 0
@@ -411,7 +440,8 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   setStep: (step: number) => set({ step }),
 
   setCarType: (carType: string) => {
-    const windows = buildWindows(carType);
+    const { tintProducts } = get();
+    const windows = buildWindows(carType, 'ceramic', 'medium', tintProducts);
     set({ carType, windows });
     get().calculatePricing();
   },
@@ -427,13 +457,16 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   },
 
   setWindowTint: (position: string, tintType: string) => {
-    const { windows } = get();
-    const tint = TINT_TYPES[tintType];
-    if (!tint) return;
+    const { windows, tintProducts } = get();
+    // Try API data first, fallback to hardcoded
+    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
+    const fallbackTint = TINT_TYPES[tintType];
+    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+    if (!apiTint && !fallbackTint) return;
     set({
       windows: windows.map((w) =>
         w.position === position
-          ? { ...w, tintType, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * w.shadeMultiplier }
+          ? { ...w, tintType, pricePerSqft, price: w.sqft * pricePerSqft * w.shadeMultiplier }
           : w
       ),
     });
@@ -463,47 +496,53 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   },
 
   applyToAll: (tintType: string, shade: string) => {
-    const { windows } = get();
-    const tint = TINT_TYPES[tintType];
-    if (!tint) return;
+    const { windows, tintProducts } = get();
+    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
+    const fallbackTint = TINT_TYPES[tintType];
+    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+    if (!apiTint && !fallbackTint) return;
     set({
       windows: windows.map((w) => ({
         ...w,
         tintType,
         shade,
-        pricePerSqft: tint.pricePerSqft,
-        price: w.sqft * tint.pricePerSqft * w.shadeMultiplier,
+        pricePerSqft,
+        price: w.sqft * pricePerSqft * w.shadeMultiplier,
       })),
     });
     get().calculatePricing();
   },
 
   applyToAllWithMultiplier: (tintType: string, shade: string, multiplier: number) => {
-    const { windows } = get();
-    const tint = TINT_TYPES[tintType];
-    if (!tint) return;
+    const { windows, tintProducts } = get();
+    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
+    const fallbackTint = TINT_TYPES[tintType];
+    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+    if (!apiTint && !fallbackTint) return;
     set({
       windows: windows.map((w) => ({
         ...w,
         tintType,
         shade,
         shadeMultiplier: multiplier,
-        pricePerSqft: tint.pricePerSqft,
-        price: w.sqft * tint.pricePerSqft * multiplier,
+        pricePerSqft,
+        price: w.sqft * pricePerSqft * multiplier,
       })),
     });
     get().calculatePricing();
   },
 
   applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => {
-    const { windows } = get();
-    const tint = TINT_TYPES[tintType];
-    if (!tint) return;
+    const { windows, tintProducts } = get();
+    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
+    const fallbackTint = TINT_TYPES[tintType];
+    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+    if (!apiTint && !fallbackTint) return;
     const positions = WINDOW_GROUPS[group].positions;
     set({
       windows: windows.map((w) =>
         positions.includes(w.position)
-          ? { ...w, tintType, shade, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * w.shadeMultiplier }
+          ? { ...w, tintType, shade, pricePerSqft, price: w.sqft * pricePerSqft * w.shadeMultiplier }
           : w
       ),
     });
@@ -511,14 +550,16 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   },
 
   applyToGroupWithMultiplier: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string, multiplier: number) => {
-    const { windows } = get();
-    const tint = TINT_TYPES[tintType];
-    if (!tint) return;
+    const { windows, tintProducts } = get();
+    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
+    const fallbackTint = TINT_TYPES[tintType];
+    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
+    if (!apiTint && !fallbackTint) return;
     const positions = WINDOW_GROUPS[group].positions;
     set({
       windows: windows.map((w) =>
         positions.includes(w.position)
-          ? { ...w, tintType, shade, shadeMultiplier: multiplier, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * multiplier }
+          ? { ...w, tintType, shade, shadeMultiplier: multiplier, pricePerSqft, price: w.sqft * pricePerSqft * multiplier }
           : w
       ),
     });
@@ -593,10 +634,11 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
         (r) => r.country === shippingCountry && r.carType === carTypeUpper && r.active
       );
       if (rateData) {
-        installationCost = rateData.baseRate + enabledWindows.length * rateData.perWindowRate;
+        installationCost = rateData.baseRate + enabledWindows.length * (rateData.perWindowRate || 0);
       } else {
-        // Fallback: simple per-sqft rate
-        installationCost = totalSqft * 4;
+        // Fallback: only used if API hasn't loaded yet
+        const fallbackRate = 4;
+        installationCost = totalSqft * fallbackRate;
       }
     }
 
@@ -610,12 +652,13 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
   reset: () => {
     // Preserve loaded config across resets
-    const { configLoaded, shippingRates, installationRates, taxRates, freeShippingThresholds, shippingMarkup, shippingMarkupType } = get();
+    const { configLoaded, shippingRates, installationRates, tintProducts, taxRates, freeShippingThresholds, shippingMarkup, shippingMarkupType } = get();
     set({
       ...initialState,
       configLoaded,
       shippingRates,
       installationRates,
+      tintProducts,
       taxRates,
       freeShippingThresholds,
       shippingMarkup,

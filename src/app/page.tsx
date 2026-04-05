@@ -84,13 +84,19 @@ interface HomepageData {
 }
 
 interface TintProduct {
+  id: string;
   name: string;
-  vlt: string;
-  features: string[];
-  priceRange: string;
-  color: string;
-  popular?: boolean;
-  image: string;
+  slug: string;
+  description: string;
+  pricePerSqft: number;
+  specs: {
+    vlt: string;
+    uvBlock: string;
+    heatRejection: string;
+  };
+  badge: string | null;
+  imageUrl?: string;
+  image?: string;
 }
 
 /* ============================================================
@@ -265,7 +271,7 @@ function BenefitsSection({ data, language }: { data: HomepageData["benefits"]; l
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.map((b, i) => {
+          {(data || []).map((b, i) => {
             const IconComp = getIcon(b.icon);
             const color = b.color || defaultBenefitColors[i % defaultBenefitColors.length];
             return (
@@ -330,71 +336,65 @@ function ProductShowcaseSection({ products }: { products: TintProduct[] }) {
         <div className="flex gap-6 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:max-w-7xl md:mx-auto md:grid md:grid-cols-3 md:overflow-visible md:px-6">
           {products.map((product, i) => (
             <motion.div
-              key={product.name}
+              key={product.id || product.name}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.1 }}
               className="snap-center min-w-[280px] md:min-w-0 group"
             >
               <div className="relative glass-card overflow-hidden h-full flex flex-col">
-                {product.popular && (
+                {product.badge && (
                   <div className="absolute top-3 left-6 z-10 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    Most Popular
+                    {product.badge}
                   </div>
                 )}
-                {/* Product tint image */}
-                <div className="w-full h-32 overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={`${product.name} tint sample`}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    style={{ filter: `brightness(0.7) saturate(0.8)` }}
-                  />
-                  <div
-                    className="absolute inset-0 h-32 opacity-30"
-                    style={{ background: `linear-gradient(135deg, ${product.color}40, transparent)` }}
-                  />
+                <div className="w-full h-32 overflow-hidden bg-gradient-to-br from-accent/10 to-transparent">
+                  {(product.imageUrl || product.image) && (
+                    <img
+                      src={product.imageUrl || product.image}
+                      alt={`${product.name} tint`}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      style={{ filter: `brightness(0.7) saturate(0.8)` }}
+                    />
+                  )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
-                {/* Color accent bar */}
-                <div
-                  className="w-full h-1 rounded-full mb-6"
-                  style={{
-                    background: `linear-gradient(90deg, ${product.color}, transparent)`,
-                  }}
-                />
+                <div className="w-full h-1 rounded-full mb-6 bg-gradient-to-r from-accent to-transparent" />
                 <h3 className="text-xl font-semibold text-white mb-1">
                   {product.name}
                 </h3>
                 <p className="text-sm text-zinc-500 mb-4">
-                  VLT: {product.vlt}
+                  {product.description || `VLT: ${product.specs?.vlt || "N/A"}`}
                 </p>
                 <ul className="space-y-2 mb-6 flex-1">
-                  {product.features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-center gap-2 text-sm text-zinc-400"
-                    >
-                      <BadgeCheck
-                        size={14}
-                        style={{ color: product.color }}
-                        className="flex-shrink-0"
-                      />
-                      {f}
-                    </li>
-                  ))}
+                  {product.specs && (
+                    <>
+                      <li className="flex items-center gap-2 text-sm text-zinc-400">
+                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
+                        UV Block: {product.specs.uvBlock}
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-zinc-400">
+                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
+                        Heat Rejection: {product.specs.heatRejection}
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-zinc-400">
+                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
+                        VLT: {product.specs.vlt}
+                      </li>
+                    </>
+                  )}
                 </ul>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold text-white">
-                    {product.priceRange}
+                    ${product.pricePerSqft}/sqft
                   </span>
-                  <button
-                    className="text-sm font-medium flex items-center gap-1 transition-colors"
-                    style={{ color: product.color }}
+                  <a
+                    href="/configurator"
+                    className="text-sm font-medium flex items-center gap-1 text-accent hover:text-accent/80 transition-colors"
                   >
-                    Details <ChevronRight size={14} />
-                  </button>
+                    Configure <ChevronRight size={14} />
+                  </a>
                 </div>
                 </div>
               </div>
@@ -436,7 +436,7 @@ function HowItWorksSection({ data, language }: { data: HomepageData["howItWorks"
           {/* Connecting line (desktop) */}
           <div className="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-accent/50 via-accent/20 to-accent/50" />
 
-          {data.map((step, i) => {
+          {(data || []).map((step, i) => {
             const IconComp = getIcon(step.icon);
             return (
               <motion.div
@@ -527,7 +527,7 @@ function StatsSection({ data, language }: { data: HomepageData["stats"]; languag
 
       <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {data.map((stat, i) => (
+          {(data || []).map((stat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -626,7 +626,7 @@ function TestimonialsSection({ data, language }: { data: HomepageData["testimoni
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {data.map((item, i) => (
+          {(data || []).map((item, i) => (
             <motion.div
               key={item.name}
               initial={{ opacity: 0, y: 40 }}
@@ -741,13 +741,13 @@ export default function Home() {
 
   return (
     <>
-      <HeroSection data={homepageData.hero} language={language} />
-      <BenefitsSection data={homepageData.benefits} language={language} />
-      <ProductShowcaseSection products={tintProducts} />
-      <HowItWorksSection data={homepageData.howItWorks} language={language} />
-      <StatsSection data={homepageData.stats} language={language} />
-      <TestimonialsSection data={homepageData.testimonials} language={language} />
-      <CTASection data={homepageData.cta} language={language} />
+      {homepageData.hero && <HeroSection data={homepageData.hero} language={language} />}
+      {homepageData.benefits && <BenefitsSection data={homepageData.benefits} language={language} />}
+      {tintProducts.length > 0 && <ProductShowcaseSection products={tintProducts} />}
+      {homepageData.howItWorks && <HowItWorksSection data={homepageData.howItWorks} language={language} />}
+      {homepageData.stats && <StatsSection data={homepageData.stats} language={language} />}
+      {homepageData.testimonials && <TestimonialsSection data={homepageData.testimonials} language={language} />}
+      {homepageData.cta && <CTASection data={homepageData.cta} language={language} />}
     </>
   );
 }

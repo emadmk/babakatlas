@@ -21,27 +21,28 @@ export default function Footer() {
     {
       title: t("footer.company"),
       links: [
-        { label: t("footer.about"), href: "/about" },
-        { label: t("footer.careers"), href: "/careers" },
-        { label: t("footer.press"), href: "/press" },
+        { label: t("footer.about"), href: "/#about" },
+        { label: "Our Technology", href: "/#benefits" },
+        { label: t("footer.careers"), href: "#" },
+        { label: "Contact", href: "#contact" },
       ],
     },
     {
       title: t("footer.products"),
       links: [
-        { label: t("footer.ceramic"), href: "/products/ceramic" },
-        { label: t("footer.carbon"), href: "/products/carbon" },
-        { label: t("footer.standard"), href: "/products/standard" },
-        { label: t("footer.specialty"), href: "/products/specialty" },
+        { label: "All Tint Films", href: "/configurator" },
+        { label: t("footer.ceramic"), href: "/configurator" },
+        { label: t("footer.carbon"), href: "/configurator" },
+        { label: "Adaptive Tint", href: "/configurator" },
       ],
     },
     {
       title: t("footer.support"),
       links: [
-        { label: t("footer.faq"), href: "/faq" },
-        { label: t("footer.installation"), href: "/installation" },
-        { label: t("footer.warranty"), href: "/warranty" },
-        { label: t("footer.returns"), href: "/returns" },
+        { label: t("footer.faq"), href: "#" },
+        { label: "Shipping Info", href: "/#shipping" },
+        { label: t("footer.installation"), href: "#" },
+        { label: "Track Order", href: "/dashboard/orders" },
       ],
     },
   ];
@@ -87,7 +88,7 @@ export default function Footer() {
             <div className="inline-flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-full px-4 py-2">
               <MapPin size={14} className="text-accent" />
               <span className="text-xs text-zinc-400">
-                {t("footer.shipping")}
+                Shipping to Philippines 🇵🇭 &amp; Australia 🇦🇺
               </span>
             </div>
           </div>

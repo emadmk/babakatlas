@@ -380,7 +380,7 @@ function HowItWorksSection() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="section-padding relative">
+    <section id="how-it-works" className="section-padding relative">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           ref={ref}
@@ -491,7 +491,7 @@ function StatsSection() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section id="stats" className="relative py-24 overflow-hidden">
       {/* BG */}
       <div className="absolute inset-0 bg-gradient-to-b from-accent/[0.03] to-transparent" />
 
@@ -536,7 +536,7 @@ function CTASection() {
   ];
 
   return (
-    <section className="section-padding relative overflow-hidden">
+    <section id="cta" className="section-padding relative overflow-hidden">
       {/* BG glow */}
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px]" />
@@ -609,7 +609,7 @@ function TestimonialsSection() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="section-padding relative">
+    <section id="testimonials" className="section-padding relative">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           ref={ref}

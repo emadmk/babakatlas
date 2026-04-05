@@ -1,20 +1,21 @@
-import { NextResponse } from 'next/server';
-import { TINT_TYPES } from '@/store/configuratorStore';
+import { NextResponse } from "next/server";
+import { getProducts } from "@/lib/adminData";
 
 export async function GET() {
-  // Transform the store data into a clean API response
-  const tints = Object.entries(TINT_TYPES).map(([slug, tint]) => ({
-    id: slug,
-    name: tint.name,
-    slug,
-    description: tint.description,
-    pricePerSqft: tint.pricePerSqft,
+  const products = getProducts().filter((p) => p.active);
+
+  const tints = products.map((p) => ({
+    id: p.id,
+    name: p.name.en,
+    slug: p.slug,
+    description: p.description.en,
+    pricePerSqft: p.pricePerSqft,
     specs: {
-      vlt: tint.vlt,
-      uvBlock: `${tint.uvBlock}%`,
-      heatRejection: `${tint.heatRejection}%`,
+      vlt: p.vlt,
+      uvBlock: `${p.uvBlock}%`,
+      heatRejection: `${p.heatRejection}%`,
     },
-    badge: tint.badge ?? null,
+    badge: p.badge,
   }));
 
   return NextResponse.json({

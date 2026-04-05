@@ -8,8 +8,17 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
+  Plus,
+  X,
 } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
+
+interface ShadeEntry {
+  id: string;
+  name: string;
+  vlt: number;
+  priceMultiplier: number;
+}
 
 interface ProductForm {
   nameEn: string;
@@ -24,6 +33,7 @@ interface ProductForm {
   imageUrl: string;
   badge: string;
   active: boolean;
+  shades: ShadeEntry[];
 }
 
 const tintOptions = [
@@ -56,6 +66,12 @@ export default function NewProductPage() {
     imageUrl: "",
     badge: "",
     active: true,
+    shades: [
+      { id: "light", name: "Light", vlt: 70, priceMultiplier: 1.0 },
+      { id: "medium", name: "Medium", vlt: 35, priceMultiplier: 1.0 },
+      { id: "dark", name: "Dark", vlt: 15, priceMultiplier: 1.1 },
+      { id: "limo", name: "Limo", vlt: 5, priceMultiplier: 1.2 },
+    ],
   });
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -80,6 +96,7 @@ export default function NewProductPage() {
           pricePerSqft: form.pricePerSqft,
           imageUrl: form.imageUrl,
           badge: form.badge || null,
+          shades: form.shades,
           active: form.active,
         }),
       });
@@ -289,6 +306,132 @@ export default function NewProductPage() {
             onImageChange={(url) => setForm({ ...form, imageUrl: url })}
             category="tints"
           />
+        </div>
+
+        {/* Shade Levels */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm text-white/60">
+              Shade Levels
+            </label>
+            <button
+              type="button"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  shades: [
+                    ...form.shades,
+                    {
+                      id: `shade-${Date.now()}`,
+                      name: "",
+                      vlt: 50,
+                      priceMultiplier: 1.0,
+                    },
+                  ],
+                })
+              }
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg ring-1 ring-blue-500/30 transition-all"
+            >
+              <Plus size={14} />
+              Add Shade
+            </button>
+          </div>
+          <div className="space-y-3">
+            {form.shades.map((shade, idx) => (
+              <div
+                key={shade.id}
+                className="flex items-center gap-3 bg-white/[0.03] ring-1 ring-white/10 rounded-lg p-3"
+              >
+                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[10px] text-white/40 mb-1">
+                      ID
+                    </label>
+                    <input
+                      type="text"
+                      value={shade.id}
+                      onChange={(e) => {
+                        const shades = [...form.shades];
+                        shades[idx] = { ...shades[idx], id: e.target.value };
+                        setForm({ ...form, shades });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-[#0071E3] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-white/40 mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={shade.name}
+                      onChange={(e) => {
+                        const shades = [...form.shades];
+                        shades[idx] = { ...shades[idx], name: e.target.value };
+                        setForm({ ...form, shades });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-[#0071E3] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-white/40 mb-1">
+                      VLT (%)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={shade.vlt}
+                      onChange={(e) => {
+                        const shades = [...form.shades];
+                        shades[idx] = {
+                          ...shades[idx],
+                          vlt: parseInt(e.target.value) || 0,
+                        };
+                        setForm({ ...form, shades });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-[#0071E3] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-white/40 mb-1">
+                      Price Multiplier
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={shade.priceMultiplier}
+                      onChange={(e) => {
+                        const shades = [...form.shades];
+                        shades[idx] = {
+                          ...shades[idx],
+                          priceMultiplier: parseFloat(e.target.value) || 1.0,
+                        };
+                        setForm({ ...form, shades });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-[#0071E3] transition-colors"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const shades = form.shades.filter((_, i) => i !== idx);
+                    setForm({ ...form, shades });
+                  }}
+                  className="p-1.5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all flex-shrink-0"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            {form.shades.length === 0 && (
+              <p className="text-center text-white/30 text-xs py-4">
+                No shade levels configured. Add at least one.
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Badge & Active */}

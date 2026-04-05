@@ -9,16 +9,19 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
+    const updates = body.data || body;
 
-    if (Array.isArray(body)) {
-      const results = body.map((item: { id: string; [key: string]: unknown }) =>
-        updateShippingRate(item.id, item)
-      );
-      return NextResponse.json({ success: true, data: results.filter(Boolean) });
+    if (Array.isArray(updates)) {
+      for (const rate of updates) {
+        if (rate.id) {
+          updateShippingRate(rate.id, rate);
+        }
+      }
+      return NextResponse.json({ success: true, data: getShippingRates() });
     }
 
-    if (body.id) {
-      const updated = updateShippingRate(body.id, body);
+    if (updates.id) {
+      const updated = updateShippingRate(updates.id, updates);
       if (!updated) {
         return NextResponse.json({ success: false, error: "Shipping rate not found" }, { status: 404 });
       }

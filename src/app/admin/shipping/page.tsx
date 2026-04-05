@@ -11,6 +11,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Info,
 } from "lucide-react";
 
 interface ShippingCountry {
@@ -41,6 +42,7 @@ export default function AdminShippingPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [shippoActive, setShippoActive] = useState<boolean | null>(null);
   const [toast, setToast] = useState<{
     type: "success" | "error";
     message: string;
@@ -53,15 +55,20 @@ export default function AdminShippingPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [shippingRes, installRes] = await Promise.all([
+      const [shippingRes, installRes, settingsRes] = await Promise.all([
         fetch("/api/admin/shipping"),
         fetch("/api/admin/installation"),
+        fetch("/api/admin/settings"),
       ]);
       const shippingData = await shippingRes.json();
       const installData = await installRes.json();
+      const settingsData = await settingsRes.json();
 
       if (shippingData.success) setCountries(shippingData.data || []);
       if (installData.success) setInstallationRates(installData.data || []);
+      if (settingsData.success) {
+        setShippoActive(settingsData.data?.integrationStatus?.shippo === true);
+      }
     } catch {
       showToast("error", "Failed to load shipping data");
     } finally {
@@ -202,6 +209,42 @@ export default function AdminShippingPage() {
           {saving ? "Saving..." : "Save All"}
         </button>
       </div>
+
+      {/* Shippo Status Banner */}
+      {shippoActive !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`flex items-start gap-3 p-4 rounded-xl border ${
+            shippoActive
+              ? 'bg-green-500/5 border-green-500/20'
+              : 'bg-amber-500/5 border-amber-500/20'
+          }`}
+        >
+          <Info size={18} className={shippoActive ? 'text-green-400 mt-0.5' : 'text-amber-400 mt-0.5'} />
+          <div>
+            {shippoActive ? (
+              <>
+                <p className="text-sm font-medium text-green-400">
+                  Shippo active
+                </p>
+                <p className="text-xs text-white/50 mt-0.5">
+                  Real-time rates from Shippo plus your markup will be used for shipping calculations. The manual rates below are used as fallback only.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-amber-400">
+                  Shippo not configured
+                </p>
+                <p className="text-xs text-white/50 mt-0.5">
+                  Manual rates below will be used for shipping calculations. Configure Shippo in Settings to enable real-time carrier rates.
+                </p>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Country Shipping Cards */}
       <div>

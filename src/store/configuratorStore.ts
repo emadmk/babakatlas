@@ -180,6 +180,7 @@ export interface WindowConfig {
   enabled: boolean;
   tintType: string;
   shade: string;
+  shadeMultiplier: number;
   sqft: number;
   pricePerSqft: number;
   price: number;
@@ -206,8 +207,11 @@ export interface ConfiguratorState {
   toggleWindow: (position: string) => void;
   setWindowTint: (position: string, tintType: string) => void;
   setWindowShade: (position: string, shade: string) => void;
+  setWindowShadeWithMultiplier: (position: string, shade: string, multiplier: number) => void;
   applyToAll: (tintType: string, shade: string) => void;
+  applyToAllWithMultiplier: (tintType: string, shade: string, multiplier: number) => void;
   applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => void;
+  applyToGroupWithMultiplier: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string, multiplier: number) => void;
   setServiceType: (serviceType: 'shipping' | 'installation') => void;
   setShippingCountry: (country: 'PH' | 'AU') => void;
   calculatePricing: () => void;
@@ -217,15 +221,17 @@ export interface ConfiguratorState {
 function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium'): WindowConfig[] {
   const windowData = WINDOW_SQFT[carType] || {};
   const tint = TINT_TYPES[defaultTint];
+  const defaultMultiplier = SHADE_LEVELS[defaultShade] ? 1.0 : 1.0;
   return Object.entries(windowData).map(([position, sqft]) => ({
     position,
     label: WINDOW_LABELS[position] || position,
     enabled: true,
     tintType: defaultTint,
     shade: defaultShade,
+    shadeMultiplier: defaultMultiplier,
     sqft,
     pricePerSqft: tint ? tint.pricePerSqft : 0,
-    price: sqft * (tint ? tint.pricePerSqft : 0),
+    price: sqft * (tint ? tint.pricePerSqft : 0) * defaultMultiplier,
   }));
 }
 
@@ -271,7 +277,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     set({
       windows: windows.map((w) =>
         w.position === position
-          ? { ...w, tintType, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft }
+          ? { ...w, tintType, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * w.shadeMultiplier }
           : w
       ),
     });
@@ -285,7 +291,18 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
         w.position === position ? { ...w, shade } : w
       ),
     });
-    // Shade doesn't affect price, but recalc for consistency
+    get().calculatePricing();
+  },
+
+  setWindowShadeWithMultiplier: (position: string, shade: string, multiplier: number) => {
+    const { windows } = get();
+    set({
+      windows: windows.map((w) =>
+        w.position === position
+          ? { ...w, shade, shadeMultiplier: multiplier, price: w.sqft * w.pricePerSqft * multiplier }
+          : w
+      ),
+    });
     get().calculatePricing();
   },
 
@@ -299,7 +316,24 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
         tintType,
         shade,
         pricePerSqft: tint.pricePerSqft,
-        price: w.sqft * tint.pricePerSqft,
+        price: w.sqft * tint.pricePerSqft * w.shadeMultiplier,
+      })),
+    });
+    get().calculatePricing();
+  },
+
+  applyToAllWithMultiplier: (tintType: string, shade: string, multiplier: number) => {
+    const { windows } = get();
+    const tint = TINT_TYPES[tintType];
+    if (!tint) return;
+    set({
+      windows: windows.map((w) => ({
+        ...w,
+        tintType,
+        shade,
+        shadeMultiplier: multiplier,
+        pricePerSqft: tint.pricePerSqft,
+        price: w.sqft * tint.pricePerSqft * multiplier,
       })),
     });
     get().calculatePricing();
@@ -313,7 +347,22 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     set({
       windows: windows.map((w) =>
         positions.includes(w.position)
-          ? { ...w, tintType, shade, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft }
+          ? { ...w, tintType, shade, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * w.shadeMultiplier }
+          : w
+      ),
+    });
+    get().calculatePricing();
+  },
+
+  applyToGroupWithMultiplier: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string, multiplier: number) => {
+    const { windows } = get();
+    const tint = TINT_TYPES[tintType];
+    if (!tint) return;
+    const positions = WINDOW_GROUPS[group].positions;
+    set({
+      windows: windows.map((w) =>
+        positions.includes(w.position)
+          ? { ...w, tintType, shade, shadeMultiplier: multiplier, pricePerSqft: tint.pricePerSqft, price: w.sqft * tint.pricePerSqft * multiplier }
           : w
       ),
     });
@@ -335,7 +384,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
     const enabledWindows = windows.filter((w) => w.enabled);
     const totalSqft = enabledWindows.reduce((sum, w) => sum + w.sqft, 0);
-    const subtotal = enabledWindows.reduce((sum, w) => sum + w.sqft * w.pricePerSqft, 0);
+    const subtotal = enabledWindows.reduce((sum, w) => sum + w.sqft * w.pricePerSqft * (w.shadeMultiplier || 1), 0);
 
     const shipping = shippingCountry ? SHIPPING_INFO[shippingCountry] : null;
     const shippingCost = shipping

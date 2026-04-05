@@ -8,6 +8,7 @@ export async function GET() {
     id: p.id,
     name: p.name.en,
     slug: p.slug,
+    tintType: p.tintType,
     description: p.description.en,
     pricePerSqft: p.pricePerSqft,
     specs: {
@@ -16,6 +17,7 @@ export async function GET() {
       heatRejection: `${p.heatRejection}%`,
     },
     badge: p.badge,
+    shades: p.shades || [],
   }));
 
   return NextResponse.json({

@@ -33,6 +33,12 @@ export async function POST(request: NextRequest) {
       pricePerSqft: body.pricePerSqft || 0,
       imageUrl: body.imageUrl || "",
       badge: body.badge || null,
+      shades: body.shades || [
+        { id: "light", name: "Light", vlt: 70, priceMultiplier: 1.0 },
+        { id: "medium", name: "Medium", vlt: 35, priceMultiplier: 1.0 },
+        { id: "dark", name: "Dark", vlt: 15, priceMultiplier: 1.1 },
+        { id: "limo", name: "Limo", vlt: 5, priceMultiplier: 1.2 },
+      ],
       active: body.active !== false,
     });
 

@@ -6,6 +6,13 @@
 // Interfaces
 // ---------------------------------------------------------------------------
 
+export interface TintShade {
+  id: string;
+  name: string;
+  vlt: number;
+  priceMultiplier: number;
+}
+
 export interface TintProduct {
   id: string;
   slug: string;
@@ -18,6 +25,7 @@ export interface TintProduct {
   pricePerSqft: number;
   imageUrl: string;
   badge: string | null;
+  shades: TintShade[];
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -162,6 +170,13 @@ export interface HomepageContent {
 
 const now = new Date().toISOString();
 
+const defaultShades: TintShade[] = [
+  { id: "light", name: "Light", vlt: 70, priceMultiplier: 1.0 },
+  { id: "medium", name: "Medium", vlt: 35, priceMultiplier: 1.0 },
+  { id: "dark", name: "Dark", vlt: 15, priceMultiplier: 1.1 },
+  { id: "limo", name: "Limo", vlt: 5, priceMultiplier: 1.2 },
+];
+
 const seedProducts: TintProduct[] = [
   {
     id: "prod-standard",
@@ -178,6 +193,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 3,
     imageUrl: "/images/tints/standard.jpg",
     badge: null,
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,
@@ -197,6 +213,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 8,
     imageUrl: "/images/tints/ceramic.jpg",
     badge: "Most Popular",
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,
@@ -216,6 +233,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 6,
     imageUrl: "/images/tints/carbon.jpg",
     badge: null,
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,
@@ -235,6 +253,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 12,
     imageUrl: "/images/tints/adaptive.jpg",
     badge: "Premium",
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,
@@ -254,6 +273,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 10,
     imageUrl: "/images/tints/crystalline.jpg",
     badge: null,
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,
@@ -273,6 +293,7 @@ const seedProducts: TintProduct[] = [
     pricePerSqft: 5,
     imageUrl: "/images/tints/metallic.jpg",
     badge: null,
+    shades: [...defaultShades],
     active: true,
     createdAt: now,
     updatedAt: now,

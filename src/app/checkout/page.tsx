@@ -186,9 +186,9 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pt-20">
       {/* ── Header ─────────────────────────────────────────────────── */}
-      <header className="border-b border-white/10 bg-black/80 backdrop-blur-lg sticky top-0 z-50">
+      <header className="border-b border-white/10 bg-black/80 backdrop-blur-lg sticky top-20 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <button
             onClick={() => router.back()}

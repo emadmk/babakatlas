@@ -84,7 +84,7 @@ export default function ConfiguratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col pt-20">
       {/* Header */}
       <header className="flex-shrink-0 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">

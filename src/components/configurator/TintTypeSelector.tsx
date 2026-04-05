@@ -58,7 +58,8 @@ export default function TintTypeSelector() {
         if (!res.ok) throw new Error('Failed to fetch tint types');
         const data = await res.json();
         if (!cancelled) {
-          const items = Array.isArray(data) ? data : data.tints || data.products || [];
+          const unwrapped = data.data || data;
+          const items = Array.isArray(unwrapped) ? unwrapped : [];
           setTintTypes(items);
           setLoading(false);
         }

@@ -42,7 +42,8 @@ export default function CarTypeSelector() {
         if (!res.ok) throw new Error('Failed to fetch car types');
         const data = await res.json();
         if (!cancelled) {
-          setCarTypes(Array.isArray(data) ? data : data.cars || data.carTypes || []);
+          const items = data.data || data;
+          setCarTypes(Array.isArray(items) ? items : []);
           setLoading(false);
         }
       } catch (err) {

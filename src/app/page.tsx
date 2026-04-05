@@ -694,12 +694,16 @@ export default function Home() {
           throw new Error("Failed to fetch data");
         }
 
-        const homepage = await homepageRes.json();
-        const products = await productsRes.json();
+        const homepageJson = await homepageRes.json();
+        const productsJson = await productsRes.json();
+
+        // APIs return { success, data } wrapper
+        const homepage = homepageJson.data || homepageJson;
+        const products = productsJson.data || productsJson;
 
         if (!cancelled) {
           setHomepageData(homepage);
-          setTintProducts(Array.isArray(products) ? products : products.products || []);
+          setTintProducts(Array.isArray(products) ? products : []);
           setLoading(false);
         }
       } catch (err) {

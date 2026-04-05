@@ -115,7 +115,8 @@ export default function FAQPage() {
         if (!res.ok) throw new Error("Failed to fetch FAQs");
         const data = await res.json();
         if (!cancelled) {
-          setFaqs(Array.isArray(data) ? data : data.faqs || data.items || []);
+          const items = data.data || data;
+          setFaqs(Array.isArray(items) ? items : []);
           setLoading(false);
         }
       } catch (err) {

@@ -99,7 +99,7 @@ export default function ContactPage() {
         if (!res.ok) throw new Error("Failed to fetch contact data");
         const json = await res.json();
         if (!cancelled) {
-          setContactData(json);
+          setContactData(json.data || json);
           setLoading(false);
         }
       } catch (err) {

@@ -131,7 +131,7 @@ export default function AboutPage() {
         if (!res.ok) throw new Error("Failed to fetch about data");
         const json = await res.json();
         if (!cancelled) {
-          setData(json);
+          setData(json.data || json);
           setLoading(false);
         }
       } catch (err) {

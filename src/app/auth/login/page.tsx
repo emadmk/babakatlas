@@ -51,7 +51,12 @@ export default function LoginPage() {
       });
 
       if (result?.ok) {
-        router.push("/dashboard");
+        // Check if admin by email
+        if (email === "admin@atlasadaptive.com") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
         router.refresh();
       } else {
         setError("Invalid credentials");
@@ -204,12 +209,9 @@ export default function LoginPage() {
                   Remember me
                 </span>
               </label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-sm text-gold/80 hover:text-gold transition-colors"
-              >
+              <span className="text-sm text-primary-500 cursor-default">
                 Forgot password?
-              </Link>
+              </span>
             </div>
 
             {/* Submit */}

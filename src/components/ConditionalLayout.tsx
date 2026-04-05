@@ -10,13 +10,14 @@ export default function ConditionalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
+  const hideNavFooter = pathname.startsWith("/admin");
+  const isAuthPage = pathname.startsWith("/auth");
 
   return (
     <>
-      {!isAdmin && <Navbar />}
+      {!hideNavFooter && !isAuthPage && <Navbar />}
       <main>{children}</main>
-      {!isAdmin && <Footer />}
+      {!hideNavFooter && !isAuthPage && <Footer />}
     </>
   );
 }

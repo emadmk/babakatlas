@@ -495,34 +495,88 @@ const seedSiteSettings: SiteSettings = {
 };
 
 // ---------------------------------------------------------------------------
-// In-Memory Maps
+// File-based persistence
 // ---------------------------------------------------------------------------
 
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import path from "path";
+
+const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_FILE = path.join(DATA_DIR, "store.json");
+
+interface StoreData {
+  products: TintProduct[];
+  carTypes: CarTypeConfig[];
+  windowConfigs: WindowConfig[];
+  serviceConfigs: ServiceConfig[];
+  shippingRates: ShippingRateConfig[];
+  installationRates: InstallationRateConfig[];
+  siteSettings: SiteSettings;
+}
+
+function loadFromFile(): StoreData | null {
+  try {
+    if (existsSync(DATA_FILE)) {
+      const raw = readFileSync(DATA_FILE, "utf-8");
+      return JSON.parse(raw) as StoreData;
+    }
+  } catch {
+    console.warn("Failed to load data from file, using defaults");
+  }
+  return null;
+}
+
+function saveToFile(): void {
+  try {
+    if (!existsSync(DATA_DIR)) {
+      mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const data: StoreData = {
+      products: Array.from(products.values()),
+      carTypes: Array.from(carTypes.values()),
+      windowConfigs: Array.from(windowConfigs.values()),
+      serviceConfigs: Array.from(serviceConfigs.values()),
+      shippingRates: Array.from(shippingRates.values()),
+      installationRates: Array.from(installationRates.values()),
+      siteSettings,
+    };
+    writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to save data to file:", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// In-Memory Maps (loaded from file or seed data)
+// ---------------------------------------------------------------------------
+
+const saved = loadFromFile();
+
 const products = new Map<string, TintProduct>(
-  seedProducts.map((p) => [p.id, p])
+  (saved?.products || seedProducts).map((p) => [p.id, p])
 );
 
 const carTypes = new Map<string, CarTypeConfig>(
-  seedCarTypes.map((c) => [c.id, c])
+  (saved?.carTypes || seedCarTypes).map((c) => [c.id, c])
 );
 
 const windowConfigs = new Map<string, WindowConfig>(
-  seedWindowConfigs.map((w) => [w.id, w])
+  (saved?.windowConfigs || seedWindowConfigs).map((w) => [w.id, w])
 );
 
 const serviceConfigs = new Map<string, ServiceConfig>(
-  seedServiceConfigs.map((s) => [s.id, s])
+  (saved?.serviceConfigs || seedServiceConfigs).map((s) => [s.id, s])
 );
 
 const shippingRates = new Map<string, ShippingRateConfig>(
-  seedShippingRates.map((r) => [r.id, r])
+  (saved?.shippingRates || seedShippingRates).map((r) => [r.id, r])
 );
 
 const installationRates = new Map<string, InstallationRateConfig>(
-  seedInstallationRates.map((r) => [r.id, r])
+  (saved?.installationRates || seedInstallationRates).map((r) => [r.id, r])
 );
 
-let siteSettings: SiteSettings = { ...seedSiteSettings };
+let siteSettings: SiteSettings = saved?.siteSettings || { ...seedSiteSettings };
 
 // ---------------------------------------------------------------------------
 // Product helpers
@@ -541,6 +595,7 @@ export function createProduct(data: Omit<TintProduct, "id" | "createdAt" | "upda
   const ts = new Date().toISOString();
   const product: TintProduct = { ...data, id, createdAt: ts, updatedAt: ts };
   products.set(id, product);
+  saveToFile();
   return product;
 }
 
@@ -549,11 +604,14 @@ export function updateProduct(id: string, data: Partial<TintProduct>): TintProdu
   if (!existing) return null;
   const updated: TintProduct = { ...existing, ...data, id: existing.id, updatedAt: new Date().toISOString() };
   products.set(id, updated);
+  saveToFile();
   return updated;
 }
 
 export function deleteProduct(id: string): boolean {
-  return products.delete(id);
+  const result = products.delete(id);
+  if (result) saveToFile();
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -572,6 +630,7 @@ export function createCarType(data: Omit<CarTypeConfig, "id">): CarTypeConfig {
   const id = `car-${crypto.randomUUID()}`;
   const carType: CarTypeConfig = { ...data, id };
   carTypes.set(id, carType);
+  saveToFile();
   return carType;
 }
 
@@ -580,11 +639,14 @@ export function updateCarType(id: string, data: Partial<CarTypeConfig>): CarType
   if (!existing) return null;
   const updated: CarTypeConfig = { ...existing, ...data, id: existing.id };
   carTypes.set(id, updated);
+  saveToFile();
   return updated;
 }
 
 export function deleteCarType(id: string): boolean {
-  return carTypes.delete(id);
+  const result = carTypes.delete(id);
+  if (result) saveToFile();
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -606,6 +668,7 @@ export function updateWindowConfig(id: string, data: Partial<WindowConfig>): Win
   if (!existing) return null;
   const updated: WindowConfig = { ...existing, ...data, id: existing.id };
   windowConfigs.set(id, updated);
+  saveToFile();
   return updated;
 }
 
@@ -626,6 +689,7 @@ export function updateServiceConfig(id: string, data: Partial<ServiceConfig>): S
   if (!existing) return null;
   const updated: ServiceConfig = { ...existing, ...data, id: existing.id };
   serviceConfigs.set(id, updated);
+  saveToFile();
   return updated;
 }
 
@@ -646,6 +710,7 @@ export function updateShippingRate(id: string, data: Partial<ShippingRateConfig>
   if (!existing) return null;
   const updated: ShippingRateConfig = { ...existing, ...data, id: existing.id };
   shippingRates.set(id, updated);
+  saveToFile();
   return updated;
 }
 
@@ -669,6 +734,7 @@ export function updateInstallationRate(id: string, data: Partial<InstallationRat
   if (!existing) return null;
   const updated: InstallationRateConfig = { ...existing, ...data, id: existing.id };
   installationRates.set(id, updated);
+  saveToFile();
   return updated;
 }
 
@@ -682,5 +748,6 @@ export function getSiteSettings(): SiteSettings {
 
 export function updateSiteSettings(data: Partial<SiteSettings>): SiteSettings {
   siteSettings = { ...siteSettings, ...data };
+  saveToFile();
   return { ...siteSettings };
 }

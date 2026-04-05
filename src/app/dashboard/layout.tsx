@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   ShoppingBag,
   UserCircle,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -21,7 +20,6 @@ const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
   { href: "/dashboard/profile", label: "Profile", icon: UserCircle },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export default function DashboardLayout({

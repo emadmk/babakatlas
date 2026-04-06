@@ -1546,11 +1546,11 @@ const adminUsers = new Map<string, AdminUser>(
 );
 
 const appointmentConfigs = new Map<string, AppointmentSlotConfig>(
-  (saved?.appointmentConfigs || seedAppointmentConfigs).map((c) => [c.country, c])
+  ((saved?.appointmentConfigs?.length ? saved.appointmentConfigs : null) || seedAppointmentConfigs).map((c) => [c.country, c])
 );
 
 const appointments = new Map<string, Appointment>(
-  (saved?.appointments || seedAppointments).map((a) => [a.id, a])
+  ((saved?.appointments?.length ? saved.appointments : null) || seedAppointments).map((a) => [a.id, a])
 );
 
 const charges = new Map<string, CustomerCharge>(

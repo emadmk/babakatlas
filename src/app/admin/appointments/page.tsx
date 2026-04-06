@@ -206,6 +206,11 @@ export default function AdminAppointmentsPage() {
       </div>
 
       {/* Settings Tab */}
+      {tab === "settings" && !currentConfig && (
+        <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center">
+          <p className="text-white/50">No configuration found for {selectedCountry}. Please delete <code className="text-[#0071E3]">data/store.json</code> on the server and restart to reload defaults.</p>
+        </div>
+      )}
       {tab === "settings" && currentConfig && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}

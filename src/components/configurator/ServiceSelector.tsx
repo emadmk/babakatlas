@@ -2,49 +2,38 @@
 
 import { motion } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
-import { Package, Wrench, Check } from 'lucide-react';
+import { Package, Wrench, Check, Info } from 'lucide-react';
 
 export default function ServiceSelector() {
-  const { serviceType, setServiceType, totalSqft, installationRates, shippingCountry, carType, windows } = useConfiguratorStore();
-
-  // Derive installation fee description from API-loaded rates
-  const carTypeUpper = (carType || 'SEDAN').toUpperCase();
-  const matchingRate = installationRates?.find(
-    (r) => r.country === (shippingCountry || 'PH') && r.carType === carTypeUpper && r.active
-  );
-  const installFeeNote = matchingRate
-    ? `+ $${matchingRate.baseRate} base + $${matchingRate.perWindowRate}/window`
-    : '+ Installation fee based on vehicle';
-
-  const enabledWindows = windows.filter((w) => w.enabled);
+  const { serviceType, setServiceType } = useConfiguratorStore();
 
   const services = [
     {
       id: 'shipping' as const,
       icon: Package,
       title: 'Shipping Only',
-      description: "We'll ship the pre-cut tint films to your address for self-installation.",
+      description: "We'll ship pre-cut tint films to your address",
       features: [
-        'Pre-cut to your exact windows',
-        'Includes application toolkit',
-        'Video installation guide',
-        'Quality guarantee',
+        'Fast delivery',
+        'DIY installation guide included',
+        'Professional tools recommended',
       ],
       note: null as string | null,
     },
     {
       id: 'installation' as const,
       icon: Wrench,
-      title: 'Installation + Shipping',
-      description: 'Professional installation at a certified center near you.',
+      title: 'Home Service Installation',
+      description:
+        'Our certified technicians will come to your location',
+      longDescription:
+        'After purchasing your tint films, book a convenient appointment. Our team will assess the installation and provide a custom quote based on your vehicle and location.',
       features: [
-        'Certified professional installer',
-        'Bubble-free guarantee',
-        'Lifetime warranty on install',
-        'Same-day service available',
-        'Free removal of old tint',
+        'Professional installation',
+        'On-site service',
+        'Warranty included',
       ],
-      note: installFeeNote,
+      note: 'Installation fee will be quoted separately after booking',
     },
   ];
 
@@ -53,7 +42,7 @@ export default function ServiceSelector() {
       <div className="text-center mb-10">
         <h2 className="text-3xl font-semibold text-white mb-2">Choose Your Service</h2>
         <p className="text-white/50 text-sm">
-          Self-install or leave it to the professionals
+          Ship to your door or book a home service installation
         </p>
       </div>
 
@@ -61,12 +50,6 @@ export default function ServiceSelector() {
         {services.map((service) => {
           const isSelected = serviceType === service.id;
           const Icon = service.icon;
-          const fallbackRate = 4; // Only used if API hasn't loaded yet
-          const installCost = service.id === 'installation'
-            ? matchingRate
-              ? matchingRate.baseRate + enabledWindows.length * (matchingRate.perWindowRate || 0)
-              : totalSqft * fallbackRate
-            : 0;
 
           return (
             <motion.button
@@ -106,12 +89,19 @@ export default function ServiceSelector() {
               </h3>
 
               {/* Description */}
-              <p className="text-white/40 text-sm mb-6 leading-relaxed">
+              <p className="text-white/40 text-sm mb-2 leading-relaxed">
                 {service.description}
               </p>
 
+              {/* Long description for installation */}
+              {'longDescription' in service && service.longDescription && (
+                <p className="text-white/30 text-xs mb-4 leading-relaxed">
+                  {service.longDescription}
+                </p>
+              )}
+
               {/* Features */}
-              <ul className="space-y-2.5">
+              <ul className="space-y-2.5 mb-4">
                 {service.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <div
@@ -126,16 +116,12 @@ export default function ServiceSelector() {
                 ))}
               </ul>
 
-              {/* Additional cost note */}
+              {/* Note for installation */}
               {service.note && (
-                <div className="mt-6 pt-4 border-t border-white/5">
-                  <div className="flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-white/5">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-3.5 h-3.5 text-amber-400/70 flex-shrink-0 mt-0.5" />
                     <span className="text-xs text-amber-400/70">{service.note}</span>
-                    {totalSqft > 0 && (
-                      <span className="text-sm font-semibold text-white/50">
-                        +${installCost}
-                      </span>
-                    )}
                   </div>
                 </div>
               )}

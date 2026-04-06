@@ -30,6 +30,8 @@ import {
   Info,
   Phone,
   LogOut,
+  Calendar,
+  CreditCard,
 } from "lucide-react";
 
 type NavItem = {
@@ -49,6 +51,8 @@ const navItems: NavItem[] = [
   { href: "/admin/shipping", label: "Shipping", icon: Truck },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/appointments", label: "Appointments", icon: Calendar },
+  { href: "/admin/charges", label: "Charges", icon: CreditCard },
   {
     href: "/admin/content",
     label: "Content",

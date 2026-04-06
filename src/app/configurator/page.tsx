@@ -4,14 +4,16 @@ import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import StepIndicator from '@/components/configurator/StepIndicator';
+import CountrySelector from '@/components/configurator/CountrySelector';
 import CarTypeSelector from '@/components/configurator/CarTypeSelector';
 import WindowTintConfigurator from '@/components/configurator/WindowTintConfigurator';
 import ServiceSelector from '@/components/configurator/ServiceSelector';
 import ShippingSelector from '@/components/configurator/ShippingSelector';
+import AppointmentBooking from '@/components/configurator/AppointmentBooking';
 import OrderSummary from '@/components/configurator/OrderSummary';
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -31,31 +33,38 @@ const slideVariants = {
 function canProceed(state: ReturnType<typeof useConfiguratorStore.getState>): boolean {
   switch (state.step) {
     case 1:
-      return !!state.carType;
+      return !!state.country;
     case 2:
-      return !!state.selectedProduct && !!state.selectedPackage;
+      return !!state.carType;
     case 3:
-      return !!state.serviceType;
+      return !!state.selectedProduct && !!state.selectedPackage;
     case 4:
-      return !!state.shippingCountry;
+      return !!state.serviceType;
     case 5:
+      if (state.serviceType === 'installation') {
+        return !!(state.appointment?.date && state.appointment?.slot && state.shippingAddress.street1);
+      }
+      return !!state.shippingCountry;
+    case 6:
       return true;
     default:
       return false;
   }
 }
 
-function StepContent({ step }: { step: number }) {
+function StepContent({ step, serviceType }: { step: number; serviceType: string | null }) {
   switch (step) {
     case 1:
-      return <CarTypeSelector />;
+      return <CountrySelector />;
     case 2:
-      return <WindowTintConfigurator />;
+      return <CarTypeSelector />;
     case 3:
-      return <ServiceSelector />;
+      return <WindowTintConfigurator />;
     case 4:
-      return <ShippingSelector />;
+      return <ServiceSelector />;
     case 5:
+      return serviceType === 'installation' ? <AppointmentBooking /> : <ShippingSelector />;
+    case 6:
       return <OrderSummary />;
     default:
       return null;
@@ -64,7 +73,7 @@ function StepContent({ step }: { step: number }) {
 
 export default function ConfiguratorPage() {
   const store = useConfiguratorStore();
-  const { step, setStep, reset, loadConfig } = store;
+  const { step, setStep, reset, loadConfig, serviceType } = store;
   const isValid = canProceed(store);
 
   useEffect(() => {
@@ -125,7 +134,7 @@ export default function ConfiguratorPage() {
                 opacity: { duration: 0.2 },
               }}
             >
-              <StepContent step={step} />
+              <StepContent step={step} serviceType={serviceType} />
             </motion.div>
           </AnimatePresence>
         </div>

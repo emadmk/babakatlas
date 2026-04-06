@@ -63,7 +63,6 @@ export default function OrderSummary() {
     metersUsed,
     subtotal,
     shippingCost,
-    installationCost,
     tax,
     total,
     setStep,
@@ -103,7 +102,7 @@ export default function OrderSummary() {
         {/* Left: Details */}
         <div className="lg:col-span-3 space-y-4">
           {/* Vehicle */}
-          <SummarySection title="Vehicle" editStep={1} onEdit={setStep}>
+          <SummarySection title="Vehicle" editStep={2} onEdit={setStep}>
             <p className="text-white font-medium">{carType ? formatCarType(carType) : '--'}</p>
             {car?.glassArea && (
               <p className="text-xs text-white/40 mt-1">
@@ -113,7 +112,7 @@ export default function OrderSummary() {
           </SummarySection>
 
           {/* Tint & Package */}
-          <SummarySection title="Tint & Package" editStep={2} onEdit={setStep}>
+          <SummarySection title="Tint & Package" editStep={3} onEdit={setStep}>
             {product && pkg ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -166,16 +165,21 @@ export default function OrderSummary() {
           </SummarySection>
 
           {/* Service */}
-          <SummarySection title="Service" editStep={3} onEdit={setStep}>
+          <SummarySection title="Service" editStep={4} onEdit={setStep}>
             <p className="text-white font-medium">
               {serviceType === 'installation'
-                ? 'Professional Installation + Shipping'
+                ? 'Home Service Installation'
                 : 'Shipping Only'}
             </p>
+            {serviceType === 'installation' && (
+              <p className="text-xs text-amber-400/70 mt-1">
+                Installation fee will be quoted separately after assessment
+              </p>
+            )}
           </SummarySection>
 
-          {/* Shipping */}
-          <SummarySection title="Shipping" editStep={4} onEdit={setStep}>
+          {/* Shipping / Appointment */}
+          <SummarySection title={serviceType === 'installation' ? 'Appointment' : 'Shipping'} editStep={5} onEdit={setStep}>
             {shipping && (
               <div>
                 <p className="text-white font-medium">
@@ -225,13 +229,6 @@ export default function OrderSummary() {
                   </span>
                   <span className="text-white/80">{formatCurrency(subtotal)}</span>
                 </div>
-
-                {installationCost > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/50">Installation</span>
-                    <span className="text-white/80">{formatCurrency(installationCost)}</span>
-                  </div>
-                )}
 
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">Shipping</span>

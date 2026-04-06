@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 const STEPS = [
-  { label: 'Vehicle', number: 1 },
-  { label: 'Tint & Package', number: 2 },
-  { label: 'Service', number: 3 },
-  { label: 'Shipping', number: 4 },
-  { label: 'Summary', number: 5 },
+  { label: 'Country', number: 1 },
+  { label: 'Vehicle', number: 2 },
+  { label: 'Tint', number: 3 },
+  { label: 'Service', number: 4 },
+  { label: 'Details', number: 5 },
+  { label: 'Summary', number: 6 },
 ];
 
 export default function StepIndicator({ currentStep }: { currentStep: number }) {

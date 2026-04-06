@@ -197,6 +197,54 @@ export interface ContactInfo {
   subjects: Array<{ en: string; tl: string }>;
 }
 
+// Appointment booking
+export interface AppointmentSlotConfig {
+  country: string; // "PH" or "AU"
+  morningSlots: number;
+  afternoonSlots: number;
+  morningTime: string;
+  afternoonTime: string;
+  morningEnabled: boolean;
+  afternoonEnabled: boolean;
+  minAdvanceHours: number;
+  holidays: string[];
+  blockedDates: string[];
+}
+
+export interface Appointment {
+  id: string;
+  orderId: string;
+  userId: string | null;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  country: string;
+  address: string;
+  city: string;
+  vehicleType: string;
+  date: string;
+  slot: "morning" | "afternoon";
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  notes: string;
+  createdAt: string;
+}
+
+// Customer charges
+export interface CustomerCharge {
+  id: string;
+  userId: string | null;
+  customerEmail: string;
+  customerName: string;
+  orderId: string | null;
+  appointmentId: string | null;
+  description: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "paid" | "cancelled";
+  createdAt: string;
+  paidAt: string | null;
+}
+
 export interface HomepageContent {
   hero: {
     title: { en: string; tl: string };
@@ -794,6 +842,36 @@ const seedInstallationRates: InstallationRateConfig[] = [
   { id: "inst-au-van", country: "AU", carType: "VAN", baseRate: 110, perWindowRate: 18, active: true },
 ];
 
+const seedAppointmentConfigs: AppointmentSlotConfig[] = [
+  {
+    country: "PH",
+    morningSlots: 1,
+    afternoonSlots: 1,
+    morningTime: "09:00 AM",
+    afternoonTime: "02:00 PM",
+    morningEnabled: true,
+    afternoonEnabled: true,
+    minAdvanceHours: 24,
+    holidays: ["2026-12-25", "2026-01-01"],
+    blockedDates: [],
+  },
+  {
+    country: "AU",
+    morningSlots: 1,
+    afternoonSlots: 1,
+    morningTime: "09:00 AM",
+    afternoonTime: "02:00 PM",
+    morningEnabled: true,
+    afternoonEnabled: true,
+    minAdvanceHours: 24,
+    holidays: ["2026-12-25", "2026-01-01", "2026-01-26"],
+    blockedDates: [],
+  },
+];
+
+const seedAppointments: Appointment[] = [];
+const seedCharges: CustomerCharge[] = [];
+
 const seedSiteSettings: SiteSettings = {
   siteName: "BabakAtlas Tint Configurator",
   description: "Premium automotive window tinting solutions for Philippines and Australia",
@@ -1364,6 +1442,9 @@ interface StoreData {
   homepageContent: HomepageContent;
   adminOrders: AdminOrder[];
   adminUsers: AdminUser[];
+  appointmentConfigs?: AppointmentSlotConfig[];
+  appointments?: Appointment[];
+  charges?: CustomerCharge[];
 }
 
 function loadFromFile(): StoreData | null {
@@ -1398,6 +1479,9 @@ function saveToFile(): void {
       homepageContent,
       adminOrders: Array.from(adminOrders.values()),
       adminUsers: Array.from(adminUsers.values()),
+      appointmentConfigs: Array.from(appointmentConfigs.values()),
+      appointments: Array.from(appointments.values()),
+      charges: Array.from(charges.values()),
     };
     writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
@@ -1457,6 +1541,18 @@ const adminOrders = new Map<string, AdminOrder>(
 
 const adminUsers = new Map<string, AdminUser>(
   (saved?.adminUsers || seedAdminUsers).map((u) => [u.id, u])
+);
+
+const appointmentConfigs = new Map<string, AppointmentSlotConfig>(
+  (saved?.appointmentConfigs || seedAppointmentConfigs).map((c) => [c.country, c])
+);
+
+const appointments = new Map<string, Appointment>(
+  (saved?.appointments || seedAppointments).map((a) => [a.id, a])
+);
+
+const charges = new Map<string, CustomerCharge>(
+  (saved?.charges || seedCharges).map((c) => [c.id, c])
 );
 
 // ---------------------------------------------------------------------------
@@ -1807,4 +1903,92 @@ export function deleteTintPackage(id: string): boolean {
   const result = tintPackages.delete(id);
   if (result) saveToFile();
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// AppointmentConfig helpers
+// ---------------------------------------------------------------------------
+
+export function getAppointmentConfigs(): AppointmentSlotConfig[] {
+  return Array.from(appointmentConfigs.values());
+}
+
+export function getAppointmentConfig(country: string): AppointmentSlotConfig | undefined {
+  return appointmentConfigs.get(country);
+}
+
+export function updateAppointmentConfig(country: string, data: Partial<AppointmentSlotConfig>): AppointmentSlotConfig | null {
+  const existing = appointmentConfigs.get(country);
+  if (!existing) return null;
+  const updated: AppointmentSlotConfig = { ...existing, ...data, country };
+  appointmentConfigs.set(country, updated);
+  saveToFile();
+  return updated;
+}
+
+// ---------------------------------------------------------------------------
+// Appointment helpers
+// ---------------------------------------------------------------------------
+
+export function getAppointments(filters?: { country?: string; status?: string; userId?: string; email?: string }): Appointment[] {
+  let all = Array.from(appointments.values());
+  if (filters?.country) all = all.filter((a) => a.country === filters.country);
+  if (filters?.status) all = all.filter((a) => a.status === filters.status);
+  if (filters?.userId) all = all.filter((a) => a.userId === filters.userId);
+  if (filters?.email) all = all.filter((a) => a.customerEmail.toLowerCase() === filters.email!.toLowerCase());
+  return all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function getAppointment(id: string): Appointment | undefined {
+  return appointments.get(id);
+}
+
+export function createAppointment(data: Omit<Appointment, "id" | "createdAt">): Appointment {
+  const id = `appt-${crypto.randomUUID().slice(0, 8)}`;
+  const appointment: Appointment = { ...data, id, createdAt: new Date().toISOString() };
+  appointments.set(id, appointment);
+  saveToFile();
+  return appointment;
+}
+
+export function updateAppointment(id: string, data: Partial<Appointment>): Appointment | null {
+  const existing = appointments.get(id);
+  if (!existing) return null;
+  const updated: Appointment = { ...existing, ...data, id: existing.id };
+  appointments.set(id, updated);
+  saveToFile();
+  return updated;
+}
+
+// ---------------------------------------------------------------------------
+// CustomerCharge helpers
+// ---------------------------------------------------------------------------
+
+export function getCharges(filters?: { userId?: string; email?: string; status?: string }): CustomerCharge[] {
+  let all = Array.from(charges.values());
+  if (filters?.userId) all = all.filter((c) => c.userId === filters.userId);
+  if (filters?.email) all = all.filter((c) => c.customerEmail.toLowerCase() === filters.email!.toLowerCase());
+  if (filters?.status) all = all.filter((c) => c.status === filters.status);
+  return all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function getCharge(id: string): CustomerCharge | undefined {
+  return charges.get(id);
+}
+
+export function createCharge(data: Omit<CustomerCharge, "id" | "createdAt">): CustomerCharge {
+  const id = `chg-${crypto.randomUUID().slice(0, 8)}`;
+  const charge: CustomerCharge = { ...data, id, createdAt: new Date().toISOString() };
+  charges.set(id, charge);
+  saveToFile();
+  return charge;
+}
+
+export function updateCharge(id: string, data: Partial<CustomerCharge>): CustomerCharge | null {
+  const existing = charges.get(id);
+  if (!existing) return null;
+  const updated: CustomerCharge = { ...existing, ...data, id: existing.id };
+  charges.set(id, updated);
+  saveToFile();
+  return updated;
 }

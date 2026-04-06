@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Clock,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -21,6 +22,14 @@ interface OrderData {
   pricing: { total: number };
   items: { tintType: string; selectedWindows: string[] };
   createdAt: string;
+}
+
+interface ChargeData {
+  id: string;
+  description: string;
+  amount: number;
+  currency: string;
+  status: string;
 }
 
 const container = {
@@ -64,16 +73,17 @@ function formatDate(iso: string) {
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState<OrderData[]>([]);
+  const [charges, setCharges] = useState<ChargeData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/user/orders")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setOrders(data.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch("/api/user/orders").then((r) => r.json()).catch(() => ({ success: false })),
+      fetch("/api/user/charges").then((r) => r.json()).catch(() => ({ success: false })),
+    ]).then(([orderData, chargeData]) => {
+      if (orderData.success) setOrders(orderData.data);
+      if (chargeData.success) setCharges(chargeData.data);
+    }).finally(() => setLoading(false));
   }, []);
 
   const totalSpent = orders.reduce((sum, o) => sum + (o.pricing?.total ?? 0), 0);
@@ -144,6 +154,37 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
+          {/* Pending Charges Banner */}
+          {charges.filter((c) => c.status === "pending").length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-yellow-500/20">
+                    <CreditCard className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-yellow-400 text-sm font-medium">
+                      You have {charges.filter((c) => c.status === "pending").length} pending charge{charges.filter((c) => c.status === "pending").length > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-white/50 text-xs">
+                      Total: ${charges.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/dashboard/charges"
+                  className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1"
+                >
+                  View <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
+
           {/* Stats Grid */}
           <motion.div
             variants={container}

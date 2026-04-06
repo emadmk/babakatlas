@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   ChevronRight,
+  Calendar,
+  CreditCard,
 } from "lucide-react";
 import { useState } from "react";
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -19,6 +21,8 @@ import AuthGuard from "@/components/auth/AuthGuard";
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/dashboard/appointments", label: "Appointments", icon: Calendar },
+  { href: "/dashboard/charges", label: "Charges", icon: CreditCard },
   { href: "/dashboard/profile", label: "Profile", icon: UserCircle },
 ];
 

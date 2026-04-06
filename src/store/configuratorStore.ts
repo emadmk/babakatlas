@@ -161,8 +161,18 @@ export interface WindowConfig {
 // Store types
 // =============================================================================
 
+export interface AppointmentData {
+  date: string | null;
+  slot: 'morning' | 'afternoon' | null;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
 export interface ConfiguratorState {
   step: number;
+  country: 'PH' | 'AU' | null;
   carType: string | null;
 
   // New package-based selection
@@ -178,6 +188,9 @@ export interface ConfiguratorState {
 
   serviceType: 'shipping' | 'installation' | null;
   shippingCountry: 'PH' | 'AU' | null;
+
+  // Appointment booking data
+  appointment: AppointmentData | null;
 
   // Computed pricing
   totalSqft: number;
@@ -208,6 +221,7 @@ export interface ConfiguratorState {
   loadConfig: () => Promise<void>;
   setShippingAddress: (address: Partial<ShippingAddress>) => void;
   setStep: (step: number) => void;
+  setCountry: (country: 'PH' | 'AU') => void;
   setCarType: (carType: string) => void;
   setSelectedCategory: (category: string) => void;
   setSelectedProduct: (slug: string) => void;
@@ -226,6 +240,7 @@ export interface ConfiguratorState {
 
   setServiceType: (serviceType: 'shipping' | 'installation') => void;
   setShippingCountry: (country: 'PH' | 'AU') => void;
+  setAppointment: (data: AppointmentData | null) => void;
   calculatePricing: () => void;
   reset: () => void;
 }
@@ -245,6 +260,7 @@ const emptyShippingAddress: ShippingAddress = {
 
 const initialState = {
   step: 1,
+  country: null as 'PH' | 'AU' | null,
   carType: null as string | null,
   selectedCategory: null as string | null,
   selectedProduct: null as string | null,
@@ -253,6 +269,7 @@ const initialState = {
   windows: [] as WindowConfig[],
   serviceType: null as 'shipping' | 'installation' | null,
   shippingCountry: null as 'PH' | 'AU' | null,
+  appointment: null as AppointmentData | null,
   totalSqft: 0,
   subtotal: 0,
   metersUsed: 0,
@@ -391,6 +408,11 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
   setStep: (step: number) => set({ step }),
 
+  setCountry: (country: 'PH' | 'AU') => {
+    set({ country, shippingCountry: country, shippingAddress: { ...get().shippingAddress, country } });
+    get().calculatePricing();
+  },
+
   setCarType: (carType: string) => {
     set({ carType, selectedCategory: null, selectedProduct: null, selectedPackage: null, comboProduct: null });
     get().calculatePricing();
@@ -444,9 +466,14 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     const { shippingAddress } = get();
     set({
       shippingCountry: country,
+      country: country,
       shippingAddress: { ...shippingAddress, country },
     });
     get().calculatePricing();
+  },
+
+  setAppointment: (data: AppointmentData | null) => {
+    set({ appointment: data });
   },
 
   calculatePricing: () => {
@@ -455,10 +482,8 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       selectedProduct,
       selectedPackage,
       comboProduct,
-      serviceType,
       shippingCountry,
       shippingRates,
-      installationRates,
       taxRates,
       freeShippingThresholds,
       shippingMarkup,
@@ -529,23 +554,13 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     }
 
     // ── Installation cost ───────────────────────────────
-    let installationCost = 0;
-    if (serviceType === 'installation' && shippingCountry && car) {
-      const carTypeUpper = car.type || carType?.toUpperCase() || '';
-      const rateData = installationRates.find(
-        (r) => r.country === shippingCountry && r.carType === carTypeUpper && r.active
-      );
-      if (rateData) {
-        installationCost = rateData.baseRate + (car.windows?.length || 0) * (rateData.perWindowRate || 0);
-      } else {
-        installationCost = 2000; // PHP fallback
-      }
-    }
+    // Installation is now quote-based via separate charges. Always 0 here.
+    const installationCost = 0;
 
     // ── Tax ─────────────────────────────────────────────
     const taxRate = shippingCountry ? (taxRates[shippingCountry] ?? 0.12) : 0.12;
-    const tax = Math.round((subtotal + installationCost) * taxRate * 100) / 100;
-    const total = Math.round((subtotal + shippingCost + installationCost + tax) * 100) / 100;
+    const tax = Math.round(subtotal * taxRate * 100) / 100;
+    const total = Math.round((subtotal + shippingCost + tax) * 100) / 100;
 
     set({ totalSqft, subtotal, metersUsed, shippingCost, installationCost, tax, total });
   },

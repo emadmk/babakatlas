@@ -19,10 +19,17 @@ export interface TintProduct {
   name: { en: string; tl: string };
   description: { en: string; tl: string };
   tintType: string;
+  category: string; // "nano-ceramic" | "adaptive"
   vlt: string;
   uvBlock: number;
   heatRejection: number;
-  pricePerSqft: number;
+  irrRejection: number; // IR rejection %
+  pricePerSqft: number; // kept for backward compat
+  rollWidth: number; // meters (1.52)
+  rollLength: number; // meters (30)
+  rollPrice: number; // price per roll in PHP
+  pricePerMeter: number; // rollPrice / rollLength
+  currency: string; // "PHP"
   imageUrl: string;
   badge: string | null;
   shades: TintShade[];
@@ -38,6 +45,33 @@ export interface CarTypeConfig {
   type: string;
   windowCount: number;
   imageUrl: string;
+  active: boolean;
+  // Glass area data from Excel (sq meters)
+  glassArea?: {
+    frontWindshield: number;
+    rearWindshield: number;
+    totalSideWindows: number;
+    totalArea: number;
+  };
+  // Tint usage in meters of 1.52m roll
+  rollUsage?: {
+    windshield: number;
+    rear: number;
+    sides: number;
+    total: number;
+  };
+  // Vehicle size group for package pricing
+  sizeGroup: string; // "small" (coupe/sedan/pickup) | "medium" (mpv/suv) | "large" (van)
+}
+
+export interface TintPackage {
+  id: string;
+  name: { en: string; tl: string };
+  description: { en: string; tl: string };
+  coverage: string; // "windshield" | "half" | "semi-full" | "full-wrap" | "combo"
+  metersUsed: Record<string, number>; // { "small": 1, "medium": 1.5, "large": 2 }
+  applicableTintTypes: string[]; // ["nano-ceramic", "adaptive", "all"]
+  order: number;
   active: boolean;
 }
 
@@ -211,87 +245,31 @@ export interface HomepageContent {
 const now = new Date().toISOString();
 
 const defaultShades: TintShade[] = [
-  { id: "light", name: "Light", vlt: 70, priceMultiplier: 1.0 },
-  { id: "medium", name: "Medium", vlt: 35, priceMultiplier: 1.0 },
-  { id: "dark", name: "Dark", vlt: 15, priceMultiplier: 1.1 },
-  { id: "limo", name: "Limo", vlt: 5, priceMultiplier: 1.2 },
+  { id: "default", name: "Default", vlt: 0, priceMultiplier: 1.0 },
 ];
 
 const seedProducts: TintProduct[] = [
   {
-    id: "prod-standard",
-    slug: "standard",
-    name: { en: "Standard", tl: "Karaniwan" },
+    id: "prod-adaptive-light",
+    slug: "adaptive-light",
+    name: { en: "Adaptive Light", tl: "Adaptive Light" },
     description: {
-      en: "Reliable dyed film with solid UV protection and classic appearance.",
-      tl: "Maaasahang pelikulang tinina na may matibay na proteksyon sa UV at klasikong hitsura.",
+      en: "Smart photochromic film that auto-adjusts from 70% to 35% VLT. Premium heat and UV rejection.",
+      tl: "Matalinong photochromic film na awtomatikong nag-aayos mula 70% hanggang 35% VLT. Premium na pagtanggi sa init at UV.",
     },
-    tintType: "standard",
-    vlt: "35%",
-    uvBlock: 95,
-    heatRejection: 35,
-    pricePerSqft: 3,
-    imageUrl: "/images/tints/standard.jpg",
-    badge: null,
-    shades: [...defaultShades],
-    active: true,
-    createdAt: now,
-    updatedAt: now,
-  },
-  {
-    id: "prod-ceramic",
-    slug: "ceramic",
-    name: { en: "Ceramic", tl: "Seramiko" },
-    description: {
-      en: "Nano-ceramic technology for maximum clarity and superior heat rejection.",
-      tl: "Nano-ceramic na teknolohiya para sa pinakamataas na kalinawan at mahusay na pagtanggi sa init.",
-    },
-    tintType: "ceramic",
-    vlt: "20-70%",
-    uvBlock: 99,
-    heatRejection: 60,
-    pricePerSqft: 8,
-    imageUrl: "/images/tints/ceramic.jpg",
-    badge: "Most Popular",
-    shades: [...defaultShades],
-    active: true,
-    createdAt: now,
-    updatedAt: now,
-  },
-  {
-    id: "prod-carbon",
-    slug: "carbon",
-    name: { en: "Carbon", tl: "Karbon" },
-    description: {
-      en: "Carbon-infused film with no signal interference and matte finish.",
-      tl: "Pelikulang may halong carbon na walang signal interference at matte na tapusin.",
-    },
-    tintType: "carbon",
-    vlt: "25-50%",
-    uvBlock: 99,
-    heatRejection: 50,
-    pricePerSqft: 6,
-    imageUrl: "/images/tints/carbon.jpg",
-    badge: null,
-    shades: [...defaultShades],
-    active: true,
-    createdAt: now,
-    updatedAt: now,
-  },
-  {
-    id: "prod-adaptive",
-    slug: "adaptive",
-    name: { en: "Adaptive", tl: "Adaptive" },
-    description: {
-      en: "Smart film that automatically adjusts tint based on light conditions.",
-      tl: "Matalinong pelikula na awtomatikong nag-aayos ng tint batay sa kondisyon ng liwanag.",
-    },
-    tintType: "adaptive",
-    vlt: "Auto-adjusting",
+    tintType: "adaptive-light",
+    category: "adaptive",
+    vlt: "70-35%",
     uvBlock: 99,
     heatRejection: 65,
-    pricePerSqft: 12,
-    imageUrl: "/images/tints/adaptive.jpg",
+    irrRejection: 95,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 200000,
+    pricePerMeter: 6666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/adaptive-light.jpg",
     badge: "Premium",
     shades: [...defaultShades],
     active: true,
@@ -299,19 +277,53 @@ const seedProducts: TintProduct[] = [
     updatedAt: now,
   },
   {
-    id: "prod-crystalline",
-    slug: "crystalline",
-    name: { en: "Crystalline", tl: "Kristalino" },
+    id: "prod-adaptive-dark",
+    slug: "adaptive-dark",
+    name: { en: "Adaptive Dark", tl: "Adaptive Dark" },
     description: {
-      en: "Multi-layer optical film that keeps your windows virtually clear.",
-      tl: "Multi-layer na optical na pelikula na nagpapanatiling malinaw ang iyong mga bintana.",
+      en: "Smart photochromic film that auto-adjusts from 17% to 35% VLT. Maximum privacy with premium performance.",
+      tl: "Matalinong photochromic film na awtomatikong nag-aayos mula 17% hanggang 35% VLT. Pinakamataas na privacy na may premium na performance.",
     },
-    tintType: "crystalline",
-    vlt: "40-90%",
+    tintType: "adaptive-dark",
+    category: "adaptive",
+    vlt: "17-35%",
+    uvBlock: 99,
+    heatRejection: 65,
+    irrRejection: 95,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 200000,
+    pricePerMeter: 6666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/adaptive-dark.jpg",
+    badge: "Premium",
+    shades: [...defaultShades],
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "prod-nano-ceramic-3",
+    slug: "nano-ceramic-3",
+    name: { en: "Nano Ceramic 3%", tl: "Nano Ceramic 3%" },
+    description: {
+      en: "Ultra-dark nano ceramic film with 3% VLT. Maximum privacy and 99% infrared heat rejection.",
+      tl: "Ultra-dark nano ceramic film na may 3% VLT. Pinakamataas na privacy at 99% infrared heat rejection.",
+    },
+    tintType: "nano-ceramic-3",
+    category: "nano-ceramic",
+    vlt: "3%",
     uvBlock: 99,
     heatRejection: 60,
-    pricePerSqft: 10,
-    imageUrl: "/images/tints/crystalline.jpg",
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
     badge: null,
     shades: [...defaultShades],
     active: true,
@@ -319,19 +331,134 @@ const seedProducts: TintProduct[] = [
     updatedAt: now,
   },
   {
-    id: "prod-metallic",
-    slug: "metallic",
-    name: { en: "Metallic", tl: "Metaliko" },
+    id: "prod-nano-ceramic-5",
+    slug: "nano-ceramic-5",
+    name: { en: "Nano Ceramic 5%", tl: "Nano Ceramic 5%" },
     description: {
-      en: "Reflective metallic particles for enhanced heat rejection and privacy.",
-      tl: "Mga reflective metallic particle para sa pinahusay na pagtanggi sa init at privacy.",
+      en: "Very dark nano ceramic film with 5% VLT. Excellent privacy and 99% infrared heat rejection.",
+      tl: "Napakadilim na nano ceramic film na may 5% VLT. Mahusay na privacy at 99% infrared heat rejection.",
     },
-    tintType: "metallic",
-    vlt: "15-35%",
-    uvBlock: 97,
-    heatRejection: 45,
-    pricePerSqft: 5,
-    imageUrl: "/images/tints/metallic.jpg",
+    tintType: "nano-ceramic-5",
+    category: "nano-ceramic",
+    vlt: "5%",
+    uvBlock: 99,
+    heatRejection: 60,
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
+    badge: null,
+    shades: [...defaultShades],
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "prod-nano-ceramic-21",
+    slug: "nano-ceramic-21",
+    name: { en: "Nano Ceramic 21%", tl: "Nano Ceramic 21%" },
+    description: {
+      en: "Dark nano ceramic film with 21% VLT. Great balance of privacy and visibility with 99% IR rejection.",
+      tl: "Madilim na nano ceramic film na may 21% VLT. Magandang balanse ng privacy at visibility na may 99% IR rejection.",
+    },
+    tintType: "nano-ceramic-21",
+    category: "nano-ceramic",
+    vlt: "21%",
+    uvBlock: 99,
+    heatRejection: 60,
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
+    badge: "Most Popular",
+    shades: [...defaultShades],
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "prod-nano-ceramic-35",
+    slug: "nano-ceramic-35",
+    name: { en: "Nano Ceramic 35%", tl: "Nano Ceramic 35%" },
+    description: {
+      en: "Medium nano ceramic film with 35% VLT. Balanced privacy and visibility with 99% IR rejection.",
+      tl: "Medium nano ceramic film na may 35% VLT. Balanseng privacy at visibility na may 99% IR rejection.",
+    },
+    tintType: "nano-ceramic-35",
+    category: "nano-ceramic",
+    vlt: "35%",
+    uvBlock: 99,
+    heatRejection: 60,
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
+    badge: null,
+    shades: [...defaultShades],
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "prod-nano-ceramic-45",
+    slug: "nano-ceramic-45",
+    name: { en: "Nano Ceramic 45%", tl: "Nano Ceramic 45%" },
+    description: {
+      en: "Light-medium nano ceramic film with 45% VLT. Good visibility with solid heat rejection.",
+      tl: "Light-medium nano ceramic film na may 45% VLT. Magandang visibility na may matibay na heat rejection.",
+    },
+    tintType: "nano-ceramic-45",
+    category: "nano-ceramic",
+    vlt: "45%",
+    uvBlock: 99,
+    heatRejection: 60,
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
+    badge: null,
+    shades: [...defaultShades],
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  },
+  {
+    id: "prod-nano-ceramic-70",
+    slug: "nano-ceramic-70",
+    name: { en: "Nano Ceramic 70%", tl: "Nano Ceramic 70%" },
+    description: {
+      en: "Nearly clear nano ceramic film with 70% VLT. Maximum visibility with full heat and UV rejection.",
+      tl: "Halos malinaw na nano ceramic film na may 70% VLT. Pinakamataas na visibility na may buong heat at UV rejection.",
+    },
+    tintType: "nano-ceramic-70",
+    category: "nano-ceramic",
+    vlt: "70%",
+    uvBlock: 99,
+    heatRejection: 60,
+    irrRejection: 99,
+    pricePerSqft: 0,
+    rollWidth: 1.52,
+    rollLength: 30,
+    rollPrice: 50000,
+    pricePerMeter: 1666.67,
+    currency: "PHP",
+    imageUrl: "/images/tints/nano-ceramic.jpg",
     badge: null,
     shades: [...defaultShades],
     active: true,
@@ -349,6 +476,21 @@ const seedCarTypes: CarTypeConfig[] = [
     windowCount: 6,
     imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=250&fit=crop",
     active: true,
+    glassArea: { frontWindshield: 1.4, rearWindshield: 1.0, totalSideWindows: 1.3, totalArea: 3.7 },
+    rollUsage: { windshield: 0.93, rear: 0.67, sides: 0.87, total: 2.47 },
+    sizeGroup: "small",
+  },
+  {
+    id: "car-mpv",
+    slug: "mpv",
+    name: { en: "MPV", tl: "MPV" },
+    type: "MPV",
+    windowCount: 8,
+    imageUrl: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop",
+    active: true,
+    glassArea: { frontWindshield: 1.7, rearWindshield: 1.3, totalSideWindows: 1.8, totalArea: 4.8 },
+    rollUsage: { windshield: 1.13, rear: 0.87, sides: 1.20, total: 3.20 },
+    sizeGroup: "medium",
   },
   {
     id: "car-suv",
@@ -358,6 +500,33 @@ const seedCarTypes: CarTypeConfig[] = [
     windowCount: 8,
     imageUrl: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=250&fit=crop",
     active: true,
+    glassArea: { frontWindshield: 1.6, rearWindshield: 1.2, totalSideWindows: 1.5, totalArea: 4.3 },
+    rollUsage: { windshield: 1.07, rear: 0.80, sides: 1.00, total: 2.87 },
+    sizeGroup: "medium",
+  },
+  {
+    id: "car-coupe",
+    slug: "coupe",
+    name: { en: "Coupe", tl: "Coupe" },
+    type: "COUPE",
+    windowCount: 4,
+    imageUrl: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop",
+    active: true,
+    glassArea: { frontWindshield: 1.2, rearWindshield: 0.9, totalSideWindows: 1.0, totalArea: 3.1 },
+    rollUsage: { windshield: 0.80, rear: 0.60, sides: 0.67, total: 2.07 },
+    sizeGroup: "small",
+  },
+  {
+    id: "car-pickup",
+    slug: "pickup",
+    name: { en: "Pickup Truck", tl: "Pickup Truck" },
+    type: "PICKUP",
+    windowCount: 6,
+    imageUrl: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop",
+    active: true,
+    glassArea: { frontWindshield: 1.5, rearWindshield: 1.0, totalSideWindows: 1.4, totalArea: 3.9 },
+    rollUsage: { windshield: 1.00, rear: 0.67, sides: 0.93, total: 2.60 },
+    sizeGroup: "small",
   },
   {
     id: "car-van",
@@ -367,51 +536,9 @@ const seedCarTypes: CarTypeConfig[] = [
     windowCount: 8,
     imageUrl: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop",
     active: true,
-  },
-  {
-    id: "car-station-wagon",
-    slug: "station_wagon",
-    name: { en: "Station Wagon", tl: "Station Wagon" },
-    type: "STATION_WAGON",
-    windowCount: 8,
-    imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=250&fit=crop",
-    active: true,
-  },
-  {
-    id: "car-hatchback",
-    slug: "hatchback",
-    name: { en: "Hatchback", tl: "Hatchback" },
-    type: "HATCHBACK",
-    windowCount: 6,
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop",
-    active: true,
-  },
-  {
-    id: "car-coupe",
-    slug: "coupe",
-    name: { en: "Coupe", tl: "Coupe" },
-    type: "COUPE",
-    windowCount: 6,
-    imageUrl: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop",
-    active: true,
-  },
-  {
-    id: "car-truck",
-    slug: "truck",
-    name: { en: "Truck", tl: "Trak" },
-    type: "TRUCK",
-    windowCount: 6,
-    imageUrl: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop",
-    active: true,
-  },
-  {
-    id: "car-convertible",
-    slug: "convertible",
-    name: { en: "Convertible", tl: "Convertible" },
-    type: "CONVERTIBLE",
-    windowCount: 6,
-    imageUrl: "https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=400&h=250&fit=crop",
-    active: true,
+    glassArea: { frontWindshield: 2.0, rearWindshield: 1.5, totalSideWindows: 2.0, totalArea: 5.5 },
+    rollUsage: { windshield: 1.33, rear: 1.00, sides: 1.33, total: 4.00 },
+    sizeGroup: "large",
   },
 ];
 
@@ -441,74 +568,56 @@ interface WindowSeedEntry {
 
 const windowSeedMap: Record<string, WindowSeedEntry[]> = {
   SEDAN: [
-    { position: "FRONT_WINDSHIELD", sqft: 12 },
-    { position: "REAR_WINDSHIELD", sqft: 10 },
-    { position: "FRONT_LEFT", sqft: 4 },
-    { position: "FRONT_RIGHT", sqft: 4 },
-    { position: "REAR_LEFT", sqft: 4 },
-    { position: "REAR_RIGHT", sqft: 4 },
-  ],
-  SUV: [
-    { position: "FRONT_WINDSHIELD", sqft: 14 },
-    { position: "REAR_WINDSHIELD", sqft: 12 },
-    { position: "FRONT_LEFT", sqft: 5 },
-    { position: "FRONT_RIGHT", sqft: 5 },
-    { position: "REAR_LEFT", sqft: 5 },
-    { position: "REAR_RIGHT", sqft: 5 },
-    { position: "REAR_QUARTER_LEFT", sqft: 3 },
-    { position: "REAR_QUARTER_RIGHT", sqft: 3 },
-  ],
-  VAN: [
-    { position: "FRONT_WINDSHIELD", sqft: 16 },
-    { position: "REAR_WINDSHIELD", sqft: 14 },
-    { position: "FRONT_LEFT", sqft: 5 },
-    { position: "FRONT_RIGHT", sqft: 5 },
-    { position: "REAR_LEFT", sqft: 6 },
-    { position: "REAR_RIGHT", sqft: 6 },
-    { position: "REAR_QUARTER_LEFT", sqft: 4 },
-    { position: "REAR_QUARTER_RIGHT", sqft: 4 },
-  ],
-  STATION_WAGON: [
-    { position: "FRONT_WINDSHIELD", sqft: 13 },
+    { position: "FRONT_WINDSHIELD", sqft: 15 },
     { position: "REAR_WINDSHIELD", sqft: 11 },
     { position: "FRONT_LEFT", sqft: 4 },
     { position: "FRONT_RIGHT", sqft: 4 },
+    { position: "REAR_LEFT", sqft: 3 },
+    { position: "REAR_RIGHT", sqft: 3 },
+  ],
+  MPV: [
+    { position: "FRONT_WINDSHIELD", sqft: 18 },
+    { position: "REAR_WINDSHIELD", sqft: 14 },
+    { position: "FRONT_LEFT", sqft: 5 },
+    { position: "FRONT_RIGHT", sqft: 5 },
     { position: "REAR_LEFT", sqft: 5 },
     { position: "REAR_RIGHT", sqft: 5 },
     { position: "REAR_QUARTER_LEFT", sqft: 3 },
     { position: "REAR_QUARTER_RIGHT", sqft: 3 },
   ],
-  HATCHBACK: [
-    { position: "FRONT_WINDSHIELD", sqft: 11 },
-    { position: "REAR_WINDSHIELD", sqft: 9 },
-    { position: "FRONT_LEFT", sqft: 4 },
-    { position: "FRONT_RIGHT", sqft: 4 },
-    { position: "REAR_LEFT", sqft: 3 },
-    { position: "REAR_RIGHT", sqft: 3 },
+  SUV: [
+    { position: "FRONT_WINDSHIELD", sqft: 17 },
+    { position: "REAR_WINDSHIELD", sqft: 13 },
+    { position: "FRONT_LEFT", sqft: 5 },
+    { position: "FRONT_RIGHT", sqft: 5 },
+    { position: "REAR_LEFT", sqft: 4 },
+    { position: "REAR_RIGHT", sqft: 4 },
+    { position: "REAR_QUARTER_LEFT", sqft: 3 },
+    { position: "REAR_QUARTER_RIGHT", sqft: 3 },
   ],
   COUPE: [
-    { position: "FRONT_WINDSHIELD", sqft: 11 },
-    { position: "REAR_WINDSHIELD", sqft: 8 },
+    { position: "FRONT_WINDSHIELD", sqft: 13 },
+    { position: "REAR_WINDSHIELD", sqft: 10 },
     { position: "FRONT_LEFT", sqft: 4 },
     { position: "FRONT_RIGHT", sqft: 4 },
-    { position: "REAR_LEFT", sqft: 3 },
-    { position: "REAR_RIGHT", sqft: 3 },
   ],
-  TRUCK: [
-    { position: "FRONT_WINDSHIELD", sqft: 14 },
-    { position: "REAR_WINDSHIELD", sqft: 10 },
+  PICKUP: [
+    { position: "FRONT_WINDSHIELD", sqft: 16 },
+    { position: "REAR_WINDSHIELD", sqft: 11 },
     { position: "FRONT_LEFT", sqft: 5 },
     { position: "FRONT_RIGHT", sqft: 5 },
     { position: "REAR_LEFT", sqft: 3 },
     { position: "REAR_RIGHT", sqft: 3 },
   ],
-  CONVERTIBLE: [
-    { position: "FRONT_WINDSHIELD", sqft: 10 },
-    { position: "FRONT_LEFT", sqft: 4 },
-    { position: "FRONT_RIGHT", sqft: 4 },
-    { position: "REAR_LEFT", sqft: 3 },
-    { position: "REAR_RIGHT", sqft: 3 },
-    { position: "SUNROOF", sqft: 6 },
+  VAN: [
+    { position: "FRONT_WINDSHIELD", sqft: 22 },
+    { position: "REAR_WINDSHIELD", sqft: 16 },
+    { position: "FRONT_LEFT", sqft: 5 },
+    { position: "FRONT_RIGHT", sqft: 5 },
+    { position: "REAR_LEFT", sqft: 5 },
+    { position: "REAR_RIGHT", sqft: 5 },
+    { position: "REAR_QUARTER_LEFT", sqft: 4 },
+    { position: "REAR_QUARTER_RIGHT", sqft: 4 },
   ],
 };
 
@@ -577,6 +686,74 @@ const seedServiceConfigs: ServiceConfig[] = [
   },
 ];
 
+const seedTintPackages: TintPackage[] = [
+  {
+    id: "pkg-windshield",
+    name: { en: "Windshield Only", tl: "Windshield Lamang" },
+    description: {
+      en: "Front windshield tint only. Great for reducing glare and heat.",
+      tl: "Harapang windshield tint lamang. Mahusay para sa pagbawas ng glare at init.",
+    },
+    coverage: "windshield",
+    metersUsed: { small: 1, medium: 1.5, large: 2 },
+    applicableTintTypes: ["nano-ceramic", "adaptive"],
+    order: 1,
+    active: true,
+  },
+  {
+    id: "pkg-half",
+    name: { en: "Windshield & Front Windows (Half Unit)", tl: "Windshield at Harapang Bintana (Kalahating Unit)" },
+    description: {
+      en: "Front windshield plus front side windows. Covers the driver area.",
+      tl: "Harapang windshield at harapang side windows. Saklaw ang driver area.",
+    },
+    coverage: "half",
+    metersUsed: { small: 2.5, medium: 3, large: 3.5 },
+    applicableTintTypes: ["nano-ceramic", "adaptive"],
+    order: 2,
+    active: true,
+  },
+  {
+    id: "pkg-semi-full",
+    name: { en: "All Windows & Rear (Semi Full)", tl: "Lahat ng Bintana at Likuran (Semi Full)" },
+    description: {
+      en: "All side windows plus rear windshield. Everything except front windshield.",
+      tl: "Lahat ng side windows at likurang windshield. Lahat maliban sa harapang windshield.",
+    },
+    coverage: "semi-full",
+    metersUsed: { small: 2.5, medium: 3, large: 4.5 },
+    applicableTintTypes: ["nano-ceramic", "adaptive"],
+    order: 3,
+    active: true,
+  },
+  {
+    id: "pkg-full-wrap",
+    name: { en: "Full Wrap", tl: "Full Wrap" },
+    description: {
+      en: "Complete vehicle coverage including front windshield, all windows, and rear windshield.",
+      tl: "Kumpletong saklaw ng sasakyan kasama ang harapang windshield, lahat ng bintana, at likurang windshield.",
+    },
+    coverage: "full-wrap",
+    metersUsed: { small: 3.5, medium: 4.5, large: 6 },
+    applicableTintTypes: ["nano-ceramic", "adaptive"],
+    order: 4,
+    active: true,
+  },
+  {
+    id: "pkg-combo",
+    name: { en: "Combo (Adaptive + Ceramic)", tl: "Combo (Adaptive + Ceramic)" },
+    description: {
+      en: "Adaptive film on windshield, Nano Ceramic on all other windows. Best of both worlds.",
+      tl: "Adaptive film sa windshield, Nano Ceramic sa lahat ng ibang bintana. Pinakamahusay na kombinasyon.",
+    },
+    coverage: "combo",
+    metersUsed: { small: 3.5, medium: 4.5, large: 6 },
+    applicableTintTypes: ["adaptive"],
+    order: 5,
+    active: true,
+  },
+];
+
 const seedShippingRates: ShippingRateConfig[] = [
   {
     id: "ship-ph",
@@ -603,22 +780,18 @@ const seedShippingRates: ShippingRateConfig[] = [
 ];
 
 const seedInstallationRates: InstallationRateConfig[] = [
-  { id: "inst-ph-sedan", country: "PH", carType: "SEDAN", baseRate: 50, perWindowRate: 8, active: true },
-  { id: "inst-ph-suv", country: "PH", carType: "SUV", baseRate: 65, perWindowRate: 10, active: true },
-  { id: "inst-ph-van", country: "PH", carType: "VAN", baseRate: 70, perWindowRate: 10, active: true },
-  { id: "inst-ph-station-wagon", country: "PH", carType: "STATION_WAGON", baseRate: 60, perWindowRate: 9, active: true },
-  { id: "inst-ph-hatchback", country: "PH", carType: "HATCHBACK", baseRate: 45, perWindowRate: 8, active: true },
-  { id: "inst-ph-coupe", country: "PH", carType: "COUPE", baseRate: 45, perWindowRate: 8, active: true },
-  { id: "inst-ph-truck", country: "PH", carType: "TRUCK", baseRate: 60, perWindowRate: 9, active: true },
-  { id: "inst-ph-convertible", country: "PH", carType: "CONVERTIBLE", baseRate: 55, perWindowRate: 9, active: true },
+  { id: "inst-ph-sedan", country: "PH", carType: "SEDAN", baseRate: 2000, perWindowRate: 500, active: true },
+  { id: "inst-ph-mpv", country: "PH", carType: "MPV", baseRate: 2500, perWindowRate: 500, active: true },
+  { id: "inst-ph-suv", country: "PH", carType: "SUV", baseRate: 2500, perWindowRate: 500, active: true },
+  { id: "inst-ph-coupe", country: "PH", carType: "COUPE", baseRate: 1800, perWindowRate: 500, active: true },
+  { id: "inst-ph-pickup", country: "PH", carType: "PICKUP", baseRate: 2200, perWindowRate: 500, active: true },
+  { id: "inst-ph-van", country: "PH", carType: "VAN", baseRate: 3000, perWindowRate: 500, active: true },
   { id: "inst-au-sedan", country: "AU", carType: "SEDAN", baseRate: 80, perWindowRate: 15, active: true },
+  { id: "inst-au-mpv", country: "AU", carType: "MPV", baseRate: 100, perWindowRate: 18, active: true },
   { id: "inst-au-suv", country: "AU", carType: "SUV", baseRate: 100, perWindowRate: 18, active: true },
-  { id: "inst-au-van", country: "AU", carType: "VAN", baseRate: 110, perWindowRate: 18, active: true },
-  { id: "inst-au-station-wagon", country: "AU", carType: "STATION_WAGON", baseRate: 90, perWindowRate: 16, active: true },
-  { id: "inst-au-hatchback", country: "AU", carType: "HATCHBACK", baseRate: 75, perWindowRate: 14, active: true },
   { id: "inst-au-coupe", country: "AU", carType: "COUPE", baseRate: 75, perWindowRate: 14, active: true },
-  { id: "inst-au-truck", country: "AU", carType: "TRUCK", baseRate: 90, perWindowRate: 16, active: true },
-  { id: "inst-au-convertible", country: "AU", carType: "CONVERTIBLE", baseRate: 85, perWindowRate: 15, active: true },
+  { id: "inst-au-pickup", country: "AU", carType: "PICKUP", baseRate: 90, perWindowRate: 16, active: true },
+  { id: "inst-au-van", country: "AU", carType: "VAN", baseRate: 110, perWindowRate: 18, active: true },
 ];
 
 const seedSiteSettings: SiteSettings = {
@@ -1183,6 +1356,7 @@ interface StoreData {
   serviceConfigs: ServiceConfig[];
   shippingRates: ShippingRateConfig[];
   installationRates: InstallationRateConfig[];
+  tintPackages: TintPackage[];
   siteSettings: SiteSettings;
   faqItems: FaqItem[];
   aboutContent: AboutContent;
@@ -1216,6 +1390,7 @@ function saveToFile(): void {
       serviceConfigs: Array.from(serviceConfigs.values()),
       shippingRates: Array.from(shippingRates.values()),
       installationRates: Array.from(installationRates.values()),
+      tintPackages: Array.from(tintPackages.values()),
       siteSettings,
       faqItems: Array.from(faqItems.values()),
       aboutContent,
@@ -1258,6 +1433,10 @@ const shippingRates = new Map<string, ShippingRateConfig>(
 
 const installationRates = new Map<string, InstallationRateConfig>(
   (saved?.installationRates || seedInstallationRates).map((r) => [r.id, r])
+);
+
+const tintPackages = new Map<string, TintPackage>(
+  (saved?.tintPackages || seedTintPackages).map((p) => [p.id, p])
 );
 
 let siteSettings: SiteSettings = saved?.siteSettings || { ...seedSiteSettings };
@@ -1593,4 +1772,39 @@ export function updateAdminUser(id: string, data: Partial<AdminUser>): AdminUser
   adminUsers.set(id, updated);
   saveToFile();
   return updated;
+}
+
+// ---------------------------------------------------------------------------
+// TintPackage helpers
+// ---------------------------------------------------------------------------
+
+export function getTintPackages(): TintPackage[] {
+  return Array.from(tintPackages.values()).sort((a, b) => a.order - b.order);
+}
+
+export function getTintPackage(id: string): TintPackage | undefined {
+  return tintPackages.get(id);
+}
+
+export function createTintPackage(data: Omit<TintPackage, "id">): TintPackage {
+  const id = `pkg-${crypto.randomUUID().slice(0, 8)}`;
+  const pkg: TintPackage = { ...data, id };
+  tintPackages.set(id, pkg);
+  saveToFile();
+  return pkg;
+}
+
+export function updateTintPackage(id: string, data: Partial<TintPackage>): TintPackage | null {
+  const existing = tintPackages.get(id);
+  if (!existing) return null;
+  const updated: TintPackage = { ...existing, ...data, id: existing.id };
+  tintPackages.set(id, updated);
+  saveToFile();
+  return updated;
+}
+
+export function deleteTintPackage(id: string): boolean {
+  const result = tintPackages.delete(id);
+  if (result) saveToFile();
+  return result;
 }

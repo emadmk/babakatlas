@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
       windowCount: body.windowCount || 0,
       imageUrl: body.imageUrl || "",
       active: body.active !== false,
+      glassArea: body.glassArea || undefined,
+      rollUsage: body.rollUsage || undefined,
+      sizeGroup: body.sizeGroup || "small",
     });
     return NextResponse.json({ success: true, data: carType }, { status: 201 });
   } catch {

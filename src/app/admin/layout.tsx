@@ -42,6 +42,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Tint Products", icon: Package },
+  { href: "/admin/packages", label: "Packages", icon: Package },
   { href: "/admin/cars", label: "Car Types", icon: Car },
   { href: "/admin/windows", label: "Windows", icon: AppWindow },
   { href: "/admin/services", label: "Services", icon: Wrench },

@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 const STEPS = [
-  { label: 'Car Type', number: 1 },
-  { label: 'Windows & Tint', number: 2 },
+  { label: 'Vehicle', number: 1 },
+  { label: 'Tint & Package', number: 2 },
   { label: 'Service', number: 3 },
   { label: 'Shipping', number: 4 },
   { label: 'Summary', number: 5 },

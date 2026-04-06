@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { buildPricingQuote } from '@/lib/pricingServer';
 import { formatCurrency } from '@/lib/pricing';
-import { TINT_TYPES, WINDOW_SQFT } from '@/store/configuratorStore';
+// Legacy imports kept for buildPricingQuote fallback path
 import { createAdminOrder } from '@/lib/adminData';
 
 import { orders, type Order } from '@/lib/ordersStore';
@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
       carType,
       carModel,
       tintType,
+      selectedProduct,
+      selectedPackage,
+      comboProduct,
       selectedWindows,
       serviceType,
     } = body;
@@ -53,19 +56,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!carType || !WINDOW_SQFT[carType]) {
+    if (!carType) {
       return NextResponse.json(
-        { success: false, error: 'Invalid car type' },
-        { status: 400 },
-      );
-    }
-
-    // tintType can be the primary tint or first window's tint
-    // Individual window tints are in windowConfigs if provided
-
-    if (!Array.isArray(selectedWindows) || selectedWindows.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'At least one window must be selected' },
+        { success: false, error: 'Car type is required' },
         { status: 400 },
       );
     }
@@ -79,13 +72,76 @@ export async function POST(request: NextRequest) {
 
     // ── Calculate pricing server-side ─────────────────────────────
     const country = shippingAddress.country;
-    const quote = buildPricingQuote({
-      carType,
-      selectedWindows,
-      tintType,
-      serviceType,
-      country,
-    });
+
+    // Try package-based pricing first, fall back to legacy
+    let quote;
+    if (selectedProduct && selectedPackage) {
+      // New package-based: use client-computed values with server validation
+      const { getProducts, getTintPackages, getCarTypes, getShippingRates, getInstallationRates, getSiteSettings } = await import('@/lib/adminData');
+      const products = getProducts();
+      const packages = getTintPackages();
+      const carTypes = getCarTypes();
+      const settings = getSiteSettings();
+
+      const product = products.find((p) => p.slug === selectedProduct);
+      const pkg = packages.find((p) => p.id === selectedPackage);
+      const car = carTypes.find((c) => c.slug === carType);
+
+      if (!product || !pkg || !car) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid product, package, or car type' },
+          { status: 400 },
+        );
+      }
+
+      const sizeGroup = car.sizeGroup || 'small';
+      const metersUsed = pkg.metersUsed[sizeGroup] || 0;
+      let subtotal = metersUsed * product.pricePerMeter;
+
+      // Handle combo pricing
+      if (pkg.coverage === 'combo' && comboProduct) {
+        const ceramicProduct = products.find((p) => p.slug === comboProduct);
+        if (ceramicProduct) {
+          const windshieldPkg = packages.find((p) => p.coverage === 'windshield');
+          const wMeters = windshieldPkg ? (windshieldPkg.metersUsed[sizeGroup] || 1) : 1;
+          const rMeters = metersUsed - wMeters;
+          subtotal = (wMeters * product.pricePerMeter) + (rMeters * ceramicProduct.pricePerMeter);
+        }
+      }
+
+      const taxRate = (settings.taxRates as Record<string, number>)[country] ?? 0.12;
+      const taxLabel = country === 'PH' ? `VAT ${taxRate * 100}%` : `GST ${taxRate * 100}%`;
+
+      // Shipping
+      let shipping = 0;
+      const shippingRates = getShippingRates();
+      const shippingRate = shippingRates.find((r) => r.country === country && r.active);
+      if (shippingRate && subtotal < shippingRate.freeAbove) {
+        shipping = shippingRate.baseRate;
+      }
+
+      // Installation
+      let installation = 0;
+      if (serviceType === 'installation') {
+        const installRates = getInstallationRates(country, car.type);
+        if (installRates.length > 0) {
+          installation = installRates[0].baseRate + (car.windowCount || 0) * installRates[0].perWindowRate;
+        }
+      }
+
+      const tax = Math.round((subtotal + installation) * taxRate * 100) / 100;
+      const total = Math.round((subtotal + shipping + installation + tax) * 100) / 100;
+
+      quote = { totalSqft: 0, unitPrice: product.pricePerMeter, subtotal, shipping, installation, taxLabel, tax, total };
+    } else {
+      quote = buildPricingQuote({
+        carType,
+        selectedWindows: Array.isArray(selectedWindows) ? selectedWindows : [],
+        tintType: tintType || 'nano-ceramic-35',
+        serviceType,
+        country,
+      });
+    }
 
     // ── Get authenticated user (optional) ─────────────────────────
     const session = await getServerSession(authOptions);
@@ -96,7 +152,7 @@ export async function POST(request: NextRequest) {
     const orderId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    const tint = TINT_TYPES[tintType] || { name: tintType || 'Custom' };
+    const tintName = selectedProduct || tintType || 'Custom';
 
     const order: Order = {
       id: orderId,
@@ -108,9 +164,9 @@ export async function POST(request: NextRequest) {
       items: {
         carType,
         carModel: carModel ?? null,
-        tintType: tintType || 'mixed',
-        tintName: tint.name,
-        selectedWindows,
+        tintType: tintType || selectedProduct || 'mixed',
+        tintName,
+        selectedWindows: Array.isArray(selectedWindows) ? selectedWindows : [],
         totalSqft: quote.totalSqft,
         unitPrice: quote.unitPrice,
         subtotal: quote.subtotal,

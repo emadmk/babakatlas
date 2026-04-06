@@ -19,9 +19,13 @@ export async function GET() {
       id: car.slug,
       name: car.name.en,
       slug: car.slug,
+      type: car.type,
       imageUrl: car.imageUrl,
       windows,
       totalSqft: windows.reduce((sum, w) => sum + w.sqft, 0),
+      glassArea: car.glassArea || null,
+      rollUsage: car.rollUsage || null,
+      sizeGroup: car.sizeGroup || "small",
     };
   });
 

@@ -11,6 +11,7 @@ import { useConfiguratorStore } from "@/store/configuratorStore";
 const navLinks = [
   { href: "/", labelKey: "nav.home" },
   { href: "/configurator", labelKey: "nav.configurator" },
+  { href: "/shop", labelKey: "nav.shop" },
   { href: "/about", labelKey: "nav.about" },
   { href: "/faq", labelKey: "nav.faq" },
   { href: "/contact", labelKey: "nav.contact" },

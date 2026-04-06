@@ -2,18 +2,21 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import {
-  useConfiguratorStore,
-  TINT_TYPES,
-  SHADE_LEVELS,
-} from '@/store/configuratorStore';
+import { useConfiguratorStore } from '@/store/configuratorStore';
 import { Edit3, Shield, Lock, CreditCard } from 'lucide-react';
 
-// Format car type string dynamically instead of using hardcoded labels
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 const formatCarType = (type: string) => {
-  // Handle common abbreviations
   const upper = type.toUpperCase();
-  if (upper === 'SUV') return 'SUV';
+  if (upper === 'SUV' || upper === 'MPV') return upper;
   return type
     ?.split('_')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -52,10 +55,12 @@ export default function OrderSummary() {
   const router = useRouter();
   const {
     carType,
-    windows,
+    selectedProduct,
+    selectedPackage,
+    comboProduct,
     serviceType,
     shippingCountry,
-    totalSqft,
+    metersUsed,
     subtotal,
     shippingCost,
     installationCost,
@@ -64,9 +69,14 @@ export default function OrderSummary() {
     setStep,
     shippingAddress,
     shippingRates,
+    tintProducts,
+    tintPackages,
+    carTypes,
   } = useConfiguratorStore();
 
-  const enabledWindows = windows.filter((w) => w.enabled);
+  const car = carTypes.find((c) => c.slug === carType || c.id === carType);
+  const product = tintProducts.find((p) => p.slug === selectedProduct);
+  const pkg = tintPackages.find((p) => p.id === selectedPackage);
 
   // Get shipping display info from API-loaded data
   const shippingRateData = shippingCountry
@@ -95,49 +105,64 @@ export default function OrderSummary() {
           {/* Vehicle */}
           <SummarySection title="Vehicle" editStep={1} onEdit={setStep}>
             <p className="text-white font-medium">{carType ? formatCarType(carType) : '--'}</p>
+            {car?.glassArea && (
+              <p className="text-xs text-white/40 mt-1">
+                Total glass area: {car.glassArea.totalArea} sqm
+              </p>
+            )}
           </SummarySection>
 
-          {/* Windows & Tint */}
-          <SummarySection title="Windows & Tint" editStep={2} onEdit={setStep}>
-            <div className="space-y-2.5">
-              {enabledWindows.map((w) => {
-                const tint = TINT_TYPES[w.tintType];
-                const shade = SHADE_LEVELS[w.shade];
-                return (
-                  <div
-                    key={w.position}
-                    className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0"
-                  >
-                    <div>
-                      <span className="text-sm text-white/80">{w.label}</span>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-white/40">
-                          {tint?.name || w.tintType}
-                        </span>
-                        <span className="text-[11px] text-white/30">|</span>
-                        <span className="text-[11px] text-white/40">
-                          {shade?.name || w.shade} ({shade?.vlt ?? '--'}% VLT)
-                        </span>
-                        <span className="text-[11px] text-white/30">|</span>
-                        <span className="text-[11px] text-white/40">{w.sqft} ft²</span>
-                      </div>
+          {/* Tint & Package */}
+          <SummarySection title="Tint & Package" editStep={2} onEdit={setStep}>
+            {product && pkg ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-sm text-white/80 font-medium">{product.name}</span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] text-white/40">
+                        VLT: {product.specs.vlt}
+                      </span>
+                      <span className="text-[11px] text-white/30">|</span>
+                      <span className="text-[11px] text-white/40">
+                        UV: {product.specs.uvBlock}
+                      </span>
+                      <span className="text-[11px] text-white/30">|</span>
+                      <span className="text-[11px] text-white/40">
+                        IRR: {product.specs.irrRejection}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-white/70">
-                      ${(w.sqft * w.pricePerSqft).toFixed(2)}
-                    </span>
                   </div>
-                );
-              })}
-              {enabledWindows.length === 0 && (
-                <p className="text-sm text-white/30">No windows selected</p>
-              )}
-              <div className="pt-2 mt-1 border-t border-white/5 flex justify-between">
-                <span className="text-sm text-white/50">
-                  {enabledWindows.length} windows | {totalSqft} sq.ft
-                </span>
-                <span className="text-sm font-medium text-white">${subtotal.toFixed(2)}</span>
+                  <span className="text-sm text-white/50">
+                    {formatCurrency(product.pricePerMeter)}/m
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm text-white/70">{pkg.name.en}</span>
+                      <span className="text-xs text-white/30 ml-2">({metersUsed}m of roll)</span>
+                    </div>
+                  </div>
+
+                  {pkg.coverage === 'combo' && comboProduct && (
+                    <div className="mt-2 text-xs text-white/40">
+                      Combo: Adaptive windshield + {tintProducts.find((p) => p.slug === comboProduct)?.name || 'Nano Ceramic'} rest
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-white/5 flex justify-between">
+                  <span className="text-sm text-white/50">
+                    {metersUsed}m x {formatCurrency(product.pricePerMeter)}/m
+                  </span>
+                  <span className="text-sm font-medium text-white">{formatCurrency(subtotal)}</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <p className="text-sm text-white/30">No tint selected</p>
+            )}
           </SummarySection>
 
           {/* Service */}
@@ -163,7 +188,6 @@ export default function OrderSummary() {
                 )}
               </div>
             )}
-            {/* Shipping Address */}
             {shippingAddress.name && (
               <div className="mt-3 pt-3 border-t border-white/5">
                 <p className="text-xs text-white/40 uppercase tracking-wider mb-1.5">Ship To</p>
@@ -197,28 +221,28 @@ export default function OrderSummary() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">
-                    Tint Films ({enabledWindows.length} windows, {totalSqft} ft²)
+                    Tint Film ({metersUsed}m)
                   </span>
-                  <span className="text-white/80">${subtotal.toFixed(2)}</span>
+                  <span className="text-white/80">{formatCurrency(subtotal)}</span>
                 </div>
 
                 {installationCost > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-white/50">Installation</span>
-                    <span className="text-white/80">${installationCost.toFixed(2)}</span>
+                    <span className="text-white/80">{formatCurrency(installationCost)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">Shipping</span>
                   <span className={shippingCost === 0 ? 'text-emerald-400 text-sm' : 'text-white/80'}>
-                    {shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0 ? 'Free' : formatCurrency(shippingCost)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">Tax (est.)</span>
-                  <span className="text-white/80">${tax.toFixed(2)}</span>
+                  <span className="text-white/50">Tax (VAT est.)</span>
+                  <span className="text-white/80">{formatCurrency(tax)}</span>
                 </div>
 
                 <div className="border-t border-white/10 pt-3 mt-3">
@@ -230,7 +254,7 @@ export default function OrderSummary() {
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
                     >
-                      ${total.toFixed(2)}
+                      {formatCurrency(total)}
                     </motion.span>
                   </div>
                 </div>

@@ -107,10 +107,26 @@ export default function CheckoutPage() {
       }
     : { name: address.country === 'PH' ? 'Philippines' : 'Australia', baseCost: 0, deliveryTime: '', flag: '' };
 
-  const isEmpty = !config.carType || enabledWindows.length === 0;
+  // New package-based data
+  const selectedProductData = config.tintProducts.find((p) => p.slug === config.selectedProduct);
+  const selectedPkgData = config.tintPackages.find((p) => p.id === config.selectedPackage);
 
-  // Window details for the order summary
+  const isEmpty = !config.carType || !config.selectedProduct || !config.selectedPackage;
+
+  // Window details for the order summary (backward compat)
   const windowItems = useMemo(() => {
+    if (selectedProductData && selectedPkgData) {
+      return [{
+        id: 'package',
+        label: `${selectedProductData.name} - ${selectedPkgData.name.en}`,
+        sqft: 0,
+        tintType: selectedProductData.tintType,
+        tintName: selectedProductData.name,
+        shade: 'default',
+        pricePerSqft: 0,
+        price: config.subtotal,
+      }];
+    }
     return enabledWindows.map((w) => ({
       id: w.position,
       label: w.label,
@@ -121,7 +137,7 @@ export default function CheckoutPage() {
       pricePerSqft: w.pricePerSqft,
       price: w.sqft * w.pricePerSqft,
     }));
-  }, [enabledWindows]);
+  }, [enabledWindows, selectedProductData, selectedPkgData, config.subtotal]);
 
   // ── Submit order ──────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
@@ -145,7 +161,11 @@ export default function CheckoutPage() {
           shippingAddress: address,
           carType: config.carType,
           carModel: null,
-          tintType: enabledWindows[0]?.tintType ?? 'ceramic',
+          tintType: selectedProductData?.tintType ?? enabledWindows[0]?.tintType ?? 'nano-ceramic-35',
+          selectedProduct: config.selectedProduct,
+          selectedPackage: config.selectedPackage,
+          comboProduct: config.comboProduct,
+          metersUsed: config.metersUsed,
           selectedWindows: enabledWindows.map((w) => w.position),
           serviceType: config.serviceType ?? 'shipping',
           windowConfigs: enabledWindows.map((w) => ({
@@ -190,7 +210,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: [{
             name: `Tint Package - ${config.carType ? formatCarType(config.carType) : 'Vehicle'}`,
-            description: `${enabledWindows.length} windows, ${config.totalSqft} sq ft`,
+            description: selectedProductData && selectedPkgData
+              ? `${selectedProductData.name} - ${selectedPkgData.name.en} (${config.metersUsed}m)`
+              : `${enabledWindows.length} windows, ${config.totalSqft} sq ft`,
             amount: totalAmount,
             quantity: 1,
           }],
@@ -470,10 +492,10 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Window list */}
+                {/* Tint package details */}
                 <div className="py-4 border-b border-white/10">
                   <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
-                    Windows ({windowItems.length})
+                    Tint Package
                   </p>
                   <div className="space-y-1.5">
                     {windowItems.map((w) => (
@@ -483,9 +505,16 @@ export default function CheckoutPage() {
                       >
                         <div>
                           <span className="text-white/60">{w.label}</span>
-                          <span className="text-white/30 text-xs ml-2">{w.tintName} | {w.sqft} ft²</span>
+                          {w.sqft > 0 && (
+                            <span className="text-white/30 text-xs ml-2">{w.tintName} | {w.sqft} ft2</span>
+                          )}
+                          {config.metersUsed > 0 && w.sqft === 0 && (
+                            <span className="text-white/30 text-xs ml-2">{config.metersUsed}m of roll</span>
+                          )}
                         </div>
-                        <span className="text-white/50">${w.price.toFixed(2)}</span>
+                        <span className="text-white/50">
+                          {formatCurrency(w.price, address.country)}
+                        </span>
                       </div>
                     ))}
                   </div>

@@ -1,183 +1,50 @@
 import { create } from 'zustand';
 
 // =============================================================================
-// Default data (used as fallback before API loads)
+// Types for API-loaded data
 // =============================================================================
 
-export const TINT_TYPES: Record<
-  string,
-  {
-    name: string;
-    pricePerSqft: number;
-    description: string;
-    uvBlock: number;
-    heatRejection: number;
-    badge?: string;
-  }
-> = {
-  standard: {
-    name: 'Standard',
-    pricePerSqft: 3,
-    description: 'Basic dyed film',
-    uvBlock: 95,
-    heatRejection: 35,
-  },
-  metallic: {
-    name: 'Metallic',
-    pricePerSqft: 5,
-    description: 'Reflective metallic',
-    uvBlock: 97,
-    heatRejection: 45,
-  },
-  carbon: {
-    name: 'Carbon',
-    pricePerSqft: 6,
-    description: 'Carbon particle film',
-    uvBlock: 99,
-    heatRejection: 50,
-  },
-  ceramic: {
-    name: 'Ceramic',
-    pricePerSqft: 8,
-    description: 'Premium nano-ceramic',
-    uvBlock: 99,
-    heatRejection: 60,
-    badge: 'Most Popular',
-  },
-  crystalline: {
-    name: 'Crystalline',
-    pricePerSqft: 10,
-    description: 'Near-invisible heat block',
-    uvBlock: 99,
-    heatRejection: 60,
-  },
-  adaptive: {
-    name: 'Adaptive',
-    pricePerSqft: 12,
-    description: 'Smart auto-adjusting',
-    uvBlock: 99,
-    heatRejection: 65,
-    badge: 'Premium',
-  },
-};
+export interface TintProductData {
+  id: string;
+  name: string;
+  slug: string;
+  tintType: string;
+  category: string; // "nano-ceramic" | "adaptive"
+  description: string;
+  pricePerSqft: number;
+  rollWidth: number;
+  rollLength: number;
+  rollPrice: number;
+  pricePerMeter: number;
+  currency: string;
+  specs: { vlt: string; uvBlock: string; heatRejection: string; irrRejection: string };
+  badge: string | null;
+  shades: { id: string; name: string; vlt: number; priceMultiplier: number }[];
+}
 
-export const SHADE_LEVELS: Record<
-  string,
-  { name: string; vlt: number; description: string }
-> = {
-  light: { name: 'Light', vlt: 70, description: 'Subtle tint, maximum visibility' },
-  medium: { name: 'Medium', vlt: 35, description: 'Balanced privacy and visibility' },
-  dark: { name: 'Dark', vlt: 15, description: 'Maximum privacy' },
-  limo: { name: 'Limo', vlt: 5, description: 'Darkest available' },
-};
+export interface TintPackageData {
+  id: string;
+  name: { en: string; tl: string };
+  description: { en: string; tl: string };
+  coverage: string;
+  metersUsed: Record<string, number>;
+  applicableTintTypes: string[];
+  order: number;
+  active: boolean;
+}
 
-export const WINDOW_SQFT: Record<string, Record<string, number>> = {
-  sedan: {
-    front_windshield: 12,
-    rear_windshield: 10,
-    front_left: 4,
-    front_right: 4,
-    rear_left: 4,
-    rear_right: 4,
-  },
-  suv: {
-    front_windshield: 14,
-    rear_windshield: 12,
-    front_left: 5,
-    front_right: 5,
-    rear_left: 5,
-    rear_right: 5,
-    rear_quarter_left: 3,
-    rear_quarter_right: 3,
-  },
-  van: {
-    front_windshield: 16,
-    rear_windshield: 14,
-    front_left: 5,
-    front_right: 5,
-    rear_left: 6,
-    rear_right: 6,
-    rear_quarter_left: 4,
-    rear_quarter_right: 4,
-  },
-  station_wagon: {
-    front_windshield: 13,
-    rear_windshield: 11,
-    front_left: 4,
-    front_right: 4,
-    rear_left: 5,
-    rear_right: 5,
-    rear_quarter_left: 3,
-    rear_quarter_right: 3,
-  },
-  hatchback: {
-    front_windshield: 11,
-    rear_windshield: 9,
-    front_left: 4,
-    front_right: 4,
-    rear_left: 3,
-    rear_right: 3,
-  },
-  coupe: {
-    front_windshield: 11,
-    rear_windshield: 8,
-    front_left: 4,
-    front_right: 4,
-    rear_left: 3,
-    rear_right: 3,
-  },
-  truck: {
-    front_windshield: 14,
-    rear_windshield: 10,
-    front_left: 5,
-    front_right: 5,
-    rear_left: 3,
-    rear_right: 3,
-  },
-  convertible: {
-    front_windshield: 10,
-    front_left: 4,
-    front_right: 4,
-    rear_left: 3,
-    rear_right: 3,
-    sunroof: 6,
-  },
-};
-
-export const WINDOW_LABELS: Record<string, string> = {
-  front_windshield: 'Front Windshield',
-  rear_windshield: 'Rear Windshield',
-  front_left: 'Front Left',
-  front_right: 'Front Right',
-  rear_left: 'Rear Left',
-  rear_right: 'Rear Right',
-  rear_quarter_left: 'Rear Quarter Left',
-  rear_quarter_right: 'Rear Quarter Right',
-  sunroof: 'Sunroof',
-};
-
-const FRONT_WINDOWS = ['front_windshield', 'front_left', 'front_right'];
-const REAR_WINDOWS = ['rear_windshield', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'];
-const SIDE_WINDOWS = ['front_left', 'front_right', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'];
-
-export const WINDOW_GROUPS = {
-  front: { label: 'Front Windows', positions: FRONT_WINDOWS },
-  rear: { label: 'Rear Windows', positions: REAR_WINDOWS },
-  sides: { label: 'Side Windows', positions: SIDE_WINDOWS },
-};
-
-// Default SHIPPING_INFO kept for backward compatibility (components that import it)
-export const SHIPPING_INFO: Record<
-  string,
-  { name: string; baseCost: number; deliveryTime: string; flag: string }
-> = {
-  PH: { name: 'Philippines', baseCost: 15, deliveryTime: '7-14 business days', flag: '\u{1F1F5}\u{1F1ED}' },
-  AU: { name: 'Australia', baseCost: 25, deliveryTime: '5-10 business days', flag: '\u{1F1E6}\u{1F1FA}' },
-};
-
-// =============================================================================
-// Types for API-loaded config
-// =============================================================================
+export interface CarTypeData {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  imageUrl: string;
+  windows: { id: string; label: string; sqft: number }[];
+  totalSqft: number;
+  glassArea: { frontWindshield: number; rearWindshield: number; totalSideWindows: number; totalArea: number } | null;
+  rollUsage: { windshield: number; rear: number; sides: number; total: number } | null;
+  sizeGroup: string;
+}
 
 export interface ShippingRateData {
   country: string;
@@ -198,18 +65,6 @@ export interface InstallationRateData {
   active: boolean;
 }
 
-export interface TintProductData {
-  id: string;
-  name: string;
-  slug: string;
-  tintType: string;
-  description: string;
-  pricePerSqft: number;
-  specs: { vlt: string; uvBlock: string; heatRejection: string };
-  badge: string | null;
-  shades: { id: string; name: string; vlt: number; priceMultiplier: number }[];
-}
-
 export interface ShippingAddress {
   name: string;
   street1: string;
@@ -220,9 +75,76 @@ export interface ShippingAddress {
 }
 
 // =============================================================================
-// Store types
+// Legacy exports for backward compatibility
 // =============================================================================
 
+// These are kept so that other components that import them don't break,
+// but the configurator no longer uses per-window pricing.
+
+export const TINT_TYPES: Record<
+  string,
+  {
+    name: string;
+    pricePerSqft: number;
+    description: string;
+    uvBlock: number;
+    heatRejection: number;
+    badge?: string;
+  }
+> = {
+  'nano-ceramic': {
+    name: 'Nano Ceramic',
+    pricePerSqft: 0,
+    description: 'Premium nano-ceramic film',
+    uvBlock: 99,
+    heatRejection: 60,
+    badge: 'Most Popular',
+  },
+  adaptive: {
+    name: 'Adaptive',
+    pricePerSqft: 0,
+    description: 'Smart auto-adjusting',
+    uvBlock: 99,
+    heatRejection: 65,
+    badge: 'Premium',
+  },
+};
+
+export const SHADE_LEVELS: Record<
+  string,
+  { name: string; vlt: number; description: string }
+> = {
+  default: { name: 'Default', vlt: 0, description: 'Default shade' },
+};
+
+export const WINDOW_SQFT: Record<string, Record<string, number>> = {};
+
+export const WINDOW_LABELS: Record<string, string> = {
+  front_windshield: 'Front Windshield',
+  rear_windshield: 'Rear Windshield',
+  front_left: 'Front Left',
+  front_right: 'Front Right',
+  rear_left: 'Rear Left',
+  rear_right: 'Rear Right',
+  rear_quarter_left: 'Rear Quarter Left',
+  rear_quarter_right: 'Rear Quarter Right',
+};
+
+export const WINDOW_GROUPS = {
+  front: { label: 'Front Windows', positions: ['front_windshield', 'front_left', 'front_right'] },
+  rear: { label: 'Rear Windows', positions: ['rear_windshield', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'] },
+  sides: { label: 'Side Windows', positions: ['front_left', 'front_right', 'rear_left', 'rear_right', 'rear_quarter_left', 'rear_quarter_right'] },
+};
+
+export const SHIPPING_INFO: Record<
+  string,
+  { name: string; baseCost: number; deliveryTime: string; flag: string }
+> = {
+  PH: { name: 'Philippines', baseCost: 15, deliveryTime: '7-14 business days', flag: '\u{1F1F5}\u{1F1ED}' },
+  AU: { name: 'Australia', baseCost: 25, deliveryTime: '5-10 business days', flag: '\u{1F1E6}\u{1F1FA}' },
+};
+
+// Legacy WindowConfig type kept for backward compat
 export interface WindowConfig {
   position: string;
   label: string;
@@ -235,16 +157,32 @@ export interface WindowConfig {
   price: number;
 }
 
+// =============================================================================
+// Store types
+// =============================================================================
+
 export interface ConfiguratorState {
   step: number;
   carType: string | null;
+
+  // New package-based selection
+  selectedCategory: string | null; // "nano-ceramic" | "adaptive"
+  selectedProduct: string | null; // product slug e.g. "nano-ceramic-35"
+  selectedPackage: string | null; // package id e.g. "pkg-full-wrap"
+
+  // Combo extra: for combo package, the ceramic product to pair
+  comboProduct: string | null; // product slug for the ceramic portion of combo
+
+  // Legacy: kept for backward compat (OrderSummary etc.)
   windows: WindowConfig[];
+
   serviceType: 'shipping' | 'installation' | null;
   shippingCountry: 'PH' | 'AU' | null;
 
   // Computed pricing
   totalSqft: number;
   subtotal: number;
+  metersUsed: number;
   shippingCost: number;
   installationCost: number;
   tax: number;
@@ -256,6 +194,8 @@ export interface ConfiguratorState {
   shippingRates: ShippingRateData[];
   installationRates: InstallationRateData[];
   tintProducts: TintProductData[];
+  tintPackages: TintPackageData[];
+  carTypes: CarTypeData[];
   taxRates: Record<string, number>;
   freeShippingThresholds: Record<string, number>;
   shippingMarkup: number;
@@ -269,6 +209,12 @@ export interface ConfiguratorState {
   setShippingAddress: (address: Partial<ShippingAddress>) => void;
   setStep: (step: number) => void;
   setCarType: (carType: string) => void;
+  setSelectedCategory: (category: string) => void;
+  setSelectedProduct: (slug: string) => void;
+  setSelectedPackage: (packageId: string) => void;
+  setComboProduct: (slug: string) => void;
+
+  // Legacy actions (kept for backward compat)
   toggleWindow: (position: string) => void;
   setWindowTint: (position: string, tintType: string) => void;
   setWindowShade: (position: string, shade: string) => void;
@@ -277,6 +223,7 @@ export interface ConfiguratorState {
   applyToAllWithMultiplier: (tintType: string, shade: string, multiplier: number) => void;
   applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => void;
   applyToGroupWithMultiplier: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string, multiplier: number) => void;
+
   setServiceType: (serviceType: 'shipping' | 'installation') => void;
   setShippingCountry: (country: 'PH' | 'AU') => void;
   calculatePricing: () => void;
@@ -286,26 +233,6 @@ export interface ConfiguratorState {
 // =============================================================================
 // Helpers
 // =============================================================================
-
-function buildWindows(carType: string, defaultTint: string = 'ceramic', defaultShade: string = 'medium', tintProducts?: TintProductData[]): WindowConfig[] {
-  const windowData = WINDOW_SQFT[carType] || {};
-  // Try API data first, fallback to hardcoded TINT_TYPES
-  const apiTint = tintProducts?.find((t) => t.slug === defaultTint || t.tintType === defaultTint);
-  const fallbackTint = TINT_TYPES[defaultTint];
-  const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-  const defaultMultiplier = 1.0;
-  return Object.entries(windowData).map(([position, sqft]) => ({
-    position,
-    label: WINDOW_LABELS[position] || position,
-    enabled: true,
-    tintType: defaultTint,
-    shade: defaultShade,
-    shadeMultiplier: defaultMultiplier,
-    sqft,
-    pricePerSqft,
-    price: sqft * pricePerSqft * defaultMultiplier,
-  }));
-}
 
 const emptyShippingAddress: ShippingAddress = {
   name: '',
@@ -319,28 +246,33 @@ const emptyShippingAddress: ShippingAddress = {
 const initialState = {
   step: 1,
   carType: null as string | null,
+  selectedCategory: null as string | null,
+  selectedProduct: null as string | null,
+  selectedPackage: null as string | null,
+  comboProduct: null as string | null,
   windows: [] as WindowConfig[],
   serviceType: null as 'shipping' | 'installation' | null,
   shippingCountry: null as 'PH' | 'AU' | null,
   totalSqft: 0,
   subtotal: 0,
+  metersUsed: 0,
   shippingCost: 0,
   installationCost: 0,
   tax: 0,
   total: 0,
 
-  // Config state
   configLoaded: false,
   configLoading: false,
   shippingRates: [] as ShippingRateData[],
   installationRates: [] as InstallationRateData[],
   tintProducts: [] as TintProductData[],
+  tintPackages: [] as TintPackageData[],
+  carTypes: [] as CarTypeData[],
   taxRates: { PH: 0.12, AU: 0.10 } as Record<string, number>,
-  freeShippingThresholds: { PH: 200, AU: 300 } as Record<string, number>,
+  freeShippingThresholds: { PH: 10000, AU: 300 } as Record<string, number>,
   shippingMarkup: 0,
   shippingMarkupType: 'flat' as 'flat' | 'percentage',
 
-  // Shipping address
   shippingAddress: { ...emptyShippingAddress },
 };
 
@@ -359,24 +291,39 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     set({ configLoading: true });
 
     try {
-      const [res, tintsRes] = await Promise.all([
+      const [pricingRes, tintsRes, packagesRes, carsRes] = await Promise.all([
         fetch('/api/config/pricing'),
         fetch('/api/products/tints'),
+        fetch('/api/products/packages'),
+        fetch('/api/products/cars'),
       ]);
-      const json = await res.json();
+
+      const pricingJson = await pricingRes.json();
+
       let tintProducts: TintProductData[] = [];
       try {
         const tintsJson = await tintsRes.json();
         const tintData = tintsJson.data || tintsJson;
         tintProducts = Array.isArray(tintData) ? tintData : [];
-      } catch {
-        // tint fetch failed, keep empty array
-      }
+      } catch { /* fallback */ }
 
-      if (json.success && json.data) {
-        const { shipping, installation, tax, shippingMarkup, shippingMarkupType } = json.data;
+      let tintPkgs: TintPackageData[] = [];
+      try {
+        const pkgsJson = await packagesRes.json();
+        const pkgData = pkgsJson.data || pkgsJson;
+        tintPkgs = Array.isArray(pkgData) ? pkgData : [];
+      } catch { /* fallback */ }
 
-        // Build lookup maps from API data
+      let carTypesData: CarTypeData[] = [];
+      try {
+        const carsJson = await carsRes.json();
+        const carsData = carsJson.data || carsJson;
+        carTypesData = Array.isArray(carsData) ? carsData : [];
+      } catch { /* fallback */ }
+
+      if (pricingJson.success && pricingJson.data) {
+        const { shipping, installation, tax, shippingMarkup, shippingMarkupType } = pricingJson.data;
+
         const freeShippingThresholds: Record<string, number> = {};
         const taxRates: Record<string, number> = {};
 
@@ -384,8 +331,6 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
           for (const rate of shipping) {
             freeShippingThresholds[rate.country] = rate.freeAbove;
           }
-
-          // Also update the exported SHIPPING_INFO for backward compat
           for (const rate of shipping) {
             const deliveryTime = rate.deliveryDays
               ? `${rate.deliveryDays.min}-${rate.deliveryDays.max} business days`
@@ -411,6 +356,8 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
           shippingRates: shipping ?? [],
           installationRates: installation ?? [],
           tintProducts,
+          tintPackages: tintPkgs,
+          carTypes: carTypesData,
           taxRates: Object.keys(taxRates).length > 0 ? taxRates : get().taxRates,
           freeShippingThresholds:
             Object.keys(freeShippingThresholds).length > 0
@@ -420,10 +367,15 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
           shippingMarkupType: shippingMarkupType ?? 'flat',
         });
 
-        // Recalculate pricing with new config values
         get().calculatePricing();
       } else {
-        set({ configLoading: false });
+        set({
+          configLoaded: true,
+          configLoading: false,
+          tintProducts,
+          tintPackages: tintPkgs,
+          carTypes: carTypesData,
+        });
       }
     } catch (err) {
       console.error('Failed to load configurator config:', err);
@@ -440,131 +392,48 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   setStep: (step: number) => set({ step }),
 
   setCarType: (carType: string) => {
-    const { tintProducts } = get();
-    const windows = buildWindows(carType, 'ceramic', 'medium', tintProducts);
-    set({ carType, windows });
+    set({ carType, selectedCategory: null, selectedProduct: null, selectedPackage: null, comboProduct: null });
     get().calculatePricing();
   },
 
-  toggleWindow: (position: string) => {
-    const { windows } = get();
-    set({
-      windows: windows.map((w) =>
-        w.position === position ? { ...w, enabled: !w.enabled } : w
-      ),
-    });
+  setSelectedCategory: (category: string) => {
+    set({ selectedCategory: category, selectedProduct: null, selectedPackage: null, comboProduct: null });
     get().calculatePricing();
   },
 
-  setWindowTint: (position: string, tintType: string) => {
-    const { windows, tintProducts } = get();
-    // Try API data first, fallback to hardcoded
-    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
-    const fallbackTint = TINT_TYPES[tintType];
-    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-    if (!apiTint && !fallbackTint) return;
-    set({
-      windows: windows.map((w) =>
-        w.position === position
-          ? { ...w, tintType, pricePerSqft, price: w.sqft * pricePerSqft * w.shadeMultiplier }
-          : w
-      ),
-    });
+  setSelectedProduct: (slug: string) => {
+    const { tintProducts, selectedCategory } = get();
+    const product = tintProducts.find((p) => p.slug === slug);
+    if (product) {
+      set({
+        selectedProduct: slug,
+        selectedCategory: product.category || selectedCategory,
+      });
+    } else {
+      set({ selectedProduct: slug });
+    }
     get().calculatePricing();
   },
 
-  setWindowShade: (position: string, shade: string) => {
-    const { windows } = get();
-    set({
-      windows: windows.map((w) =>
-        w.position === position ? { ...w, shade } : w
-      ),
-    });
+  setSelectedPackage: (packageId: string) => {
+    set({ selectedPackage: packageId });
     get().calculatePricing();
   },
 
-  setWindowShadeWithMultiplier: (position: string, shade: string, multiplier: number) => {
-    const { windows } = get();
-    set({
-      windows: windows.map((w) =>
-        w.position === position
-          ? { ...w, shade, shadeMultiplier: multiplier, price: w.sqft * w.pricePerSqft * multiplier }
-          : w
-      ),
-    });
+  setComboProduct: (slug: string) => {
+    set({ comboProduct: slug });
     get().calculatePricing();
   },
 
-  applyToAll: (tintType: string, shade: string) => {
-    const { windows, tintProducts } = get();
-    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
-    const fallbackTint = TINT_TYPES[tintType];
-    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-    if (!apiTint && !fallbackTint) return;
-    set({
-      windows: windows.map((w) => ({
-        ...w,
-        tintType,
-        shade,
-        pricePerSqft,
-        price: w.sqft * pricePerSqft * w.shadeMultiplier,
-      })),
-    });
-    get().calculatePricing();
-  },
-
-  applyToAllWithMultiplier: (tintType: string, shade: string, multiplier: number) => {
-    const { windows, tintProducts } = get();
-    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
-    const fallbackTint = TINT_TYPES[tintType];
-    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-    if (!apiTint && !fallbackTint) return;
-    set({
-      windows: windows.map((w) => ({
-        ...w,
-        tintType,
-        shade,
-        shadeMultiplier: multiplier,
-        pricePerSqft,
-        price: w.sqft * pricePerSqft * multiplier,
-      })),
-    });
-    get().calculatePricing();
-  },
-
-  applyToGroup: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string) => {
-    const { windows, tintProducts } = get();
-    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
-    const fallbackTint = TINT_TYPES[tintType];
-    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-    if (!apiTint && !fallbackTint) return;
-    const positions = WINDOW_GROUPS[group].positions;
-    set({
-      windows: windows.map((w) =>
-        positions.includes(w.position)
-          ? { ...w, tintType, shade, pricePerSqft, price: w.sqft * pricePerSqft * w.shadeMultiplier }
-          : w
-      ),
-    });
-    get().calculatePricing();
-  },
-
-  applyToGroupWithMultiplier: (group: 'front' | 'rear' | 'sides', tintType: string, shade: string, multiplier: number) => {
-    const { windows, tintProducts } = get();
-    const apiTint = tintProducts.find((t) => t.slug === tintType || t.tintType === tintType);
-    const fallbackTint = TINT_TYPES[tintType];
-    const pricePerSqft = apiTint?.pricePerSqft ?? fallbackTint?.pricePerSqft ?? 0;
-    if (!apiTint && !fallbackTint) return;
-    const positions = WINDOW_GROUPS[group].positions;
-    set({
-      windows: windows.map((w) =>
-        positions.includes(w.position)
-          ? { ...w, tintType, shade, shadeMultiplier: multiplier, pricePerSqft, price: w.sqft * pricePerSqft * multiplier }
-          : w
-      ),
-    });
-    get().calculatePricing();
-  },
+  // Legacy window actions (no-ops for backward compat)
+  toggleWindow: () => { get().calculatePricing(); },
+  setWindowTint: () => { get().calculatePricing(); },
+  setWindowShade: () => { get().calculatePricing(); },
+  setWindowShadeWithMultiplier: () => { get().calculatePricing(); },
+  applyToAll: () => { get().calculatePricing(); },
+  applyToAllWithMultiplier: () => { get().calculatePricing(); },
+  applyToGroup: () => { get().calculatePricing(); },
+  applyToGroupWithMultiplier: () => { get().calculatePricing(); },
 
   setServiceType: (serviceType: 'shipping' | 'installation') => {
     set({ serviceType });
@@ -582,7 +451,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
   calculatePricing: () => {
     const {
-      windows,
+      carType,
+      selectedProduct,
+      selectedPackage,
+      comboProduct,
       serviceType,
       shippingCountry,
       shippingRates,
@@ -591,31 +463,61 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       freeShippingThresholds,
       shippingMarkup,
       shippingMarkupType,
-      carType,
+      tintProducts,
+      tintPackages,
+      carTypes,
     } = get();
 
-    const enabledWindows = windows.filter((w) => w.enabled);
-    const totalSqft = enabledWindows.reduce((sum, w) => sum + w.sqft, 0);
-    const subtotal = enabledWindows.reduce((sum, w) => sum + w.sqft * w.pricePerSqft * (w.shadeMultiplier || 1), 0);
+    // Find the selected car, product, and package
+    const car = carTypes.find((c) => c.slug === carType || c.id === carType);
+    const product = tintProducts.find((p) => p.slug === selectedProduct);
+    const pkg = tintPackages.find((p) => p.id === selectedPackage);
 
-    // ── Shipping cost (from API config) ───────────────────────────
+    let metersUsed = 0;
+    let subtotal = 0;
+
+    if (car && product && pkg) {
+      const sizeGroup = car.sizeGroup || 'small';
+      metersUsed = pkg.metersUsed[sizeGroup] || 0;
+
+      if (pkg.coverage === 'combo' && comboProduct) {
+        // Combo: adaptive on windshield (1m or 1.5m), ceramic on rest
+        const adaptiveProduct = product;
+        const ceramicProduct = tintProducts.find((p) => p.slug === comboProduct);
+
+        if (ceramicProduct) {
+          // Windshield portion uses adaptive pricing
+          const windshieldPkg = tintPackages.find((p) => p.coverage === 'windshield');
+          const windshieldMeters = windshieldPkg ? (windshieldPkg.metersUsed[sizeGroup] || 1) : 1;
+          const remainingMeters = metersUsed - windshieldMeters;
+
+          subtotal = (windshieldMeters * adaptiveProduct.pricePerMeter) +
+                     (remainingMeters * ceramicProduct.pricePerMeter);
+        } else {
+          subtotal = metersUsed * adaptiveProduct.pricePerMeter;
+        }
+      } else {
+        subtotal = metersUsed * product.pricePerMeter;
+      }
+    }
+
+    const totalSqft = car?.totalSqft || 0;
+
+    // ── Shipping cost ───────────────────────────────────
     let shippingCost = 0;
     if (shippingCountry) {
-      const freeThreshold = freeShippingThresholds[shippingCountry] ?? 200;
+      const freeThreshold = freeShippingThresholds[shippingCountry] ?? 10000;
       if (subtotal >= freeThreshold) {
         shippingCost = 0;
       } else {
-        // Look up from API-loaded rates first
         const rateData = shippingRates.find((r) => r.country === shippingCountry && r.active);
         if (rateData) {
           shippingCost = rateData.baseRate + totalSqft * rateData.perSqftRate;
         } else {
-          // Fallback to SHIPPING_INFO
           const fallback = SHIPPING_INFO[shippingCountry];
           shippingCost = fallback ? fallback.baseCost : 0;
         }
 
-        // Apply markup
         if (shippingMarkup > 0) {
           if (shippingMarkupType === 'percentage') {
             shippingCost = shippingCost * (1 + shippingMarkup / 100);
@@ -626,39 +528,38 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       }
     }
 
-    // ── Installation cost (from API config) ───────────────────────
+    // ── Installation cost ───────────────────────────────
     let installationCost = 0;
-    if (serviceType === 'installation' && shippingCountry && carType) {
-      const carTypeUpper = carType.toUpperCase();
+    if (serviceType === 'installation' && shippingCountry && car) {
+      const carTypeUpper = car.type || carType?.toUpperCase() || '';
       const rateData = installationRates.find(
         (r) => r.country === shippingCountry && r.carType === carTypeUpper && r.active
       );
       if (rateData) {
-        installationCost = rateData.baseRate + enabledWindows.length * (rateData.perWindowRate || 0);
+        installationCost = rateData.baseRate + (car.windows?.length || 0) * (rateData.perWindowRate || 0);
       } else {
-        // Fallback: only used if API hasn't loaded yet
-        const fallbackRate = 4;
-        installationCost = totalSqft * fallbackRate;
+        installationCost = 2000; // PHP fallback
       }
     }
 
-    // ── Tax (from API config) ─────────────────────────────────────
-    const taxRate = shippingCountry ? (taxRates[shippingCountry] ?? 0.08) : 0.08;
+    // ── Tax ─────────────────────────────────────────────
+    const taxRate = shippingCountry ? (taxRates[shippingCountry] ?? 0.12) : 0.12;
     const tax = Math.round((subtotal + installationCost) * taxRate * 100) / 100;
     const total = Math.round((subtotal + shippingCost + installationCost + tax) * 100) / 100;
 
-    set({ totalSqft, subtotal, shippingCost, installationCost, tax, total });
+    set({ totalSqft, subtotal, metersUsed, shippingCost, installationCost, tax, total });
   },
 
   reset: () => {
-    // Preserve loaded config across resets
-    const { configLoaded, shippingRates, installationRates, tintProducts, taxRates, freeShippingThresholds, shippingMarkup, shippingMarkupType } = get();
+    const { configLoaded, shippingRates, installationRates, tintProducts, tintPackages, carTypes, taxRates, freeShippingThresholds, shippingMarkup, shippingMarkupType } = get();
     set({
       ...initialState,
       configLoaded,
       shippingRates,
       installationRates,
       tintProducts,
+      tintPackages,
+      carTypes,
       taxRates,
       freeShippingThresholds,
       shippingMarkup,

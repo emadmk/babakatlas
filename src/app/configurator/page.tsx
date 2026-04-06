@@ -33,7 +33,7 @@ function canProceed(state: ReturnType<typeof useConfiguratorStore.getState>): bo
     case 1:
       return !!state.carType;
     case 2:
-      return state.windows.some((w) => w.enabled);
+      return !!state.selectedProduct && !!state.selectedPackage;
     case 3:
       return !!state.serviceType;
     case 4:

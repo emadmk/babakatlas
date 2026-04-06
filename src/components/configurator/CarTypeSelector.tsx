@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useConfiguratorStore, WINDOW_SQFT } from '@/store/configuratorStore';
+import { useConfiguratorStore } from '@/store/configuratorStore';
 
 interface CarTypeItem {
   id: string;
   name: string;
   slug: string;
-  label?: string;
-  image?: string;
+  type: string;
   imageUrl?: string;
-  windows?: Array<{ id: string; label: string; sqft: number }>;
   totalSqft?: number;
+  sizeGroup?: string;
+  glassArea?: { totalArea: number } | null;
 }
 
 function LoadingSkeleton() {
@@ -22,8 +22,8 @@ function LoadingSkeleton() {
         <div className="w-64 h-8 bg-white/10 rounded-lg mx-auto animate-pulse" />
         <div className="w-48 h-4 bg-white/5 rounded-lg mx-auto animate-pulse" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="w-full h-44 bg-white/5 rounded-2xl animate-pulse" />
         ))}
       </div>
@@ -82,23 +82,21 @@ export default function CarTypeSelector() {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="text-center mb-10">
-        <h2 className="text-3xl font-semibold text-white mb-2">Select Your Car Type</h2>
+        <h2 className="text-3xl font-semibold text-white mb-2">Select Your Vehicle Type</h2>
         <p className="text-white/50 text-sm">
           Choose the body style that matches your vehicle
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {carTypes.map((car) => {
-          const isSelected = carType === car.id;
-          const carKey = (car.slug || car.id || "").toLowerCase();
-          const windowCount = car.windows?.length || Object.keys(WINDOW_SQFT[carKey] || {}).length;
-          const imgSrc = car.imageUrl || car.image;
+          const isSelected = carType === car.slug;
+          const imgSrc = car.imageUrl;
 
           return (
             <motion.button
               key={car.id}
-              onClick={() => setCarType(car.id)}
+              onClick={() => setCarType(car.slug)}
               className={`relative group rounded-2xl p-6 text-left transition-all duration-300 ${
                 isSelected
                   ? 'bg-blue-500/10 ring-2 ring-blue-500'
@@ -113,16 +111,18 @@ export default function CarTypeSelector() {
               }
             >
               {/* Car Image */}
-              <div className="w-full h-24 mb-4 overflow-hidden rounded-lg">
-                <img
-                  src={imgSrc}
-                  alt={`${car.label} car type`}
-                  loading="lazy"
-                  className={`w-full h-full object-cover transition-all duration-300 ${
-                    isSelected ? 'brightness-110 scale-105' : 'brightness-75 group-hover:brightness-90 group-hover:scale-105'
-                  }`}
-                />
-              </div>
+              {imgSrc && (
+                <div className="w-full h-24 mb-4 overflow-hidden rounded-lg">
+                  <img
+                    src={imgSrc}
+                    alt={`${car.name} vehicle type`}
+                    loading="lazy"
+                    className={`w-full h-full object-cover transition-all duration-300 ${
+                      isSelected ? 'brightness-110 scale-105' : 'brightness-75 group-hover:brightness-90 group-hover:scale-105'
+                    }`}
+                  />
+                </div>
+              )}
 
               {/* Label */}
               <div
@@ -130,11 +130,20 @@ export default function CarTypeSelector() {
                   isSelected ? 'text-white' : 'text-white/70'
                 }`}
               >
-                {car.name || car.label}
+                {car.name}
               </div>
 
-              {/* Window count */}
-              <div className="text-xs text-white/40">{windowCount} windows</div>
+              {/* Info */}
+              <div className="text-xs text-white/40 space-y-0.5">
+                {car.glassArea && (
+                  <div>Glass area: {car.glassArea.totalArea} sqm</div>
+                )}
+                {car.sizeGroup && (
+                  <div className="text-[10px] text-white/30">
+                    Size: {car.sizeGroup}
+                  </div>
+                )}
+              </div>
 
               {/* Selected indicator */}
               {isSelected && (

@@ -168,6 +168,7 @@ export default function CheckoutPage() {
           metersUsed: config.metersUsed,
           selectedWindows: enabledWindows.map((w) => w.position),
           serviceType: config.serviceType ?? 'shipping',
+          appointment: config.appointment || null,
           windowConfigs: enabledWindows.map((w) => ({
             position: w.position,
             tintType: w.tintType,

@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { buildPricingQuote } from '@/lib/pricingServer';
 import { formatCurrency } from '@/lib/pricing';
 // Legacy imports kept for buildPricingQuote fallback path
-import { createAdminOrder } from '@/lib/adminData';
+import { createAdminOrder, createAppointment } from '@/lib/adminData';
 
 import { orders, type Order } from '@/lib/ordersStore';
 
@@ -204,6 +204,26 @@ export async function POST(request: NextRequest) {
       createdAt: now,
       updatedAt: now,
     });
+
+    // If installation service, create appointment from body.appointment
+    if (serviceType === 'installation' && body.appointment) {
+      const appt = body.appointment;
+      createAppointment({
+        orderId,
+        userId,
+        customerName: contact.name,
+        customerEmail: contact.email,
+        customerPhone: contact.phone || '',
+        country: shippingAddress?.country || country || 'PH',
+        address: appt.address || shippingAddress?.address || '',
+        city: appt.city || shippingAddress?.city || '',
+        vehicleType: carType || '',
+        date: appt.date || '',
+        slot: appt.slot || 'morning',
+        status: 'pending',
+        notes: appt.notes || '',
+      });
+    }
 
     return NextResponse.json(
       {

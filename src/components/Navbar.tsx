@@ -24,7 +24,7 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, t } = useLanguage();
   const { data: session } = useSession();
-  const configuredWindows = useConfiguratorStore((s) => s.windows.filter((w) => w.enabled).length);
+  const hasConfiguration = useConfiguratorStore((s) => s.selectedProduct && s.selectedPackage ? 1 : 0);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -108,9 +108,9 @@ export default function Navbar() {
             className="relative text-zinc-400 hover:text-white transition-colors duration-200 p-2 rounded-lg hover:bg-white/5"
           >
             <ShoppingCart size={20} />
-            {configuredWindows > 0 && (
+            {hasConfiguration > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {configuredWindows}
+                {hasConfiguration}
               </span>
             )}
           </Link>

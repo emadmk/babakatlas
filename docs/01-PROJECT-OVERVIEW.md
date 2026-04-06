@@ -6,7 +6,7 @@
 
 ## Purpose
 
-AtlasAdaptive is an e-commerce platform for selling and configuring automotive window tint films. Customers can use an interactive 5-step configurator to select their car type, choose specific windows, pick tint products and shade levels, select shipping or professional installation service, and complete checkout with Stripe payment processing.
+AtlasAdaptive is an e-commerce platform for selling and configuring automotive window tint films. Customers can use an interactive 6-step configurator to select their country (PHP/AUD), choose their vehicle type, pick a tint product and coverage package, select shipping or professional installation (with appointment booking), and complete checkout with Stripe payment processing. The platform also includes an appointment scheduling system for home service installations and a charges system for tracking installation-related payments.
 
 ## Target Markets
 
@@ -51,7 +51,7 @@ A full Prisma schema exists at `prisma/schema.prisma` for PostgreSQL. It mirrors
 ### Client State
 
 Zustand stores manage client-side state:
-- `configuratorStore` - The main tint configurator state machine
+- `configuratorStore` - The main tint configurator state machine (6-step, package-based pricing, appointment booking)
 - `cartStore` - Generic cart (currently unused, persisted to localStorage)
 - `authStore` - User authentication state
 - `adminStore` - Admin panel UI state
@@ -69,12 +69,15 @@ babakatlas/
 |   |   |   +-- layout.tsx          # Admin layout with sidebar, auth check
 |   |   |   +-- page.tsx            # Admin dashboard
 |   |   |   +-- products/           # Tint product CRUD
+|   |   |   +-- packages/           # Tint package management
 |   |   |   +-- cars/               # Car type CRUD
 |   |   |   +-- windows/            # Window config management
 |   |   |   +-- services/           # Service config
 |   |   |   +-- shipping/           # Shipping & installation rates
 |   |   |   +-- pricing/            # Pricing configuration
 |   |   |   +-- orders/             # Order management
+|   |   |   +-- appointments/       # Appointment scheduling management
+|   |   |   +-- charges/            # Installation charges management
 |   |   |   +-- users/              # User management
 |   |   |   +-- settings/           # Site settings
 |   |   |   +-- content/            # CMS (homepage, FAQ, about, contact)
@@ -84,16 +87,17 @@ babakatlas/
 |   |   |   +-- orders/             # Order creation & retrieval
 |   |   |   +-- checkout/           # Stripe checkout session
 |   |   |   +-- webhooks/           # Stripe webhook handler
-|   |   |   +-- products/           # Public product endpoints (tints, cars)
+|   |   |   +-- appointments/       # Appointment booking & availability
+|   |   |   +-- products/           # Public product endpoints (tints, cars, packages)
 |   |   |   +-- config/             # Public config (pricing, services, shipping, windows)
 |   |   |   +-- content/            # Public content (homepage, FAQ, about, contact)
 |   |   |   +-- shipping/           # Shipping rate calculation
-|   |   |   +-- user/               # User orders & profile
+|   |   |   +-- user/               # User orders, profile, charges, appointments
 |   |   |   +-- email/              # Test email
 |   |   |   +-- contact/            # Contact form submission
 |   |   +-- auth/                   # Auth pages (login, register, forgot-password)
 |   |   +-- dashboard/              # User dashboard (orders, profile)
-|   |   +-- configurator/           # 5-step tint configurator
+|   |   +-- configurator/           # 6-step tint configurator
 |   |   +-- checkout/               # Checkout + success page
 |   |   +-- about/                  # About page
 |   |   +-- faq/                    # FAQ page
@@ -112,10 +116,12 @@ babakatlas/
 |   |   +-- auth/                   # Auth components
 |   |   |   +-- AuthGuard.tsx       # Route protection wrapper
 |   |   +-- configurator/           # Configurator step components
+|   |       +-- CountrySelector.tsx
 |   |       +-- CarTypeSelector.tsx
 |   |       +-- WindowTintConfigurator.tsx
 |   |       +-- ServiceSelector.tsx
 |   |       +-- ShippingSelector.tsx
+|   |       +-- AppointmentBooking.tsx
 |   |       +-- OrderSummary.tsx
 |   |       +-- StepIndicator.tsx
 |   +-- context/
@@ -162,10 +168,14 @@ babakatlas/
 
 3. **Dual pricing modules**: `pricing.ts` (client-safe, uses hardcoded defaults) and `pricingServer.ts` (reads from admin config). The configurator store fetches server config via API to override client defaults.
 
-4. **Admin-configurable everything**: Products, car types, windows, services, shipping rates, installation rates, tax rates, homepage content, FAQ, about page, and contact info are all editable through the admin panel.
+4. **Admin-configurable everything**: Products, packages, car types, windows, services, shipping rates, installation rates, tax rates, appointments, charges, homepage content, FAQ, about page, and contact info are all editable through the admin panel.
 
 5. **Apple-inspired dark theme**: The UI uses a dark theme with glassmorphism effects, subtle gradients, and Framer Motion animations following Apple's design language.
 
 6. **Bilingual support (EN/TL)**: All user-facing content supports English and Tagalog via a custom i18n system with JSON translation files and a React context provider.
 
-7. **Shade price multipliers**: Each tint shade (Light, Medium, Dark, Limo) has a price multiplier that adjusts the per-sqft price, allowing premium pricing for darker shades.
+7. **Package-based pricing**: The configurator uses a package-based pricing model (e.g., full wrap, partial coverage) with prices calculated from meters of tint film used, rather than per-window/per-sqft pricing.
+
+8. **Appointment scheduling**: Home service installations include a built-in appointment booking system with calendar availability, morning/afternoon slots, and per-country configuration.
+
+9. **Charges system**: Installation-related charges are tracked separately, allowing admin to manage payments for home service appointments.

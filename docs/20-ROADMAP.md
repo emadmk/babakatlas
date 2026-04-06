@@ -5,14 +5,19 @@
 AtlasAdaptive is a functional MVP e-commerce platform for automotive window tint films. The core flow works end-to-end:
 
 1. Browse products on the homepage
-2. Configure tint in the 5-step wizard
-3. Checkout with Stripe
-4. Receive order confirmation email
-5. Admin manages orders, products, and content
+2. Configure tint in the 6-step wizard (Country -> Vehicle -> Tint/Package -> Service -> Details -> Summary)
+3. Checkout with Stripe (product cost + shipping; installation charged separately)
+4. Book appointment for home service installation (if applicable)
+5. Receive order confirmation email
+6. Admin manages orders, appointments, charges, products, packages, and content
 
 **What works well**:
 - Full admin CMS for all site content
-- 5-step configurator with per-window tint/shade selection
+- 6-step configurator with package-based pricing (by meters of film, not per-window)
+- Country-first flow with PHP/AUD currency support
+- Tint package system (full wrap, partial coverage, etc.)
+- Appointment booking system for home service installations
+- Charges system for tracking installation payments separately
 - Dynamic pricing with admin-configurable rates
 - Bilingual support (EN/TL)
 - Stripe payment integration
@@ -79,10 +84,13 @@ AtlasAdaptive is a functional MVP e-commerce platform for automotive window tint
 - [ ] **Stripe refund integration**: Allow admin to process refunds through the panel
 - [ ] **Order tracking page**: Public order tracking by order number
 - [ ] **Invoice PDF generation**: Generate PDF invoices for orders
-- [ ] **Multi-currency display**: Show prices in PHP for PH customers and AUD for AU customers
+- [x] **Multi-currency display**: Show prices in PHP for PH customers and AUD for AU customers (implemented via country-first configurator flow)
 - [ ] **Saved configurations**: Let logged-in users save and resume configurations
 - [ ] **Wishlist / Favorites**: Save preferred tint products
 - [ ] **Coupon / Discount codes**: Admin-configurable promo codes
+- [x] **Appointment booking**: Home service appointment scheduling with calendar availability (implemented)
+- [x] **Charges system**: Separate installation charge tracking and management (implemented)
+- [x] **Package-based pricing**: Tint packages with meter-based pricing instead of per-window (implemented)
 
 ### Phase 3: Scale & Performance
 

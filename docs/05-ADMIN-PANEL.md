@@ -30,12 +30,15 @@ The admin panel uses a sidebar + content layout:
 |-------|-------|------|
 | `/admin` | Dashboard | LayoutDashboard |
 | `/admin/products` | Tint Products | Package |
+| `/admin/packages` | Packages | Package |
 | `/admin/cars` | Car Types | Car |
 | `/admin/windows` | Windows | AppWindow |
 | `/admin/services` | Services | Wrench |
 | `/admin/shipping` | Shipping | Truck |
 | `/admin/pricing` | Pricing | DollarSign |
 | `/admin/orders` | Orders | ShoppingCart |
+| `/admin/appointments` | Appointments | Calendar |
+| `/admin/charges` | Charges | CreditCard |
 | `/admin/content/homepage` | Homepage | Home |
 | `/admin/content/faq` | FAQ | HelpCircle |
 | `/admin/content/about` | About | Info |
@@ -166,6 +169,35 @@ API: `GET /api/admin/users`, `GET/PUT /api/admin/users/[id]`
 - Test email button (sends to admin email)
 
 API: `GET/PUT /api/admin/settings`
+
+### Appointments (`/admin/appointments`)
+
+**File**: `src/app/admin/appointments/page.tsx`
+
+- View and manage all booked appointments
+- Filter by country, status
+- Each appointment shows: customer name, email, phone, vehicle type, date, time slot (morning/afternoon), address, city, status
+- Status management (e.g., pending, confirmed, completed, cancelled)
+- **Appointment configuration** per country:
+  - Morning/afternoon slot capacity and time ranges
+  - Enable/disable slots
+  - Minimum advance booking hours
+  - Holiday and blocked date management
+
+API: `GET /api/admin/appointments`, `GET/PUT /api/admin/appointments/config`
+
+### Charges (`/admin/charges`)
+
+**File**: `src/app/admin/charges/page.tsx`
+
+- View and manage installation-related charges
+- Filter by status (pending, paid, cancelled), search by email
+- Shows: customer name, email, description, amount, currency, status, linked order/appointment
+- Create new charges linked to orders or appointments
+- Update charge status (mark as paid, cancel)
+- Also shows installation orders for reference
+
+API: `GET/POST /api/admin/charges`, `GET/PATCH /api/admin/charges/[id]`
 
 ### Content Management
 

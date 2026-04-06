@@ -134,6 +134,73 @@ Handles `checkout.session.completed` event. Updates order status and sends email
 
 ---
 
+## Appointment APIs (Public)
+
+### List Appointments
+
+```
+GET /api/appointments
+```
+**File**: `src/app/api/appointments/route.ts`
+
+**Auth required**: No
+
+**Query params**: `country`, `status`, `userId`, `email`
+
+**Response**: `{ "success": true, "data": [...appointments] }`
+
+### Create Appointment
+
+```
+POST /api/appointments
+```
+**File**: `src/app/api/appointments/route.ts`
+
+**Auth required**: No
+
+**Request body**:
+```json
+{
+  "orderId": "",
+  "userId": null,
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",
+  "customerPhone": "+63 917 123 4567",
+  "country": "PH",
+  "address": "123 Main St",
+  "city": "Manila",
+  "vehicleType": "sedan",
+  "date": "2026-04-15",
+  "slot": "morning",
+  "notes": ""
+}
+```
+
+**Required fields**: customerName, customerEmail, country, address, city, date, slot
+
+### Get/Update Single Appointment
+
+```
+GET /api/appointments/[id]
+PATCH /api/appointments/[id]
+```
+**File**: `src/app/api/appointments/[id]/route.ts`
+
+PATCH accepts partial updates (e.g., status changes).
+
+### Check Availability
+
+```
+GET /api/appointments/available
+```
+**File**: `src/app/api/appointments/available/route.ts`
+
+**Query params**: `country` (default "PH"), `month`, `year`
+
+Returns per-day availability for the given month, including morning/afternoon slot counts, holidays, and blocked dates. Used by the `AppointmentBooking` configurator component.
+
+---
+
 ## Product APIs (Public)
 
 ### List Tint Products
@@ -172,7 +239,39 @@ GET /api/products/cars
 ```
 **File**: `src/app/api/products/cars/route.ts`
 
-Returns all active car types with images and window counts.
+Returns all active car types with images, window counts, glass area data, roll usage, and size group.
+
+### List Tint Packages
+
+```
+GET /api/products/packages
+POST /api/products/packages
+PUT /api/products/packages
+DELETE /api/products/packages
+```
+**File**: `src/app/api/products/packages/route.ts`
+
+GET returns all active tint packages with coverage type, meters used per vehicle size group, and applicable tint types. POST/PUT/DELETE for admin management.
+
+**Response** (GET):
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "pkg-full-wrap",
+      "name": { "en": "Full Wrap", "tl": "Buong Balot" },
+      "description": { "en": "All windows covered", "tl": "..." },
+      "coverage": "full-wrap",
+      "metersUsed": { "small": 3, "medium": 4, "large": 5 },
+      "applicableTintTypes": ["nano-ceramic", "adaptive"],
+      "order": 1,
+      "active": true
+    }
+  ],
+  "count": 3
+}
+```
 
 ---
 
@@ -295,6 +394,28 @@ PUT /api/user/profile
 
 GET returns user profile. PUT updates profile fields (name, phone, city, country).
 
+### User Charges
+
+```
+GET /api/user/charges
+```
+**File**: `src/app/api/user/charges/route.ts`
+
+**Auth required**: Yes
+
+Returns charges for the authenticated user.
+
+### User Appointments
+
+```
+GET /api/user/appointments
+```
+**File**: `src/app/api/user/appointments/route.ts`
+
+**Auth required**: Yes
+
+Returns appointments for the authenticated user.
+
 ---
 
 ## Shipping APIs
@@ -395,6 +516,31 @@ GET /api/admin/orders/[id]          # Get single order
 PUT /api/admin/orders/[id]          # Update order (status, notes)
 ```
 **Files**: `src/app/api/admin/orders/route.ts`, `[id]/route.ts`
+
+### Appointments
+
+```
+GET /api/admin/appointments         # List all appointments (filterable by country, status)
+GET /api/admin/appointments/config  # Get appointment config for all countries
+PUT /api/admin/appointments/config  # Update appointment config for a country
+```
+**Files**: `src/app/api/admin/appointments/route.ts`, `config/route.ts`
+
+Config update accepts: `{ country, morningSlots, afternoonSlots, morningTime, afternoonTime, morningEnabled, afternoonEnabled, minAdvanceHours, holidays, blockedDates }`
+
+### Charges
+
+```
+GET  /api/admin/charges             # List all charges (filterable by status, email)
+POST /api/admin/charges             # Create a new charge
+GET  /api/admin/charges/[id]        # Get single charge
+PATCH /api/admin/charges/[id]       # Update charge (status, amount, etc.)
+```
+**Files**: `src/app/api/admin/charges/route.ts`, `[id]/route.ts`
+
+Create charge body: `{ customerEmail, customerName, description, amount, currency?, userId?, orderId?, appointmentId? }`
+
+GET also returns `installationOrders` (orders with `serviceType: 'installation'`) for reference.
 
 ### Users
 

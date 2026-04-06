@@ -126,41 +126,38 @@ Per-country thresholds are configurable:
 
 When `subtotal >= freeAbove`, shipping cost is $0 regardless of other calculations.
 
-## Installation Rates
+## Home Service (Professional Installation)
 
-For the "Professional Installation" service type, rates replace shipping costs.
+For the "Professional Installation" service type, the customer books an appointment for home service installation instead of receiving a shipment. Installation cost is handled separately through the **charges system** (see Admin Panel docs) and is **not** included in the checkout total.
 
-### Rate Structure
+### Appointment Booking Flow
 
-```typescript
-interface InstallationRateConfig {
-  id: string;
-  country: string;       // "PH" or "AU"
-  carType: string;        // "SEDAN", "SUV", "VAN", etc.
-  baseRate: number;
-  perWindowRate: number;
-  active: boolean;
-}
-```
+When the customer selects "Professional Installation" in Step 4 of the configurator, Step 5 shows the `AppointmentBooking` component instead of `ShippingSelector`:
 
-### Calculation
+1. Customer enters their service address (street, city, state/region)
+2. An interactive calendar shows available dates for the selected country
+3. Customer selects a date and a time slot (morning or afternoon)
+4. Availability is checked in real-time via `GET /api/appointments/available`
 
-```
-installationCost = baseRate + (enabledWindowCount * perWindowRate)
-```
+### Appointment Configuration (Admin)
 
-### Default Installation Rates (PH)
+Per-country appointment settings are managed at `/admin/appointments`:
 
-| Car Type | Base Rate | Per Window |
-|----------|-----------|------------|
-| Sedan | $50 | $8 |
-| SUV | $65 | $10 |
-| Van | $70 | $10 |
-| Hatchback | $45 | $8 |
-| Coupe | $45 | $8 |
-| Truck | $60 | $9 |
+| Setting | Description |
+|---------|-------------|
+| `morningSlots` | Number of morning appointment slots per day |
+| `afternoonSlots` | Number of afternoon appointment slots per day |
+| `morningTime` | Morning slot time label (e.g., "8:00 AM - 12:00 PM") |
+| `afternoonTime` | Afternoon slot time label (e.g., "1:00 PM - 5:00 PM") |
+| `morningEnabled` | Whether morning slots are available |
+| `afternoonEnabled` | Whether afternoon slots are available |
+| `minAdvanceHours` | Minimum hours in advance to book (e.g., 24) |
+| `holidays` | List of holiday dates (unavailable) |
+| `blockedDates` | Admin-blocked dates (unavailable) |
 
-Australian rates are approximately 50-80% higher.
+### Installation Charges
+
+Installation charges are created and managed through the charges system (`/admin/charges`). Charges can be linked to orders and/or appointments, and have their own payment lifecycle (pending -> paid -> cancelled). This decouples the product purchase from the installation service fee.
 
 ## Address Collection
 

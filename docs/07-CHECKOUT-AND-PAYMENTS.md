@@ -2,7 +2,7 @@
 
 ## Overview
 
-The checkout flow starts when the user clicks "Checkout" on the configurator's Order Summary step. The system creates an order, then redirects to Stripe for payment (or simulates payment if Stripe is not configured).
+The checkout flow starts when the user clicks "Checkout" on the configurator's Order Summary step (Step 6). The system creates an order, then redirects to Stripe for payment (or simulates payment if Stripe is not configured). Note that installation cost is handled separately through the charges system and is **not** included in the checkout total.
 
 ## Checkout Page
 
@@ -71,7 +71,6 @@ The checkout page:
     "pricing": {
       "subtotal": 128,
       "shipping": 0,
-      "installation": 0,
       "taxLabel": "VAT (12%)",
       "tax": 15.36,
       "total": 143.36,

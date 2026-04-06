@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCharges, createCharge } from "@/lib/adminData";
+import { getCharges, createCharge, getAdminOrders } from "@/lib/adminData";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
     const email = searchParams.get("email") || undefined;
 
     const charges = getCharges({ status, email });
-    return NextResponse.json({ success: true, data: charges });
+    // Get orders with installation service type
+    const installationOrders = getAdminOrders().filter(o => o.serviceType === 'installation');
+    return NextResponse.json({ success: true, data: { charges, installationOrders } });
   } catch (error) {
     console.error("Error fetching charges:", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus, ShoppingCart, Info, Ruler, Check } from 'lucide-react';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/pricing';
 
 interface TintProduct {
   id: string;
@@ -20,15 +21,6 @@ interface TintProduct {
   badge: string | null;
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
 function getVltOpacity(vlt: string): number {
   const num = parseInt(vlt.replace('%', ''));
   if (isNaN(num)) return 0.5;
@@ -41,6 +33,7 @@ export default function ShopPage() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [meters, setMeters] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/products/tints')
@@ -78,10 +71,55 @@ export default function ShopPage() {
   const ceramicProducts = products.filter((p) => p.category === 'nano-ceramic');
   const adaptiveProducts = products.filter((p) => p.category === 'adaptive');
 
+  // Country code for formatCurrency
+  const country = selectedCountry === 'AU' ? 'AU' : 'PH';
+
+  const fmtPrice = (amount: number) => formatCurrency(amount, country);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center pt-20">
         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Country selection screen
+  if (!selectedCountry) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-16">
+        <div className="max-w-2xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-white mb-3">Buy Tint Film</h1>
+            <p className="text-white/50 text-lg">
+              Select your country to see prices in your local currency.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <motion.button
+              onClick={() => setSelectedCountry('PH')}
+              className="rounded-2xl p-8 bg-white/[0.03] ring-1 ring-white/10 hover:ring-blue-500/50 hover:bg-blue-500/5 transition-all text-center group"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="text-5xl mb-4 block">{'\u{1F1F5}\u{1F1ED}'}</span>
+              <h3 className="text-xl font-semibold text-white mb-1">Philippines</h3>
+              <p className="text-white/40 text-sm">Prices in {'\u20B1'} (Philippine Peso)</p>
+            </motion.button>
+
+            <motion.button
+              onClick={() => setSelectedCountry('AU')}
+              className="rounded-2xl p-8 bg-white/[0.03] ring-1 ring-white/10 hover:ring-blue-500/50 hover:bg-blue-500/5 transition-all text-center group"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="text-5xl mb-4 block">{'\u{1F1E6}\u{1F1FA}'}</span>
+              <h3 className="text-xl font-semibold text-white mb-1">Australia</h3>
+              <p className="text-white/40 text-sm">Prices in A$ (Australian Dollar)</p>
+            </motion.button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -91,6 +129,14 @@ export default function ShopPage() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <button
+              onClick={() => setSelectedCountry(null)}
+              className="text-xs text-white/30 hover:text-white/60 transition-colors px-3 py-1 rounded-full ring-1 ring-white/10"
+            >
+              {country === 'PH' ? '\u{1F1F5}\u{1F1ED} Philippines' : '\u{1F1E6}\u{1F1FA} Australia'} - Change
+            </button>
+          </div>
           <h1 className="text-4xl font-bold text-white mb-3">Buy Tint Film by the Meter</h1>
           <p className="text-white/50 text-lg max-w-2xl mx-auto">
             Purchase tint film in custom lengths. Perfect for DIY installation, commercial projects,
@@ -105,7 +151,7 @@ export default function ShopPage() {
             {adaptiveProducts.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
-                  Adaptive Series - {formatCurrency(adaptiveProducts[0]?.pricePerMeter || 0)}/m
+                  Adaptive Series - {fmtPrice(adaptiveProducts[0]?.pricePerMeter || 0)}/m
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {adaptiveProducts.map((p) => {
@@ -156,7 +202,7 @@ export default function ShopPage() {
             {ceramicProducts.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-3">
-                  Nano Ceramic Series - {formatCurrency(ceramicProducts[0]?.pricePerMeter || 0)}/m
+                  Nano Ceramic Series - {fmtPrice(ceramicProducts[0]?.pricePerMeter || 0)}/m
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {ceramicProducts.map((p) => {
@@ -206,7 +252,7 @@ export default function ShopPage() {
                 <div className="text-xs text-white/30 space-y-1">
                   <p>All tint films are 1.52m wide. You choose the length in meters.</p>
                   <p>Minimum order: 0.5m. Maximum: 30m (full roll).</p>
-                  <p>Nano Ceramic: {formatCurrency(50000)}/roll (30m). Adaptive: {formatCurrency(200000)}/roll (30m).</p>
+                  <p>Nano Ceramic: {fmtPrice(50000)}/roll (30m). Adaptive: {fmtPrice(200000)}/roll (30m).</p>
                 </div>
               </div>
             </div>
@@ -301,7 +347,7 @@ export default function ShopPage() {
                 {/* Pricing */}
                 <div className="border-t border-white/10 pt-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-white/50">{meters}m x {formatCurrency(product?.pricePerMeter || 0)}/m</span>
+                    <span className="text-white/50">{meters}m x {fmtPrice(product?.pricePerMeter || 0)}/m</span>
                   </div>
                   <div className="flex justify-between items-baseline">
                     <span className="text-white font-semibold">Total</span>
@@ -311,7 +357,7 @@ export default function ShopPage() {
                       initial={{ scale: 1.1, color: '#60a5fa' }}
                       animate={{ scale: 1, color: '#ffffff' }}
                     >
-                      {formatCurrency(totalPrice)}
+                      {fmtPrice(totalPrice)}
                     </motion.span>
                   </div>
                 </div>
@@ -332,7 +378,7 @@ export default function ShopPage() {
                     ) : (
                       <>
                         <ShoppingCart className="w-4 h-4" />
-                        Add to Cart - {formatCurrency(totalPrice)}
+                        Add to Cart - {fmtPrice(totalPrice)}
                       </>
                     )}
                   </span>

@@ -8,7 +8,12 @@ import {
   X,
   ChevronDown,
   Loader2,
+  Search,
+  Wrench,
+  Calendar,
+  Car,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/pricing";
 
 interface Charge {
   id: string;
@@ -25,6 +30,17 @@ interface Charge {
   paidAt: string | null;
 }
 
+interface InstallationOrder {
+  id: string;
+  orderNumber: string;
+  contact: { name: string; email: string; phone: string };
+  shippingAddress: { country: string; city: string };
+  items: { carType: string; tintName: string };
+  serviceType: string;
+  pricing: { total: number };
+  createdAt: string;
+}
+
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-400",
   paid: "bg-green-500/20 text-green-400",
@@ -33,9 +49,11 @@ const statusColors: Record<string, string> = {
 
 export default function AdminChargesPage() {
   const [charges, setCharges] = useState<Charge[]>([]);
+  const [installationOrders, setInstallationOrders] = useState<InstallationOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Create charge form
   const [form, setForm] = useState({
@@ -44,26 +62,28 @@ export default function AdminChargesPage() {
     description: "",
     amount: "",
     currency: "PHP",
+    orderId: null as string | null,
   });
 
-  const fetchCharges = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filterStatus !== "all") params.set("status", filterStatus);
-      const res = await fetch(`/api/admin/charges?${params}`);
+      const res = await fetch("/api/admin/charges");
       const data = await res.json();
-      if (data.success) setCharges(data.data);
+      if (data.success) {
+        setCharges(data.data.charges || []);
+        setInstallationOrders(data.data.installationOrders || []);
+      }
     } catch {
       // handle
     } finally {
       setLoading(false);
     }
-  }, [filterStatus]);
+  }, []);
 
   useEffect(() => {
-    fetchCharges();
-  }, [fetchCharges]);
+    fetchData();
+  }, [fetchData]);
 
   const createCharge = async () => {
     if (!form.customerEmail || !form.customerName || !form.description || !form.amount) return;
@@ -77,11 +97,23 @@ export default function AdminChargesPage() {
       if (data.success) {
         setCharges((prev) => [data.data, ...prev]);
         setShowCreate(false);
-        setForm({ customerEmail: "", customerName: "", description: "", amount: "", currency: "PHP" });
+        setForm({ customerEmail: "", customerName: "", description: "", amount: "", currency: "PHP", orderId: null });
       }
     } catch {
       // handle
     }
+  };
+
+  const createChargeFromOrder = (order: InstallationOrder) => {
+    setForm({
+      customerEmail: order.contact.email,
+      customerName: order.contact.name,
+      description: `Installation service - ${order.items?.carType || "Vehicle"}, ${order.shippingAddress?.city || ""}`,
+      amount: "",
+      currency: order.shippingAddress?.country === "AU" ? "AUD" : "PHP",
+      orderId: order.id,
+    });
+    setShowCreate(true);
   };
 
   const updateChargeStatus = async (id: string, status: string) => {
@@ -102,10 +134,25 @@ export default function AdminChargesPage() {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
-    if (currency === "AUD") return `A$${amount.toFixed(2)}`;
-    return `\u20B1${amount.toLocaleString()}`;
-  };
+  // Pending installation orders = orders that don't have a charge yet
+  const chargedOrderIds = new Set(charges.map((c) => c.orderId).filter(Boolean));
+  const pendingInstallOrders = installationOrders.filter(
+    (o) => !chargedOrderIds.has(o.id)
+  );
+
+  // Filter charges
+  const filteredCharges = charges.filter((c) => {
+    if (filterStatus !== "all" && c.status !== filterStatus) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        c.customerName.toLowerCase().includes(q) ||
+        c.customerEmail.toLowerCase().includes(q) ||
+        c.description.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   if (loading) {
     return (
@@ -125,7 +172,10 @@ export default function AdminChargesPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowCreate(true)}
+          onClick={() => {
+            setForm({ customerEmail: "", customerName: "", description: "", amount: "", currency: "PHP", orderId: null });
+            setShowCreate(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0071E3] text-white text-sm font-medium hover:bg-[#0071E3]/90 transition-colors"
         >
           <Plus size={16} />
@@ -133,85 +183,163 @@ export default function AdminChargesPage() {
         </button>
       </div>
 
-      {/* Filter */}
-      <div className="flex gap-3 mb-6">
-        <div className="relative">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm appearance-none pr-8"
-          >
-            <option value="all" className="bg-neutral-900">All Status</option>
-            <option value="pending" className="bg-neutral-900">Pending</option>
-            <option value="paid" className="bg-neutral-900">Paid</option>
-            <option value="cancelled" className="bg-neutral-900">Cancelled</option>
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+      {/* Section 1: Pending Installation Orders */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <Wrench size={18} className="text-amber-400" />
+          <h2 className="text-lg font-semibold text-white">
+            Pending Installation Orders
+          </h2>
+          <span className="text-xs text-white/30 ml-2">
+            ({pendingInstallOrders.length} orders need charging)
+          </span>
         </div>
+
+        {pendingInstallOrders.length === 0 ? (
+          <div className="bg-white/[0.02] border border-white/10 rounded-xl p-8 text-center">
+            <Wrench className="w-10 h-10 text-white/15 mx-auto mb-2" />
+            <p className="text-white/30 text-sm">
+              No pending installation orders without charges
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {pendingInstallOrders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white/[0.03] border border-white/10 rounded-xl p-5 hover:border-white/20 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium text-sm">
+                      {order.contact?.name || "N/A"}
+                    </p>
+                    <p className="text-white/40 text-xs">{order.contact?.email}</p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-white/50">
+                      <span className="flex items-center gap-1">
+                        <Car className="w-3 h-3" />
+                        {order.items?.carType || "Vehicle"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-white/50 text-xs mt-1">
+                      Order Total (film): {formatCurrency(order.pricing?.total || 0, order.shippingAddress?.country)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => createChargeFromOrder(order)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-400 text-xs font-medium hover:bg-amber-500/25 transition-colors shrink-0 ml-3"
+                  >
+                    <Plus size={12} />
+                    Create Charge
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Charges list */}
-      {charges.length === 0 ? (
-        <div className="text-center py-16">
-          <DollarSign className="w-12 h-12 text-white/20 mx-auto mb-3" />
-          <p className="text-white/40 text-sm">No charges found</p>
+      {/* Section 2: All Charges */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <DollarSign size={18} className="text-[#0071E3]" />
+          <h2 className="text-lg font-semibold text-white">All Charges</h2>
         </div>
-      ) : (
-        <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Customer</th>
-                <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Description</th>
-                <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Amount</th>
-                <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Status</th>
-                <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Date</th>
-                <th className="text-right px-5 py-3 text-xs text-white/40 font-medium uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {charges.map((charge) => (
-                <tr key={charge.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-4">
-                    <p className="text-white text-sm">{charge.customerName}</p>
-                    <p className="text-white/40 text-xs">{charge.customerEmail}</p>
-                  </td>
-                  <td className="px-5 py-4 text-white/70 text-sm max-w-xs truncate">{charge.description}</td>
-                  <td className="px-5 py-4 text-white font-medium text-sm">
-                    {formatCurrency(charge.amount, charge.currency)}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${statusColors[charge.status]}`}>
-                      {charge.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-white/40 text-sm">
-                    {new Date(charge.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    {charge.status === "pending" && (
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() => updateChargeStatus(charge.id, "paid")}
-                          className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
-                        >
-                          Mark Paid
-                        </button>
-                        <button
-                          onClick={() => updateChargeStatus(charge.id, "cancelled")}
-                          className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </td>
+
+        {/* Filters */}
+        <div className="flex gap-3 mb-6">
+          <div className="relative flex-1 max-w-sm">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name or email..."
+              className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-white text-sm focus:outline-none focus:border-[#0071E3] transition-colors placeholder:text-white/30"
+            />
+          </div>
+          <div className="relative">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm appearance-none pr-8"
+            >
+              <option value="all" className="bg-neutral-900">All Status</option>
+              <option value="pending" className="bg-neutral-900">Pending</option>
+              <option value="paid" className="bg-neutral-900">Paid</option>
+              <option value="cancelled" className="bg-neutral-900">Cancelled</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Charges list */}
+        {filteredCharges.length === 0 ? (
+          <div className="text-center py-16">
+            <DollarSign className="w-12 h-12 text-white/20 mx-auto mb-3" />
+            <p className="text-white/40 text-sm">No charges found</p>
+          </div>
+        ) : (
+          <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Customer</th>
+                  <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Description</th>
+                  <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Amount</th>
+                  <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Status</th>
+                  <th className="text-left px-5 py-3 text-xs text-white/40 font-medium uppercase">Date</th>
+                  <th className="text-right px-5 py-3 text-xs text-white/40 font-medium uppercase">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredCharges.map((charge) => (
+                  <tr key={charge.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-4">
+                      <p className="text-white text-sm">{charge.customerName}</p>
+                      <p className="text-white/40 text-xs">{charge.customerEmail}</p>
+                    </td>
+                    <td className="px-5 py-4 text-white/70 text-sm max-w-xs truncate">{charge.description}</td>
+                    <td className="px-5 py-4 text-white font-medium text-sm">
+                      {formatCurrency(charge.amount, charge.currency === "AUD" ? "AU" : "PH")}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${statusColors[charge.status]}`}>
+                        {charge.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-white/40 text-sm">
+                      {new Date(charge.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      {charge.status === "pending" && (
+                        <div className="flex gap-1 justify-end">
+                          <button
+                            onClick={() => updateChargeStatus(charge.id, "paid")}
+                            className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+                          >
+                            Mark Paid
+                          </button>
+                          <button
+                            onClick={() => updateChargeStatus(charge.id, "cancelled")}
+                            className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Create charge modal */}
       {showCreate && (

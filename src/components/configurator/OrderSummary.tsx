@@ -4,15 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import { Edit3, Shield, Lock, CreditCard } from 'lucide-react';
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '@/lib/pricing';
 
 const formatCarType = (type: string) => {
   const upper = type.toUpperCase();
@@ -133,7 +125,7 @@ export default function OrderSummary() {
                     </div>
                   </div>
                   <span className="text-sm text-white/50">
-                    {formatCurrency(product.pricePerMeter)}/m
+                    {formatCurrency(product.pricePerMeter, shippingCountry)}/m
                   </span>
                 </div>
 
@@ -154,9 +146,9 @@ export default function OrderSummary() {
 
                 <div className="pt-2 border-t border-white/5 flex justify-between">
                   <span className="text-sm text-white/50">
-                    {metersUsed}m x {formatCurrency(product.pricePerMeter)}/m
+                    {metersUsed}m x {formatCurrency(product.pricePerMeter, shippingCountry)}/m
                   </span>
-                  <span className="text-sm font-medium text-white">{formatCurrency(subtotal)}</span>
+                  <span className="text-sm font-medium text-white">{formatCurrency(subtotal, shippingCountry)}</span>
                 </div>
               </div>
             ) : (
@@ -227,19 +219,19 @@ export default function OrderSummary() {
                   <span className="text-white/50">
                     Tint Film ({metersUsed}m)
                   </span>
-                  <span className="text-white/80">{formatCurrency(subtotal)}</span>
+                  <span className="text-white/80">{formatCurrency(subtotal, shippingCountry)}</span>
                 </div>
 
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">Shipping</span>
                   <span className={shippingCost === 0 ? 'text-emerald-400 text-sm' : 'text-white/80'}>
-                    {shippingCost === 0 ? 'Free' : formatCurrency(shippingCost)}
+                    {shippingCost === 0 ? 'Free' : formatCurrency(shippingCost, shippingCountry)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">Tax (VAT est.)</span>
-                  <span className="text-white/80">{formatCurrency(tax)}</span>
+                  <span className="text-white/80">{formatCurrency(tax, shippingCountry)}</span>
                 </div>
 
                 <div className="border-t border-white/10 pt-3 mt-3">
@@ -251,7 +243,7 @@ export default function OrderSummary() {
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
                     >
-                      {formatCurrency(total)}
+                      {formatCurrency(total, shippingCountry)}
                     </motion.span>
                   </div>
                 </div>

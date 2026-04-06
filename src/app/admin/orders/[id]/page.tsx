@@ -12,6 +12,7 @@ import {
   Clock,
   Send,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/pricing";
 
 interface AdminOrder {
   id: string;
@@ -270,10 +271,10 @@ export default function OrderDetailPage() {
             </div>
             <div className="text-right">
               <p className="text-white/70">
-                {order.items.totalSqft} sqft x ${order.items.unitPrice}/sqft
+                {order.items.totalSqft} sqft x {formatCurrency(order.items.unitPrice, order.shippingAddress?.country)}/sqft
               </p>
               <p className="text-white font-medium">
-                ${order.items.subtotal.toFixed(2)}
+                {formatCurrency(order.items.subtotal, order.shippingAddress?.country)}
               </p>
             </div>
           </div>
@@ -305,27 +306,27 @@ export default function OrderDetailPage() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between text-white/70">
             <span>Subtotal</span>
-            <span>${order.pricing.subtotal.toFixed(2)}</span>
+            <span>{formatCurrency(order.pricing.subtotal, order.shippingAddress?.country)}</span>
           </div>
           {order.pricing.shipping > 0 && (
             <div className="flex justify-between text-white/70">
               <span>Shipping</span>
-              <span>${order.pricing.shipping.toFixed(2)}</span>
+              <span>{formatCurrency(order.pricing.shipping, order.shippingAddress?.country)}</span>
             </div>
           )}
           {order.pricing.installation > 0 && (
             <div className="flex justify-between text-white/70">
               <span>Installation</span>
-              <span>${order.pricing.installation.toFixed(2)}</span>
+              <span>{formatCurrency(order.pricing.installation, order.shippingAddress?.country)}</span>
             </div>
           )}
           <div className="flex justify-between text-white/70">
             <span>{order.pricing.taxLabel}</span>
-            <span>${order.pricing.tax.toFixed(2)}</span>
+            <span>{formatCurrency(order.pricing.tax, order.shippingAddress?.country)}</span>
           </div>
           <div className="flex justify-between text-white font-semibold pt-2 border-t border-white/10">
             <span>Total</span>
-            <span>${order.pricing.total.toFixed(2)}</span>
+            <span>{formatCurrency(order.pricing.total, order.shippingAddress?.country)}</span>
           </div>
           <div className="flex justify-between text-white/50 pt-1">
             <span>Payment Status</span>

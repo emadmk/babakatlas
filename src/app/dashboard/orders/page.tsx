@@ -167,7 +167,7 @@ export default function OrdersPage() {
 
                 <div className="flex items-center gap-3 shrink-0 ml-4">
                   <span className="text-white font-semibold text-sm">
-                    ${(order.pricing?.total ?? 0).toFixed(2)}
+                    {`\u20B1${(order.pricing?.total ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </span>
                   {isExpanded ? (
                     <ChevronUp className="w-4 h-4 text-primary-500" />
@@ -202,7 +202,7 @@ export default function OrdersPage() {
                           </div>
                           <div className="text-right shrink-0 ml-4">
                             <p className="text-primary-300">
-                              ${(order.items?.subtotal ?? 0).toFixed(2)}
+                              {`\u20B1${(order.items?.subtotal ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             </p>
                           </div>
                         </div>
@@ -213,7 +213,7 @@ export default function OrdersPage() {
                         <div>
                           <p className="text-primary-600">Subtotal</p>
                           <p className="text-primary-300">
-                            ${(order.pricing?.subtotal ?? 0).toFixed(2)}
+                            {`\u20B1${(order.pricing?.subtotal ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                           </p>
                         </div>
                         <div>
@@ -221,14 +221,14 @@ export default function OrdersPage() {
                           <p className="text-primary-300">
                             {order.pricing?.shipping === 0
                               ? "Free"
-                              : `$${(order.pricing?.shipping ?? 0).toFixed(2)}`}
+                              : `\u20B1${(order.pricing?.shipping ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                           </p>
                         </div>
                         {order.pricing?.installation > 0 && (
                           <div>
                             <p className="text-primary-600">Installation</p>
                             <p className="text-primary-300">
-                              ${order.pricing.installation.toFixed(2)}
+                              {`\u20B1${order.pricing.installation.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             </p>
                           </div>
                         )}
@@ -237,13 +237,13 @@ export default function OrdersPage() {
                             {order.pricing?.taxLabel ?? "Tax"}
                           </p>
                           <p className="text-primary-300">
-                            ${(order.pricing?.tax ?? 0).toFixed(2)}
+                            {`\u20B1${(order.pricing?.tax ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                           </p>
                         </div>
                         <div>
                           <p className="text-primary-600">Total</p>
                           <p className="text-white font-semibold">
-                            ${(order.pricing?.total ?? 0).toFixed(2)}
+                            {`\u20B1${(order.pricing?.total ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                           </p>
                         </div>
                       </div>

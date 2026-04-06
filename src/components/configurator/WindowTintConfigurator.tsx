@@ -4,16 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import type { TintProductData, TintPackageData, CarTypeData } from '@/store/configuratorStore';
 import { Shield, Zap, ChevronRight, Check, Info } from 'lucide-react';
+import { formatCurrency as formatCurrencyBase } from '@/lib/pricing';
 
 // ---------- Helpers ----------
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+function formatCurrency(amount: number, country?: string): string {
+  return formatCurrencyBase(amount, country);
 }
 
 function getVltOpacity(vlt: string): number {

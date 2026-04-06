@@ -209,7 +209,7 @@ export default function AdminPricingPage() {
                     />
                   </td>
                   <td className="py-3 text-white/40 hidden md:table-cell">
-                    ${(product.pricePerSqft * exampleSqft).toFixed(2)}
+                    {`\u20B1${(product.pricePerSqft * exampleSqft).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </td>
                 </tr>
               ))}

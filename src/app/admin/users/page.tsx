@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
                     {user.ordersCount}
                   </td>
                   <td className="p-4 text-white/60 hidden lg:table-cell">
-                    ${user.totalSpent.toFixed(2)}
+                    {`\u20B1${user.totalSpent.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </td>
                   <td className="p-4 text-white/60 hidden md:table-cell">
                     {new Date(user.joinedAt).toLocaleDateString()}

@@ -27,6 +27,7 @@ interface BusinessSettings {
   phVatRate: number;
   auGstRate: number;
   defaultCurrency: string;
+  audExchangeRate: number;
 }
 
 interface ShippingSettings {
@@ -83,7 +84,8 @@ export default function AdminSettingsPage() {
   const [business, setBusiness] = useState<BusinessSettings>({
     phVatRate: 12,
     auGstRate: 10,
-    defaultCurrency: "USD",
+    defaultCurrency: "PHP",
+    audExchangeRate: 0.025,
   });
 
   const [shipping, setShipping] = useState<ShippingSettings>({
@@ -344,7 +346,7 @@ export default function AdminSettingsPage() {
           </h2>
         </div>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className={labelClass}>PH VAT Rate (%)</label>
               <input
@@ -385,10 +387,28 @@ export default function AdminSettingsPage() {
                 }
                 className={inputClass}
               >
-                <option value="USD" className="bg-[#1a1a1a]">USD</option>
                 <option value="PHP" className="bg-[#1a1a1a]">PHP</option>
                 <option value="AUD" className="bg-[#1a1a1a]">AUD</option>
               </select>
+            </div>
+            <div>
+              <label className={labelClass}>AUD Exchange Rate</label>
+              <input
+                type="number"
+                step="0.001"
+                min="0"
+                value={business.audExchangeRate}
+                onChange={(e) =>
+                  setBusiness({
+                    ...business,
+                    audExchangeRate: parseFloat(e.target.value) || 0,
+                  })
+                }
+                className={inputClass}
+              />
+              <p className="text-white/30 text-xs mt-1">
+                1 PHP = {business.audExchangeRate} AUD
+              </p>
             </div>
           </div>
         </div>
@@ -683,7 +703,7 @@ export default function AdminSettingsPage() {
                   className={inputClass}
                 >
                   <option value="flat" className="bg-[#1a1a1a]">
-                    Flat Amount ($)
+                    Flat Amount ({'\u20B1'})
                   </option>
                   <option value="percentage" className="bg-[#1a1a1a]">
                     Percentage (%)
@@ -694,7 +714,7 @@ export default function AdminSettingsPage() {
             <p className="text-white/30 text-xs mt-2">
               This amount is added to Shippo rates but hidden from customers.
               {shipping.shippingMarkupType === "flat"
-                ? ` Currently adding $${shipping.shippingMarkup.toFixed(2)} to each rate.`
+                ? ` Currently adding \u20B1${shipping.shippingMarkup.toFixed(2)} to each rate.`
                 : ` Currently adding ${shipping.shippingMarkup}% to each rate.`}
             </p>
           </div>

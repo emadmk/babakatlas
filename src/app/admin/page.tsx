@@ -14,6 +14,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
+import { formatCurrency } from "@/lib/pricing";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-400",
@@ -53,7 +54,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Revenue",
-      value: `$${stats.revenue.toLocaleString()}`,
+      value: `\u20B1${stats.revenue.toLocaleString()}`,
       icon: DollarSign,
       color: "from-green-500/20 to-green-600/5",
       iconColor: "text-green-400",
@@ -161,7 +162,7 @@ export default function AdminDashboard() {
                 className="flex-1 flex flex-col items-center gap-2"
               >
                 <span className="text-[10px] text-white/40">
-                  ${(month.revenue / 1000).toFixed(1)}k
+                  {`\u20B1${(month.revenue / 1000).toFixed(1)}k`}
                 </span>
                 <div
                   className="w-full bg-gradient-to-t from-[#0071E3] to-[#0071E3]/40 rounded-t-md transition-all duration-500"
@@ -215,7 +216,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="py-3 text-white/70">{order.contact.name}</td>
                     <td className="py-3 text-white/70 hidden sm:table-cell">
-                      ${order.pricing.total.toFixed(2)}
+                      {formatCurrency(order.pricing.total, order.shippingAddress?.country)}
                     </td>
                     <td className="py-3">
                       <span

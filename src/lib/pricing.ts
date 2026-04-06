@@ -90,20 +90,12 @@ export function calculateTotal(
 }
 
 // ── Currency formatting ───────────────────────────────────────────────
-const CURRENCY_MAP: Record<string, { code: string; symbol: string; locale: string }> = {
-  PH: { code: 'PHP', symbol: '\u20B1', locale: 'en-PH' },
-  AU: { code: 'AUD', symbol: 'A$', locale: 'en-AU' },
-};
-
-export function formatCurrency(amount: number, country: string = 'PH'): string {
-  const info = CURRENCY_MAP[country];
-  if (!info) return `$${amount.toFixed(2)}`;
-
-  return new Intl.NumberFormat(info.locale, {
-    style: 'currency',
-    currency: info.code,
-    minimumFractionDigits: 2,
-  }).format(amount);
+export function formatCurrency(amount: number, country?: string | null): string {
+  if (country === 'AU') {
+    return `A$${amount.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  // Default to PHP
+  return `\u20B1${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 // ── Full quote builder (used by API) ──────────────────────────────────

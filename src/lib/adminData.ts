@@ -123,6 +123,7 @@ export interface SiteSettings {
   currencies: { PH: string; AU: string };
   shippingMarkup: number;
   shippingMarkupType: 'flat' | 'percentage';
+  audExchangeRate: number; // e.g., 0.025 (1 PHP = 0.025 AUD, so ₱1,667 = A$41.67)
   shippoFromAddress: {
     name: string;
     street1: string;
@@ -881,6 +882,7 @@ const seedSiteSettings: SiteSettings = {
   currencies: { PH: "PHP", AU: "AUD" },
   shippingMarkup: 0,
   shippingMarkupType: 'flat',
+  audExchangeRate: 0.025,
   shippoFromAddress: {
     name: 'AtlasAdaptive',
     street1: '123 Main Street',

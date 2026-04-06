@@ -103,7 +103,7 @@ export default function DashboardPage() {
     },
     {
       label: "Total Spent",
-      value: `$${totalSpent.toFixed(2)}`,
+      value: `\u20B1${totalSpent.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: DollarSign,
       change: "",
       color: "text-gold",
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                       You have {charges.filter((c) => c.status === "pending").length} pending charge{charges.filter((c) => c.status === "pending").length > 1 ? "s" : ""}
                     </p>
                     <p className="text-white/50 text-xs">
-                      Total: ${charges.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0).toLocaleString()}
+                      Total: {`\u20B1${charges.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0).toLocaleString()}`}
                     </p>
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right shrink-0 ml-4">
                       <p className="text-white text-sm font-medium">
-                        ${(order.pricing?.total ?? 0).toFixed(2)}
+                        {`\u20B1${(order.pricing?.total ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                       </p>
                       <p className="text-primary-500 text-xs">
                         {formatDate(order.createdAt)}

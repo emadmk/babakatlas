@@ -14,7 +14,6 @@ import {
   MousePointer2,
   Layers,
   Package,
-  ChevronRight,
   Star,
   Truck,
   Award,
@@ -81,22 +80,6 @@ interface HomepageData {
     button: TranslatedText;
     badges: TranslatedText[];
   };
-}
-
-interface TintProduct {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  pricePerSqft: number;
-  specs: {
-    vlt: string;
-    uvBlock: string;
-    heatRejection: string;
-  };
-  badge: string | null;
-  imageUrl?: string;
-  image?: string;
 }
 
 /* ============================================================
@@ -215,7 +198,7 @@ function HeroSection({ data, language }: { data: HomepageData["hero"]; language:
             <ArrowRight size={18} />
           </Link>
           <Link
-            href="#products"
+            href="#how-it-works"
             className="text-zinc-400 hover:text-white border border-white/10 hover:border-white/25 px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 hover:bg-white/5"
           >
             {t("hero.cta2")}
@@ -298,108 +281,6 @@ function BenefitsSection({ data, language }: { data: HomepageData["benefits"]; l
               </motion.div>
             );
           })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   PRODUCT SHOWCASE SECTION
-   ============================================================ */
-function ProductShowcaseSection({ products }: { products: TintProduct[] }) {
-  const { t } = useLanguage();
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
-
-  return (
-    <section id="products" className="section-padding relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-16"
-        >
-          <h2 className="heading-section text-white mb-4">
-            {t("products.title")}
-          </h2>
-          <p className="subheading max-w-xl mx-auto">
-            {t("products.subtitle")}
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Horizontal scroll on mobile, grid on desktop */}
-      <div className="relative">
-        <div className="flex gap-6 overflow-x-auto px-6 pb-4 snap-x snap-mandatory md:max-w-7xl md:mx-auto md:grid md:grid-cols-3 md:overflow-visible md:px-6">
-          {products.map((product, i) => (
-            <motion.div
-              key={product.id || product.name}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="snap-center min-w-[280px] md:min-w-0 group"
-            >
-              <div className="relative glass-card overflow-hidden h-full flex flex-col">
-                {product.badge && (
-                  <div className="absolute top-3 left-6 z-10 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    {product.badge}
-                  </div>
-                )}
-                <div className="w-full h-32 overflow-hidden bg-gradient-to-br from-accent/10 to-transparent">
-                  {(product.imageUrl || product.image) && (
-                    <img
-                      src={product.imageUrl || product.image}
-                      alt={`${product.name} tint`}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      style={{ filter: `brightness(0.7) saturate(0.8)` }}
-                    />
-                  )}
-                </div>
-                <div className="p-6 flex flex-col flex-1">
-                <div className="w-full h-1 rounded-full mb-6 bg-gradient-to-r from-accent to-transparent" />
-                <h3 className="text-xl font-semibold text-white mb-1">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-zinc-500 mb-4">
-                  {product.description || `VLT: ${product.specs?.vlt || "N/A"}`}
-                </p>
-                <ul className="space-y-2 mb-6 flex-1">
-                  {product.specs && (
-                    <>
-                      <li className="flex items-center gap-2 text-sm text-zinc-400">
-                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
-                        UV Block: {product.specs.uvBlock}
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-zinc-400">
-                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
-                        Heat Rejection: {product.specs.heatRejection}
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-zinc-400">
-                        <BadgeCheck size={14} className="text-accent flex-shrink-0" />
-                        VLT: {product.specs.vlt}
-                      </li>
-                    </>
-                  )}
-                </ul>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-white">
-                    ${product.pricePerSqft}/sqft
-                  </span>
-                  <a
-                    href="/configurator"
-                    className="text-sm font-medium flex items-center gap-1 text-accent hover:text-accent/80 transition-colors"
-                  >
-                    Configure <ChevronRight size={14} />
-                  </a>
-                </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
         </div>
       </div>
     </section>
@@ -676,7 +557,6 @@ function TestimonialsSection({ data, language }: { data: HomepageData["testimoni
 export default function Home() {
   const { language } = useLanguage();
   const [homepageData, setHomepageData] = useState<HomepageData | null>(null);
-  const [tintProducts, setTintProducts] = useState<TintProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -685,25 +565,19 @@ export default function Home() {
 
     async function fetchData() {
       try {
-        const [homepageRes, productsRes] = await Promise.all([
-          fetch("/api/content/homepage"),
-          fetch("/api/products/tints"),
-        ]);
+        const homepageRes = await fetch("/api/content/homepage");
 
-        if (!homepageRes.ok || !productsRes.ok) {
+        if (!homepageRes.ok) {
           throw new Error("Failed to fetch data");
         }
 
         const homepageJson = await homepageRes.json();
-        const productsJson = await productsRes.json();
 
         // APIs return { success, data } wrapper
         const homepage = homepageJson.data || homepageJson;
-        const products = productsJson.data || productsJson;
 
         if (!cancelled) {
           setHomepageData(homepage);
-          setTintProducts(Array.isArray(products) ? products : []);
           setLoading(false);
         }
       } catch (err) {
@@ -743,7 +617,6 @@ export default function Home() {
     <>
       {homepageData.hero && <HeroSection data={homepageData.hero} language={language} />}
       {homepageData.benefits && <BenefitsSection data={homepageData.benefits} language={language} />}
-      {tintProducts.length > 0 && <ProductShowcaseSection products={tintProducts} />}
       {homepageData.howItWorks && <HowItWorksSection data={homepageData.howItWorks} language={language} />}
       {homepageData.stats && <StatsSection data={homepageData.stats} language={language} />}
       {homepageData.testimonials && <TestimonialsSection data={homepageData.testimonials} language={language} />}

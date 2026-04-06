@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/pricing";
 
 interface AdminOrder {
   id: string;
@@ -289,7 +290,7 @@ export default function AdminOrdersPage() {
                         {new Date(order.createdAt).toLocaleDateString()}
                       </td>
                       <td className="p-3 text-white font-medium whitespace-nowrap">
-                        ${(order.pricing?.total || 0).toFixed(2)}
+                        {formatCurrency(order.pricing?.total || 0, order.shippingAddress?.country)}
                       </td>
                       <td className="p-3 text-white/60 text-xs">
                         {order.shippingAddress?.country || "N/A"}
@@ -378,28 +379,23 @@ export default function AdminOrdersPage() {
                                   Pricing
                                 </h4>
                                 <p className="text-white/70">
-                                  Subtotal: $
-                                  {(order.pricing?.subtotal || 0).toFixed(2)}
+                                  Subtotal: {formatCurrency(order.pricing?.subtotal || 0, order.shippingAddress?.country)}
                                 </p>
                                 {(order.pricing?.shipping || 0) > 0 && (
                                   <p className="text-white/70">
-                                    Shipping: $
-                                    {(order.pricing?.shipping || 0).toFixed(2)}
+                                    Shipping: {formatCurrency(order.pricing?.shipping || 0, order.shippingAddress?.country)}
                                   </p>
                                 )}
                                 {(order.pricing?.installation || 0) > 0 && (
                                   <p className="text-white/70">
-                                    Installation: $
-                                    {(order.pricing?.installation || 0).toFixed(2)}
+                                    Installation: {formatCurrency(order.pricing?.installation || 0, order.shippingAddress?.country)}
                                   </p>
                                 )}
                                 <p className="text-white/70">
-                                  {order.pricing?.taxLabel || "Tax"}: $
-                                  {(order.pricing?.tax || 0).toFixed(2)}
+                                  {order.pricing?.taxLabel || "Tax"}: {formatCurrency(order.pricing?.tax || 0, order.shippingAddress?.country)}
                                 </p>
                                 <p className="text-white font-medium mt-1">
-                                  Total: $
-                                  {(order.pricing?.total || 0).toFixed(2)}
+                                  Total: {formatCurrency(order.pricing?.total || 0, order.shippingAddress?.country)}
                                 </p>
                               </div>
                             </div>

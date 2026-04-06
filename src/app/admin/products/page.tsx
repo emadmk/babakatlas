@@ -210,7 +210,7 @@ export default function AdminProductsPage() {
                       {product.heatRejection}%
                     </td>
                     <td className="p-4 text-white font-medium">
-                      ${product.pricePerSqft}
+                      {`\u20B1${product.pricePerSqft}`}
                     </td>
                     <td className="p-4">
                       <button

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfiguratorStore } from '@/store/configuratorStore';
 import { Clock, Truck, MapPin, ChevronDown } from 'lucide-react';
+import { formatCurrency } from '@/lib/pricing';
 
 const PH_REGIONS = [
   'Metro Manila',
@@ -326,7 +327,7 @@ export default function ShippingSelector() {
                           </div>
                         </div>
                         <span className={`text-sm font-medium ${isFree ? 'text-emerald-400' : 'text-white'}`}>
-                          {isFree ? 'Free' : `$${info.baseCost.toFixed(2)}`}
+                          {isFree ? 'Free' : formatCurrency(info.baseCost, shippingCountry)}
                         </span>
                       </div>
                     );

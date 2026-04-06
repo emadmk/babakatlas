@@ -158,7 +158,7 @@ export default function UserDetailPage() {
           },
           {
             label: "Total Spent",
-            value: `$${user.totalSpent.toFixed(2)}`,
+            value: `\u20B1${user.totalSpent.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             icon: DollarSign,
             color: "text-green-400",
           },

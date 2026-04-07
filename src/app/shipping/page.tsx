@@ -140,7 +140,7 @@ export default function ShippingPage() {
             {
               icon: Truck,
               title: "Order Tracking",
-              text: "Track your order in real-time through your AtlasAdaptive dashboard. You will receive email notifications at every stage: order confirmed, shipped, out for delivery, and delivered.",
+              text: "Track your order in real-time through your Atlas Adaptive Tint dashboard. You will receive email notifications at every stage: order confirmed, shipped, out for delivery, and delivered.",
             },
           ].map((item, i) => (
             <motion.div

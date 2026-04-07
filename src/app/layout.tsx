@@ -12,7 +12,7 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AtlasAdaptive - Premium Window Tint Films",
+  title: "Atlas Adaptive Tint - Premium Window Tint Films",
   description:
     "Professional-grade ceramic and carbon window tint films. UV protection, heat reduction, and style for your vehicle. Shipping to Philippines & Australia.",
   keywords: [
@@ -24,13 +24,19 @@ export const metadata: Metadata = {
     "heat reduction",
     "Philippines",
     "Australia",
+    "adaptive tint",
   ],
+  icons: {
+    icon: "/images/logo/logo-dark.png",
+    apple: "/images/logo/logo-dark.png",
+  },
   openGraph: {
-    title: "AtlasAdaptive - Premium Window Tint Films",
+    title: "Atlas Adaptive Tint - Premium Window Tint Films",
     description:
       "Professional-grade ceramic and carbon window tint films for ultimate UV protection, heat reduction, and style.",
     type: "website",
-    siteName: "AtlasAdaptive",
+    siteName: "Atlas Adaptive Tint",
+    images: ["/images/logo/logo-main.png"],
   },
 };
 

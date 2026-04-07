@@ -48,8 +48,12 @@ export default function DashboardLayout({
           <div className="flex flex-col h-full bg-glass-medium backdrop-blur-2xl border-r border-glass-border">
             {/* Brand */}
             <div className="px-6 py-6 border-b border-glass-border">
-              <Link href="/" className="text-xl font-bold text-white tracking-tight">
-                Atlas<span className="text-[#0071E3]">Adaptive</span>
+              <Link href="/" className="inline-block">
+                <img
+                  src="/images/logo/logo-dark.png"
+                  alt="Atlas Adaptive Tint"
+                  className="h-10 w-auto"
+                />
               </Link>
             </div>
 
@@ -117,8 +121,12 @@ export default function DashboardLayout({
         {/* Mobile header */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-glass-medium backdrop-blur-2xl border-b border-glass-border">
           <div className="flex items-center justify-between px-4 py-3">
-            <Link href="/" className="text-lg font-bold text-white">
-              Atlas<span className="text-[#0071E3]">Adaptive</span>
+            <Link href="/" className="inline-block">
+              <img
+                src="/images/logo/logo-dark.png"
+                alt="Atlas Adaptive Tint"
+                className="h-8 w-auto"
+              />
             </Link>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}

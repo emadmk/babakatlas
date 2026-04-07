@@ -13,7 +13,7 @@ function getTransporter() {
   });
 }
 
-const FROM = process.env.SMTP_FROM || 'AtlasAdaptive <noreply@atlasadaptive.com>';
+const FROM = process.env.SMTP_FROM || 'Atlas Adaptive Tint <noreply@atlasadaptivetint.com>';
 const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3002';
 
 // ── Email Templates ──────────────────────────────────────
@@ -26,8 +26,7 @@ function baseTemplate(content: string): string {
       <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
         <!-- Logo -->
         <div style="text-align:center;margin-bottom:32px;">
-          <span style="font-size:24px;font-weight:bold;color:#ffffff;">Atlas</span>
-          <span style="font-size:24px;font-weight:bold;color:#0071E3;">Adaptive</span>
+          <img src="${BASE_URL}/images/logo/logo-dark.png" alt="Atlas Adaptive Tint" style="height:48px;width:auto;" />
         </div>
         <!-- Content Card -->
         <div style="background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:32px;">
@@ -35,7 +34,7 @@ function baseTemplate(content: string): string {
         </div>
         <!-- Footer -->
         <div style="text-align:center;margin-top:24px;color:#666;font-size:12px;">
-          <p>&copy; ${new Date().getFullYear()} AtlasAdaptive. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Atlas Adaptive Tint. All rights reserved.</p>
           <p>Premium Window Tint Films | Philippines & Australia</p>
         </div>
       </div>
@@ -59,15 +58,15 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
 // ── 1. Welcome / Registration ─────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
   const html = baseTemplate(`
-    <h2 style="color:#fff;margin:0 0 16px;">Welcome to AtlasAdaptive!</h2>
+    <h2 style="color:#fff;margin:0 0 16px;">Welcome to Atlas Adaptive Tint!</h2>
     <p style="color:#aaa;line-height:1.6;">Hi ${name},</p>
     <p style="color:#aaa;line-height:1.6;">Thank you for creating your account. You now have access to our premium window tint configurator and can track all your orders.</p>
     <div style="text-align:center;margin:24px 0;">
       <a href="${BASE_URL}/configurator" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">Start Configuring</a>
     </div>
-    <p style="color:#666;font-size:13px;">If you have any questions, contact us at hello@atlasadaptive.com</p>
+    <p style="color:#666;font-size:13px;">If you have any questions, contact us at hello@atlasadaptivetint.com</p>
   `);
-  return send(to, 'Welcome to AtlasAdaptive!', html);
+  return send(to, 'Welcome to Atlas Adaptive Tint!', html);
 }
 
 // ── 2. Password Reset ─────────────────────────────────────
@@ -81,7 +80,7 @@ export async function sendPasswordResetEmail(to: string, resetToken: string) {
     </div>
     <p style="color:#666;font-size:13px;">This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
   `);
-  return send(to, 'Reset Your Password - AtlasAdaptive', html);
+  return send(to, 'Reset Your Password - Atlas Adaptive Tint', html);
 }
 
 // ── 3. Order Confirmation ─────────────────────────────────
@@ -137,7 +136,7 @@ export async function sendOrderConfirmationEmail(to: string, order: {
       <a href="${BASE_URL}/dashboard/orders" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">Track Your Order</a>
     </div>
   `);
-  return send(to, `Order Confirmed #${order.orderNumber} - AtlasAdaptive`, html);
+  return send(to, `Order Confirmed #${order.orderNumber} - Atlas Adaptive Tint`, html);
 }
 
 // ── 4. Order Status Update (Processing) ───────────────────
@@ -150,7 +149,7 @@ export async function sendOrderProcessingEmail(to: string, orderNumber: string) 
       <a href="${BASE_URL}/dashboard/orders" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">View Order</a>
     </div>
   `);
-  return send(to, `Order Processing #${orderNumber} - AtlasAdaptive`, html);
+  return send(to, `Order Processing #${orderNumber} - Atlas Adaptive Tint`, html);
 }
 
 // ── 5. Order Shipped ──────────────────────────────────────
@@ -172,7 +171,7 @@ export async function sendOrderShippedEmail(to: string, orderNumber: string, tra
       <a href="${BASE_URL}/dashboard/orders" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">Track Order</a>
     </div>
   `);
-  return send(to, `Order Shipped #${orderNumber} - AtlasAdaptive`, html);
+  return send(to, `Order Shipped #${orderNumber} - Atlas Adaptive Tint`, html);
 }
 
 // ── 6. Order Delivered ────────────────────────────────────
@@ -186,7 +185,7 @@ export async function sendOrderDeliveredEmail(to: string, orderNumber: string) {
       <a href="${BASE_URL}/dashboard/orders" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">View Order</a>
     </div>
   `);
-  return send(to, `Order Delivered #${orderNumber} - AtlasAdaptive`, html);
+  return send(to, `Order Delivered #${orderNumber} - Atlas Adaptive Tint`, html);
 }
 
 // ── 7. Order Cancelled ────────────────────────────────────
@@ -200,7 +199,7 @@ export async function sendOrderCancelledEmail(to: string, orderNumber: string, r
       <a href="${BASE_URL}/configurator" style="background:#0071E3;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">Start New Order</a>
     </div>
   `);
-  return send(to, `Order Cancelled #${orderNumber} - AtlasAdaptive`, html);
+  return send(to, `Order Cancelled #${orderNumber} - Atlas Adaptive Tint`, html);
 }
 
 // ── 8. Contact Form Notification (to admin) ───────────────
@@ -245,7 +244,7 @@ export async function sendAdminNewOrderEmail(orderNumber: string, total: number,
 export async function sendTestEmail(to: string) {
   const html = baseTemplate(`
     <h2 style="color:#fff;margin:0 0 16px;">Test Email</h2>
-    <p style="color:#aaa;line-height:1.6;">This is a test email from AtlasAdaptive. If you received this, your SMTP configuration is working correctly.</p>
+    <p style="color:#aaa;line-height:1.6;">This is a test email from Atlas Adaptive Tint. If you received this, your SMTP configuration is working correctly.</p>
     <div style="margin:16px 0;padding:16px;background:#111;border-radius:8px;">
       <p style="color:#888;margin:0 0 4px;font-size:12px;">SMTP Host:</p>
       <p style="color:#fff;margin:0 0 12px;">${process.env.SMTP_HOST || 'smtp.gmail.com'}</p>
@@ -253,5 +252,5 @@ export async function sendTestEmail(to: string) {
       <p style="color:#fff;margin:0;">${FROM}</p>
     </div>
   `);
-  return send(to, 'Test Email - AtlasAdaptive', html);
+  return send(to, 'Test Email - Atlas Adaptive Tint', html);
 }

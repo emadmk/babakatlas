@@ -94,9 +94,11 @@ export default function LoginPage() {
           transition={{ delay: 0.1 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Atlas<span className="text-[#0071E3]">Adaptive</span>
-          </h1>
+          <img
+            src="/images/logo/logo-dark.png"
+            alt="Atlas Adaptive Tint"
+            className="h-16 w-auto mx-auto"
+          />
           <p className="text-primary-400 mt-2 text-sm">
             Welcome back. Sign in to your account.
           </p>

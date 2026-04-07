@@ -158,6 +158,19 @@ function HeroSection({ data, language }: { data: HomepageData["hero"]; language:
       {/* Content */}
       <motion.div style={{ opacity }} className="relative z-10 text-center max-w-4xl mx-auto px-6">
         <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="mb-6"
+        >
+          <img
+            src="/images/logo/logo-dark.png"
+            alt="Atlas Adaptive Tint"
+            className="h-16 w-auto mx-auto mb-4"
+          />
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}

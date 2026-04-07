@@ -69,12 +69,11 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-white group-hover:text-accent transition-colors duration-300">
-              Atlas
-            </span>
-            <span className="text-[#0071E3]">Adaptive</span>
-          </span>
+          <img
+            src="/images/logo/logo-dark.png"
+            alt="Atlas Adaptive Tint"
+            className="h-10 w-auto"
+          />
         </Link>
 
         {/* Desktop Nav */}

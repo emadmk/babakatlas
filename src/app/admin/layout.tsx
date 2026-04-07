@@ -149,12 +149,11 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#0071E3] flex items-center justify-center text-white font-bold text-sm">
-              AA
-            </div>
-            <span className="text-white font-semibold text-sm">
-              AtlasAdaptive Admin
-            </span>
+            <img
+              src="/images/logo/logo-dark.png"
+              alt="Atlas Adaptive Tint"
+              className="h-8 w-auto"
+            />
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}

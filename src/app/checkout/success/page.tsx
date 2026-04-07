@@ -164,7 +164,7 @@ export default function CheckoutSuccessPage() {
             Your order has been placed!
           </h1>
           <p className="text-white/50 text-lg">
-            Thank you for choosing AtlasAdaptive tinted glass.
+            Thank you for choosing Atlas Adaptive Tint.
           </p>
         </motion.div>
 
@@ -263,7 +263,7 @@ export default function CheckoutSuccessPage() {
           transition={{ delay: 1.1 }}
           className="text-white/30 text-xs"
         >
-          Need help? Contact us at support@atlasadaptive.com
+          Need help? Contact us at support@atlasadaptivetint.com
         </motion.p>
       </motion.div>
     </div>

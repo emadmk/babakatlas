@@ -74,10 +74,10 @@ export default function AdminSettingsPage() {
   const [testingEmail, setTestingEmail] = useState(false);
 
   const [site, setSite] = useState<SiteSettings>({
-    siteName: "AtlasAdaptive",
+    siteName: "Atlas Adaptive Tint",
     description:
       "Professional-grade ceramic and carbon window tint films. UV protection, heat reduction, and style for your vehicle.",
-    contactEmail: "support@atlasadaptive.com",
+    contactEmail: "support@atlasadaptivetint.com",
     phone: "+63 917 000 0000",
   });
 
@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
     shippingMarkup: 0,
     shippingMarkupType: "flat",
     shippoFromAddress: {
-      name: "AtlasAdaptive",
+      name: "Atlas Adaptive Tint",
       street1: "123 Main Street",
       city: "Manila",
       state: "Metro Manila",

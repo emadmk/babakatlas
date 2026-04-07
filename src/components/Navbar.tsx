@@ -72,7 +72,7 @@ export default function Navbar() {
           <img
             src="/images/logo/logo-transparent.png"
             alt="Atlas Adaptive Tint"
-            className="h-10 w-auto"
+            className="h-[60px] w-auto"
           />
         </Link>
 

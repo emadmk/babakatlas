@@ -70,7 +70,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <img
-            src="/images/logo/logo-dark.png"
+            src="/images/logo/logo-transparent.png"
             alt="Atlas Adaptive Tint"
             className="h-10 w-auto"
           />

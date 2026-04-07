@@ -50,7 +50,7 @@ export default function DashboardLayout({
             <div className="px-6 py-6 border-b border-glass-border">
               <Link href="/" className="inline-block">
                 <img
-                  src="/images/logo/logo-dark.png"
+                  src="/images/logo/logo-transparent.png"
                   alt="Atlas Adaptive Tint"
                   className="h-10 w-auto"
                 />
@@ -123,7 +123,7 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between px-4 py-3">
             <Link href="/" className="inline-block">
               <img
-                src="/images/logo/logo-dark.png"
+                src="/images/logo/logo-transparent.png"
                 alt="Atlas Adaptive Tint"
                 className="h-8 w-auto"
               />

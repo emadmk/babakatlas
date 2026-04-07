@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     "adaptive tint",
   ],
   icons: {
-    icon: "/images/logo/logo-dark.png",
-    apple: "/images/logo/logo-dark.png",
+    icon: "/images/logo/logo-transparent.png",
+    apple: "/images/logo/logo-transparent.png",
   },
   openGraph: {
     title: "Atlas Adaptive Tint - Premium Window Tint Films",

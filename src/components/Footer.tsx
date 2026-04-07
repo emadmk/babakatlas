@@ -56,7 +56,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
               <img
-                src="/images/logo/logo-dark.png"
+                src="/images/logo/logo-transparent.png"
                 alt="Atlas Adaptive Tint"
                 className="h-12 w-auto mb-4"
               />

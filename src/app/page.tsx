@@ -164,7 +164,7 @@ function HeroSection({ data, language }: { data: HomepageData["hero"]; language:
           className="mb-6"
         >
           <img
-            src="/images/logo/logo-dark.png"
+            src="/images/logo/logo-transparent.png"
             alt="Atlas Adaptive Tint"
             className="h-16 w-auto mx-auto mb-4"
           />

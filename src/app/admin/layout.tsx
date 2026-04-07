@@ -150,7 +150,7 @@ export default function AdminLayout({
         <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
           <Link href="/admin" className="flex items-center gap-2">
             <img
-              src="/images/logo/logo-dark.png"
+              src="/images/logo/logo-transparent.png"
               alt="Atlas Adaptive Tint"
               className="h-8 w-auto"
             />

@@ -10,7 +10,7 @@ export default function ConditionalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideNavFooter = pathname.startsWith("/admin");
+  const hideNavFooter = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
   const isAuthPage = pathname.startsWith("/auth");
 
   return (

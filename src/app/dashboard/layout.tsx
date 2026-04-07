@@ -42,7 +42,7 @@ export default function DashboardLayout({
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-primary-900 flex pt-20">
+      <div className="min-h-screen bg-primary-900 flex">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex w-72 flex-col fixed inset-y-0 left-0 z-30">
           <div className="flex flex-col h-full bg-glass-medium backdrop-blur-2xl border-r border-glass-border">
